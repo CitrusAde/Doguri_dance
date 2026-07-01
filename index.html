@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V14 (난이도 이미지화)</title>
+    <title>도구리 하와이 댄스 게임 - V15 (TOP 10 데이터 최적화)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -141,7 +141,7 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.9); }
 
-        /* [구조 변경] 난이도 이미지 버튼 그룹 */
+        /* 난이도 이미지 버튼 그룹 */
         .difficulty-group {
             display: flex;
             gap: 25px;
@@ -150,14 +150,12 @@
             justify-content: center;
         }
         
-        /* 난이도 이미지 버튼 전용 스타일 */
         .diff-img-btn {
             border: 3px solid transparent;
             border-radius: 12px;
             padding: 4px;
             transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
         }
-        /* 어떤 난이도가 클릭되어 선택 중인지 직관적으로 보여주는 노란색 발광 연출 */
         .diff-img-btn.selected {
             border-color: #ffeb3b;
             box-shadow: 0 0 15px #ffeb3b;
@@ -380,7 +378,7 @@
     <!-- 파이어베이스 SDK 바인딩 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDL0ytMkp9lhXKNETfo_phU2mYybWSMLrc",
@@ -399,6 +397,7 @@
         window.dbRef = ref;
         window.dbPush = push;
         window.dbSet = set;
+        window.dbGet = get;
         window.dbOnValue = onValue;
         window.dbQuery = query;
         window.dbOrderBy = orderByChild;
@@ -427,13 +426,12 @@
         </div>
     </div>
 
-    <!-- 2. 게임 시작화면 (난이도 선택창 이미지 패치 완료) -->
+    <!-- 2. 게임 시작화면 -->
     <div id="screen-start" class="screen">
         <button id="btn-main-back" class="img-btn top-right-back" onclick="goToIntro()">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
-        <!-- 요청 반영: 난이도 선택 텍스트를 이미지 버튼으로 전면 전치 -->
         <div class="difficulty-group">
             <button id="btn-easy" class="img-btn diff-img-btn selected" onclick="selectDifficulty('easy')">
                 <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
@@ -504,7 +502,7 @@
         
         <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
         <p id="popup-playtime-result" style="font-size: 16px; margin: 0; color: #666; font-weight: bold;">기록: 0.00초</p>
-        <p id="popup-firebase-status" style="font-size: 13px; margin: 5px 0 15px 0; color: #4caf50; font-weight: bold;">서버에 순위 기록 업로드 중...</p>
+        <p id="popup-firebase-status" style="font-size: 13px; margin: 5px 0 15px 0; color: #4caf50; font-weight: bold;">순위 판단 중...</p>
 
         <hr style="border: 0; height: 1px; background: #eee; margin: 15px 0;">
         <p style="font-size: 16px; color: #555; margin-bottom: 5px;">🎁 하와이 기념 도감 보상 🎁</p>
@@ -596,7 +594,7 @@
         } catch(e) { console.error("로컬 세이브 저장 실패:", e); }
     }
 
-    // --- 🏆 파이어베이스 10명 서버 랭킹 연동 모듈 ---
+    // --- 🏆 파이어베이스 10명 서버 랭킹 뷰 바인딩 ---
     function fetchServerLeaderboard() {
         if (!window.isFirebaseReady) return;
         
@@ -633,27 +631,50 @@
         });
     }
 
-    function uploadScoreToServer(nickname, elapsedMs) {
+    // [규칙 변경 개편]: 무조건 쌓이지 않도록 10위 안에 들 때만 기록하는 서버 필터 커스텀 모듈
+    function checkAndUploadScore(nickname, elapsedMs) {
         if (!window.isFirebaseReady) return;
         
         let statusText = document.getElementById('popup-firebase-status');
-        statusText.innerText = "서버에 기록 저장 중...";
+        statusText.innerText = "순위 연산 판독 중...";
         statusText.style.color = "#ffeb3b";
 
-        const scoreListRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
-        const newScoreRef = window.dbPush(scoreListRef);
+        const scoreRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
+        const rankQuery = window.dbQuery(scoreRef, window.dbOrderBy('playTime'), window.dbLimit(10));
 
-        window.dbSet(newScoreRef, {
-            name: nickname,
-            playTime: elapsedMs,
-            timestamp: Date.now()
-        }).then(() => {
-            statusText.innerText = "✓ 글로벌 랭킹 등록 완료!";
-            statusText.style.color = "#4caf50";
+        // 1단계: 현재 서버의 top 10 리스트를 단발성(get)으로 긁어옵니다.
+        window.dbGet(rankQuery).then((snapshot) => {
+            let records = [];
+            snapshot.forEach((child) => {
+                records.push(child.val().playTime);
+            });
+
+            // 2단계: 서버에 등록된 개수가 10개 미만이거나, 현재 내 기록이 기존 10등의 기록보다 빠른 수치인지 판별합니다.
+            if (records.length < 10 || elapsedMs < records[records.length - 1]) {
+                statusText.innerText = "⭐ TOP 10 랭크인 진입! 기록 업로드 중...";
+                
+                const scoreListRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
+                const newScoreRef = window.dbPush(scoreListRef);
+
+                window.dbSet(newScoreRef, {
+                    name: nickname,
+                    playTime: elapsedMs,
+                    timestamp: Date.now()
+                }).then(() => {
+                    statusText.innerText = "✓ 글로벌 실시간 10위권 등록 성공!";
+                    statusText.style.color = "#4caf50";
+                }).catch((err) => {
+                    statusText.innerText = "서버 연결 지연";
+                    statusText.style.color = "#f44336";
+                });
+            } else {
+                // 10위권 커트라인 밖일 때의 안전 연출 플래그
+                statusText.innerText = "아쉽게도 아케이드 10위권 순위 내에 진입하지 못했습니다.";
+                statusText.style.color = "#999";
+            }
         }).catch((err) => {
-            console.error("서버 오류:", err);
-            statusText.innerText = "서버 연결 실패";
-            statusText.style.color = "#f44336";
+            console.error("판독 스레드 오류:", err);
+            statusText.innerText = "오프라인 모드 플레이 완료";
         });
     }
 
@@ -705,7 +726,6 @@
         showScreen('screen-intro'); 
     }
 
-    // 난이도 클릭 인터페이스 세팅 (이미지 전용 시각 보정 추가)
     function selectDifficulty(diff) {
         currentDifficulty = diff;
         document.querySelectorAll('.diff-img-btn').forEach(b => b.classList.remove('selected'));
@@ -974,7 +994,8 @@
         badgeEl.innerText = rankLetter;
         badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
 
-        uploadScoreToServer(globalNickname, totalElapsedTime);
+        // 🚀 [업데이트 적용] 무조건 쌓이지 않게 10위 필터를 검증한 뒤 점수를 쏩니다.
+        checkAndUploadScore(globalNickname, totalElapsedTime);
 
         let randomIndex = Math.floor(Math.random() * collectionItems.length);
         unlockedItems.add(randomIndex);
@@ -1031,6 +1052,7 @@
         document.getElementById('leaderboard-modal').style.display = 'none';
     }
 
+    // 도감 열기/닫기
     function openCollection() {
         initCollectionUI();
         document.getElementById('collection-modal').style.display = 'flex';
