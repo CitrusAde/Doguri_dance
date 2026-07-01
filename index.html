@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v4.1</title>
+    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v4.2</title>
     <style>
         :root {
             --theme-border: #e17055;
@@ -11,6 +11,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        
         body {
             background-color: #f0e6d2;
             color: var(--theme-font);
@@ -19,6 +20,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            margin: 0;
             padding: 10px;
         }
         
@@ -27,9 +29,11 @@
             height: 576px;
             max-width: 100%;
             aspect-ratio: 16 / 9;
-            /* 전달해주신 단 하나의 메인 배경화면으로 완전 통일 */
-            background: url('DD_Main_Image.jpg') no-repeat center center;
-            background-size: cover;
+            /* 이중 안전장치로 배경화면 지정 */
+            background-image: url('DD_Main_Image.jpg') !important;
+            background-repeat: no-repeat !important;
+            background-position: center center !important;
+            background-size: cover !important;
             border: 8px solid var(--theme-border);
             box-shadow: 0 10px 30px rgba(74, 59, 50, 0.2);
             border-radius: 20px;
@@ -43,12 +47,13 @@
             #game-container { width: 100%; height: auto; aspect-ratio: 9 / 16; max-height: 95vh; }
         }
 
-        /* 기존의 모든 배경 스타일 요소를 완전히 지우고 투명화 */
+        /* 모든 화면 내부 레이아웃의 투명화 절대 유지 */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 10; padding: 20px;
             background: transparent !important;
+            background-color: transparent !important;
         }
         .hidden { display: none !important; }
 
@@ -90,7 +95,6 @@
             background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 4px; border: 1px solid #b2bec3;
         }
 
-        /* DD_Game_Table 단상 지정 */
         .hawaii-podium {
             width: 220px; 
             height: 73px; 
@@ -144,7 +148,6 @@
         }
         #dance-sequence-box.animating { display: block; animation: textDance 0.15s infinite alternate; }
 
-        /* 방향키 및 게이지 하단 배치 가중치 유지 */
         #input-chain-area { 
             position: absolute;
             bottom: 95px;
@@ -180,7 +183,9 @@
 </head>
 <body>
 
-    <div id="game-container">
+    <!-- HTML 태그 자체에 인라인 스타일로 배경을 직접 한 번 더 강제 고정합니다. -->
+    <div id="game-container" style="background-image: url('DD_Main_Image.jpg'); background-size: cover; background-position: center;">
+        
         <!-- 1. 시작 화면 -->
         <div id="main-screen" class="screen">
             <div class="title-logo">도구리 댄스</div>
@@ -215,7 +220,7 @@
             </div>
         </div>
 
-        <!-- 3. 플레이 화면 (HTML 내 인라인 테그 배경 완전 제거) -->
+        <!-- 3. 플레이 화면 -->
         <div id="play-screen" class="screen hidden">
             <div id="game-hud">
                 <div class="hud-block" id="hud-stage-name">EASY - STAGE 1 (1/3)</div>
@@ -245,7 +250,7 @@
             </div>
         </div>
 
-        <!-- 4. 결과 및 라운드 클리어 화면 (HTML 내 인라인 테그 배경 완전 제거) -->
+        <!-- 4. 결과 및 라운드 클리어 화면 -->
         <div id="result-screen" class="screen hidden">
             <div class="title-logo" id="result-header" style="font-size:36px; margin-top: -60px;">STAGE CLEAR</div>
             <p id="result-message" style="font-weight: bold; color:#636e72; margin-bottom: 20px;">축하합니다!</p>
