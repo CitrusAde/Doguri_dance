@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V9 (댄스 연출 추가)</title>
+    <title>도구리 하와이 댄스 게임 - V10 (랭크 시스템)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -114,7 +114,7 @@
         .difficulty-group {
             display: flex;
             gap: 30px;
-            margin-bottom: 50px;
+            margin-bottom: 30px;
         }
         .diff-btn {
             padding: 15px 40px;
@@ -132,7 +132,20 @@
             border-color: #ffeb3b;
         }
 
-        /* 상단 상태 판넬 */
+        /* 난이도 화면용 최고 기록 보드 */
+        #best-record-board {
+            font-size: 20px;
+            color: #ffeb3b;
+            font-weight: bold;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 25px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 8px rgba(255,235,59,0.5);
+            border: 1px solid rgba(255,235,59,0.3);
+        }
+
+        /* 상단 상태 판넬 및 타이머 디스플레이 */
         .game-status {
             position: absolute;
             top: 35px;
@@ -144,9 +157,11 @@
             font-size: 20px;
             font-weight: bold;
             z-index: 5;
+            display: flex;
+            gap: 15px;
         }
 
-        /* 왼쪽 아래 하트(라이프) 표시 영역 */
+        /* 왼쪽 아래 하트 표시 영역 */
         .life-container {
             position: absolute;
             bottom: 40px;
@@ -196,7 +211,7 @@
             z-index: 4;
         }
 
-        /* 방향키 배치 상자 및 노드 타격 애니메이션 규격 */
+        /* 방향키 배치 상자 */
         .arrow-sequence-box {
             display: flex;
             gap: 15px;
@@ -222,7 +237,7 @@
             object-fit: contain;
         }
 
-        /* 5초 타이머 바 프로그레스 규격 */
+        /* 5초 타이머 바 규격 */
         .timer-wrapper {
             width: 400px;
             height: 10px;
@@ -248,6 +263,17 @@
             text-shadow: 0 3px 6px rgba(0,0,0,0.9);
             z-index: 4;
         }
+
+        /* 보상 획득 팝업 내 랭크 스코어 보드 연출 */
+        .rank-badge {
+            font-size: 64px;
+            font-weight: 900;
+            margin: 10px 0;
+            text-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        .rank-s { color: #ff1744; }
+        .rank-a { color: #ff9100; }
+        .rank-b { color: #00e676; }
 
         /* 도감 및 랜덤 보상 팝업 레이아웃 */
         .modal {
@@ -298,12 +324,13 @@
             transform: translate(-50%, -50%);
             background: rgba(255,255,255,0.98);
             border: 4px solid #ffeb3b;
-            padding: 40px;
+            padding: 45px;
             border-radius: 20px;
             text-align: center;
             display: none;
             z-index: 25;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            width: 500px;
         }
     </style>
 </head>
@@ -333,6 +360,9 @@
             <button id="btn-hard" class="diff-btn" onclick="selectDifficulty('hard')">어려움</button>
         </div>
 
+        <!-- 해당 난이도 최고 기록 출력 컴포넌트 -->
+        <div id="best-record-board">최고 기록: 없음</div>
+
         <div class="bottom-center-position">
             <button id="btn-main-dance" class="img-btn origin-size-btn" onclick="startGameLoop()">
                 <img src="DD_Main_Dance_Button.png" alt="DANCE" onerror="this.style.display='none'; this.after('[DANCE 버튼]');">
@@ -340,7 +370,7 @@
         </div>
 
         <div class="bottom-right-group">
-            <button class="dummy-reset-btn" onclick="alert('도감이 초기화되었습니다. (더미 기능)')">도감 초기화</button>
+            <button class="dummy-reset-btn" onclick="resetAllGameData()">데이터 초기화</button>
             <button id="btn-main-gift" class="img-btn origin-size-btn" onclick="openCollection()">
                 <img src="DD_Main_Gift_Button.png" alt="도감" onerror="this.style.display='none'; this.after('[도감]');">
             </button>
@@ -352,15 +382,13 @@
         <div class="game-status">
             <span id="txt-difficulty">난이도: 쉬움</span> | 
             <span id="txt-stage">스테이지: 1/3</span> | 
-            <span id="txt-round">판수: 1/5</span>
+            <span id="txt-round">판수: 1/5</span> |
+            <span id="txt-playtime" style="color: #ffeb3b;">시간: 0.00초</span>
         </div>
 
-        <!-- 하트 표시 레이어 -->
         <div class="life-container" id="hearts-display"></div>
 
         <img id="game-table" src="DD_Game_Table.png" alt="단상" onerror="this.style.display='none';">
-        
-        <!-- 중앙 도구리 캐릭터 노드 -->
         <img id="doguri-char" src="doguri_image_base.png" alt="도구리" onerror="this.style.display='none'; this.after('[도구리]');">
 
         <div id="judgment-text"></div>
@@ -381,11 +409,19 @@
         </div>
     </div>
 
-    <!-- 도감 보상 알림 팝업 -->
+    <!-- 도감 보상 및 랭크 결산 알림 팝업 -->
     <div id="reward-popup">
-        <h2 style="color: #333; margin-top:0;">🌴 스테이지 클리어 보상 🌴</h2>
-        <p style="font-size: 18px; color: #555;">랜덤 하와이 도감 아이템 증정 완료!</p>
-        <div id="reward-item-name" style="font-size: 28px; font-weight: bold; color: #2196f3; margin: 20px 0;">[아이템]</div>
+        <h2 style="color: #333; margin-top:0; margin-bottom:5px;">🌴 스테이지 클리어! 🌴</h2>
+        
+        <!-- 랭크 스코어보드 출력 유닛 -->
+        <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
+        <p id="popup-playtime-result" style="font-size: 16px; margin: 0; color: #666; font-weight: bold;">기록: 0.00초</p>
+        <p id="popup-best-alert" style="font-size: 14px; margin: 3px 0 15px 0; color: #ff1744; font-weight: bold; display:none;">🎉 NEW BEST RECORD! 🎉</p>
+
+        <hr style="border: 0; height: 1px; background: #eee; margin: 15px 0;">
+        <p style="font-size: 16px; color: #555; margin-bottom: 5px;">🎁 하와이 기념 도감 보상 🎁</p>
+        <div id="reward-item-name" style="font-size: 24px; font-weight: bold; color: #2196f3; margin-bottom: 25px;">[아이템]</div>
+        
         <button class="close-btn" onclick="closeRewardPopup()">확인</button>
     </div>
 
@@ -401,7 +437,7 @@
 </div>
 
 <script>
-    // --- 글로벌 게임 상태 관리 변수 ---
+    // --- 글로벌 게임 상태 제어 변수 ---
     let currentDifficulty = 'easy';
     let currentStage = 1;           
     let currentRound = 1;           
@@ -413,9 +449,15 @@
     let isStageClearedWait = false; 
     let isRewardGivenThisGame = false; 
 
+    // 5초 타이머용 제어 변수
     let roundTimerId = null;
     let timeLimit = 5000;           
     let timeRemaining = 5000;
+
+    // --- [신규] 전체 스톱워치 타임 레코드 변수 ---
+    let totalStartTime = 0;         // 게임 전체 시작 타임스탬프
+    let totalElapsedTime = 0;       // 소요된 밀리초 총합
+    let stopwatchIntervalId = null; // 상단 텍스트 표기용 인터벌
 
     const collectionItems = [
         "🍍 하와이안 파인애플", "🌸 알로하 레이", "🕶️ 선글라스",
@@ -423,6 +465,13 @@
         "🩴 비치 샌들", "👕 하와이안 셔츠", "🏖️ 도구리 튜브"
     ];
     let unlockedItems = new Set();
+
+    // 로컬 스토리지 키 명칭 구조 정의
+    const STORAGE_KEY_ITEMS = "doguri_unlocked_items_v2";
+    const STORAGE_KEY_BEST = "doguri_best_records_v2";
+
+    // 난이도별 최고 기록 상태 객체
+    let bestRecords = { easy: null, normal: null, hard: null };
 
     const BG_MAIN = "DD_Main_Image.png";
     const DOGURI_BASE = "doguri_image_base.png";
@@ -433,10 +482,34 @@
 
     window.onload = function() {
         document.getElementById('game-container').style.backgroundImage = `url('${BG_MAIN}')`;
+        loadLocalStorageData();
         initCollectionUI();
         updateDoguriImage();
+        updateBestRecordDisplay();
         setupButtonEffects();
     };
+
+    // 로컬 스토리지 세이브 로드 핸들러
+    function loadLocalStorageData() {
+        try {
+            let savedItems = localStorage.getItem(STORAGE_KEY_ITEMS);
+            if(savedItems) {
+                let arr = JSON.parse(savedItems);
+                unlockedItems = new Set(arr);
+            }
+            let savedBest = localStorage.getItem(STORAGE_KEY_BEST);
+            if(savedBest) {
+                bestRecords = JSON.parse(savedBest);
+            }
+        } catch(e) { console.error("로컬 스토리지 로드 실패:", e); }
+    }
+
+    function saveGameDataToStorage() {
+        try {
+            localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(Array.from(unlockedItems)));
+            localStorage.setItem(STORAGE_KEY_BEST, JSON.stringify(bestRecords));
+        } catch(e) { console.error("로컬 스토리지 저장 실패:", e); }
+    }
 
     function setupButtonEffects() {
         const btns = document.querySelectorAll('.img-btn');
@@ -464,7 +537,6 @@
         document.getElementById(screenId).classList.add('active');
     }
 
-    // 캐릭터 이미지 업데이트 헬퍼 (대체 텍스트 예외처리 포함)
     function setCharacterImage(srcPath, fallbackText) {
         let charImg = document.getElementById('doguri-char');
         if (charImg) {
@@ -476,9 +548,14 @@
         }
     }
 
-    function goToGameStart() { showScreen('screen-start'); }
+    function goToGameStart() { 
+        updateBestRecordDisplay();
+        showScreen('screen-start'); 
+    }
+
     function goToIntro() { 
         stopRoundTimer();
+        stopStopwatch();
         showScreen('screen-intro'); 
     }
 
@@ -486,16 +563,52 @@
         currentDifficulty = diff;
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
         document.getElementById(`btn-${diff}`).classList.add('selected');
+        updateBestRecordDisplay();
     }
 
+    // 메인 준비화면 최고기록 텍스트 업데이트 갱신문
+    function updateBestRecordDisplay() {
+        let board = document.getElementById('best-record-board');
+        let record = bestRecords[currentDifficulty];
+        if (record) {
+            board.innerText = `최고 기록: ${(record / 1000).toFixed(2)}초`;
+        } else {
+            board.innerText = "최고 기록: 없음";
+        }
+    }
+
+    // --- 런타임 게임 루프 도입부 ---
     function startGameLoop() {
         showScreen('screen-game');
         currentStage = 1;
         currentRound = 1;
         userLives = 5; 
         isRewardGivenThisGame = false; 
+        
+        // 스톱워치 타임 트래킹 구동 시작
+        totalStartTime = Date.now();
+        totalElapsedTime = 0;
+        startStopwatch();
+
         updateHeartsUI();
         initRound();
+    }
+
+    // 실시간 스톱워치 인터벌 스레드 가동
+    function startStopwatch() {
+        if(stopwatchIntervalId) clearInterval(stopwatchIntervalId);
+        stopwatchIntervalId = setInterval(() => {
+            if(isStageClearedWait || isRoundFinished) return;
+            totalElapsedTime = Date.now() - totalStartTime;
+            document.getElementById('txt-playtime').innerText = `시간: ${(totalElapsedTime / 1000).toFixed(2)}초`;
+        }, 30);
+    }
+
+    function stopStopwatch() {
+        if(stopwatchIntervalId) {
+            clearInterval(stopwatchIntervalId);
+            stopwatchIntervalId = null;
+        }
     }
 
     function updateHeartsUI() {
@@ -520,8 +633,6 @@
         isStageClearedWait = false;
         currentArrowIndex = 0;
         stopRoundTimer();
-        
-        // 새 판이 시작되면 무조건 기본 도구리 이미지로 초기화
         updateDoguriImage();
         
         let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
@@ -592,16 +703,14 @@
         }
     }
 
-    // --- 실패 공통 처리 (Fail 이미지 즉시 주입) ---
     function handleRoundFailure(reasonText) {
         userLives--;
         updateHeartsUI();
-
-        // 실패하는 즉시 중앙 도구리를 DD_Dance_Fail 이미지로 변경
         setCharacterImage('DD_Dance_Fail.png', '도구리 실패 연출');
 
         if (userLives <= 0) {
             stopRoundTimer();
+            stopStopwatch();
             setTimeout(() => {
                 alert("GAME OVER! 모든 하트를 잃었습니다.");
                 showScreen('screen-start');
@@ -613,11 +722,10 @@
         jTxt.innerText = reasonText;
         jTxt.style.color = "#f44336";
 
-        // 패널티 후 딜레이 없이 다음 판으로 즉시 세팅 (initRound에서 캐릭터가 다시 원상복구됩니다.)
         initRound();
     }
 
-    // --- 키보드 리스너 ---
+    // --- 키보드 통합 관리부 ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -667,7 +775,6 @@
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
                 currentArrowIndex++;
 
-                // [추가 규칙] 방향키를 맞출 때마다 DD_Dance_1 ~ DD_Dance_4 이미지 무작위 출력
                 let randomDanceNum = Math.floor(Math.random() * 4) + 1;
                 setCharacterImage(`DD_Dance_${randomDanceNum}.png`, `도구리 댄스 ${randomDanceNum}`);
 
@@ -704,11 +811,84 @@
             currentRound = 1;
             initRound();
         } else {
-            giveRandomReward();
+            // 3스테이지 마지막 5판까지 올클리어 시 타이머 멈추고 보상/랭크 계산기 가동
+            stopStopwatch();
+            giveRandomRewardAndRank();
         }
     }
 
-    // --- 하와이 도감 로직 시스템 ---
+    // --- [개편] 랭크 판정 및 보상 통합 시스템 ---
+    function giveRandomRewardAndRank() {
+        if (isRewardGivenThisGame) return;
+        isRewardGivenThisGame = true; 
+
+        // 1. 플레이 타임 레코드 연산 및 포맷팅
+        let finalTimeSec = totalElapsedTime / 1000;
+        document.getElementById('popup-playtime-result').innerText = `최종 클리어 시간: ${finalTimeSec.toFixed(2)}초`;
+
+        // 2. 난이도별 상대 랭크 산정 알고리즘
+        let rankLetter = 'B';
+        let badgeEl = document.getElementById('popup-rank-badge');
+        
+        if (currentDifficulty === 'easy') {
+            if (finalTimeSec <= 22) rankLetter = 'S';
+            else if (finalTimeSec <= 32) rankLetter = 'A';
+        } else if (currentDifficulty === 'normal') {
+            if (finalTimeSec <= 26) rankLetter = 'S';
+            else if (finalTimeSec <= 38) rankLetter = 'A';
+        } else { // hard
+            if (finalTimeSec <= 30) rankLetter = 'S';
+            else if (finalTimeSec <= 45) rankLetter = 'A';
+        }
+
+        badgeEl.innerText = rankLetter;
+        badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
+
+        // 3. 뉴 베스트 레코드 비교 체크 및 로컬 백업
+        let currentBest = bestRecords[currentDifficulty];
+        let alertBest = document.getElementById('popup-best-alert');
+        
+        if (currentBest === null || totalElapsedTime < currentBest) {
+            bestRecords[currentDifficulty] = totalElapsedTime;
+            alertBest.style.display = 'block';
+        } else {
+            alertBest.style.display = 'none';
+        }
+
+        // 4. 아이템 도감 랜덤 증정
+        let randomIndex = Math.floor(Math.random() * collectionItems.length);
+        unlockedItems.add(randomIndex);
+        
+        // 가동 상태 백업 및 UI 리빌딩
+        saveGameDataToStorage();
+        initCollectionUI();
+        updateDoguriImage();
+
+        document.getElementById('reward-item-name').innerText = collectionItems[randomIndex];
+        document.getElementById('reward-popup').style.display = 'block';
+    }
+
+    function closeRewardPopup() {
+        document.getElementById('reward-popup').style.display = 'none';
+        goToGameStart();
+    }
+
+    // --- 데이터 전면 공장 초기화 핸들러 (도감 + 하이 스코어 레코드 초기화) ---
+    function resetAllGameData() {
+        if (confirm("도감 및 난이도별 플레이 타임 최고 기록이 전면 초기화됩니다. 진행하시겠습니까?")) {
+            unlockedItems.clear();
+            bestRecords = { easy: null, normal: null, hard: null };
+            isRewardGivenThisGame = false;
+            
+            saveGameDataToStorage();
+            initCollectionUI();
+            updateDoguriImage();
+            updateBestRecordDisplay();
+            
+            alert('모든 데이터가 완전히 초기화되었습니다!');
+        }
+    }
+
     function initCollectionUI() {
         let grid = document.getElementById('book-grid-container');
         grid.innerHTML = '';
@@ -722,40 +902,11 @@
     }
 
     function updateDoguriImage() {
-        // 도감을 9개 다 모았을 때와 그렇지 않을 때 기본 상태의 베이스 이미지를 결정
         if (unlockedItems.size === 9) {
             setCharacterImage(DOGURI_UPGRADE, '👑 하와이안 도구리 업그레이드 완료');
         } else {
             setCharacterImage(DOGURI_BASE, '도구리 기본 상태');
         }
-    }
-
-    function giveRandomReward() {
-        if (isRewardGivenThisGame) return;
-        isRewardGivenThisGame = true; 
-        
-        let randomIndex = Math.floor(Math.random() * collectionItems.length);
-        unlockedItems.add(randomIndex);
-        
-        initCollectionUI();
-        updateDoguriImage();
-
-        document.getElementById('reward-item-name').innerText = collectionItems[randomIndex];
-        document.getElementById('reward-popup').style.display = 'block';
-    }
-
-    function closeRewardPopup() {
-        document.getElementById('reward-popup').style.display = 'none';
-        goToGameStart();
-    }
-
-    // 도감 초기화 실제 작동 로직 연결 (더미 버튼에서 작동하도록 가볍게 연동 가능)
-    function resetCollectionData() {
-        unlockedItems.clear();
-        isRewardGivenThisGame = false;
-        initCollectionUI();
-        updateDoguriImage();
-        alert('도감이 초기화되었습니다.');
     }
 
     function openCollection() {
