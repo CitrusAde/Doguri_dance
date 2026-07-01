@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V2</title>
+    <title>도구리 하와이 댄스 게임 - V3 (스피드 타이밍)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -52,9 +52,7 @@
             transition: transform 0.1s ease;
             transform-origin: center;
         }
-        /* 마우스 호버 시 버튼 중앙 기준 살짝 확대 */
         .img-btn:hover { transform: scale(1.03); }
-        /* 클릭 또는 단축키 동작 시 눌리는 애니메이션 효과 */
         .img-btn.pressed { transform: scale(0.92); }
 
         /* UI 배치 요소 및 스케일 조정 */
@@ -67,7 +65,7 @@
         /* START, DANCE 버튼 크기 2배 확대 */
         .large-btn img {
             width: auto;
-            height: 140px; /* 원본의 2배 스케일 가정한 세로 높이 지정 */
+            height: 140px; 
         }
 
         /* BACK 버튼 우측 상단으로 이동 및 2배 축소 */
@@ -79,7 +77,7 @@
         }
         .top-right-back img {
             width: auto;
-            height: 35px; /* 원본의 절반 크기로 지정 */
+            height: 35px; 
         }
 
         .bottom-right-gift {
@@ -153,7 +151,7 @@
             display: none;
         }
 
-        /* 하단 리듬 제어 영역 (네모 박스 프레임 투명화 처리) */
+        /* 하단 리듬 제어 영역 */
         .rhythm-container {
             position: absolute;
             bottom: 40px;
@@ -162,13 +160,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: none; /* 요청사항: 주변 네모 박스 프레임 삭제 */
+            background: none; 
             border: none;
             padding: 0;
             width: 600px;
         }
 
-        /* 방향키 커스텀 아이콘 배치 레이아웃 */
+        /* 방향키 배치 레이아웃 */
         .arrow-sequence-box {
             display: flex;
             gap: 15px;
@@ -181,7 +179,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.1s ease;
         }
         .arrow-icon-slot img {
             width: 100%;
@@ -189,36 +186,26 @@
             object-fit: contain;
         }
 
-        /* 판정 게이지 바 */
+        /* 제한 시간 타이머 타임바 (디자인 변경) */
         .gauge-wrapper {
             width: 480px;
-            height: 24px;
-            background: rgba(50, 50, 50, 0.7);
-            border-radius: 12px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
             position: relative;
             overflow: hidden;
             border: 2px solid #fff;
         }
-        .perfect-target {
+        /* 줄어드는 남은 시간 바 */
+        #time-bar {
             position: absolute;
-            left: 42%;
-            width: 16%;
+            left: 0;
+            top: 0;
             height: 100%;
-            background: rgba(255, 235, 59, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #000;
-            font-weight: bold;
-        }
-        #gauge-pin {
-            position: absolute;
-            left: 0%;
-            width: 6px;
-            height: 100%;
+            width: 100%;
             background: #ff1744;
             box-shadow: 0 0 10px #ff1744;
+            transition: width 0.05s linear;
         }
 
         #judgment-text {
@@ -293,14 +280,16 @@
 
 <div id="game-container">
     
+    <!-- 1. 인트로 화면 -->
     <div id="screen-intro" class="screen active">
-        <button id="btn-main-start" class="img-btn bottom-center large-btn" onclick="triggerBtnAction('btn-main-start', goToGameStart)">
+        <button id="btn-main-start" class="img-btn bottom-center large-btn">
             <img src="DD_Main_Start_Button.png" alt="START" onerror="this.style.display='none'; this.after('[START 버튼]');">
         </button>
     </div>
 
+    <!-- 2. 게임 시작화면 (난이도 선택 및 댄스 대기) -->
     <div id="screen-start" class="screen">
-        <button id="btn-main-back" class="img-btn top-right-back" onclick="triggerBtnAction('btn-main-back', goToIntro)">
+        <button id="btn-main-back" class="img-btn top-right-back">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
@@ -310,7 +299,7 @@
             <button id="btn-hard" class="diff-btn" onclick="selectDifficulty('hard')">어려움</button>
         </div>
 
-        <button id="btn-main-dance" class="img-btn bottom-center large-btn" onclick="triggerBtnAction('btn-main-dance', startGameLoop)">
+        <button id="btn-main-dance" class="img-btn bottom-center large-btn">
             <img src="DD_Main_Dance_Button.png" alt="DANCE" onerror="this.style.display='none'; this.after('[DANCE 버튼]');">
         </button>
 
@@ -319,6 +308,7 @@
         </button>
     </div>
 
+    <!-- 3. 인게임 화면 -->
     <div id="screen-game" class="screen">
         <div class="game-status">
             <span id="txt-difficulty">난이도: 쉬움</span> | 
@@ -332,20 +322,23 @@
         <div id="dance-sequence-text">1</div>
         <div id="judgment-text"></div>
 
+        <!-- 하단 리듬 영역 -->
         <div class="rhythm-container" id="rhythm-ui">
             <div class="arrow-sequence-box" id="arrow-sequence-area"></div>
             
+            <!-- 시간 초 제한 타임 게이지 -->
             <div class="gauge-wrapper">
-                <div class="perfect-target">PERFECT</div>
-                <div id="gauge-pin"></div>
+                <div id="time-bar"></div>
             </div>
         </div>
 
-        <button id="btn-main-next" class="img-btn bottom-center large-btn" style="display: none;" onclick="triggerBtnAction('btn-main-next', nextStageOrRound)">
+        <!-- NEXT 버튼 -->
+        <button id="btn-main-next" class="img-btn bottom-center large-btn" style="display: none;">
             <img src="DD_Main_Next_Button.png" alt="NEXT" onerror="this.style.display='none'; this.after('[NEXT 스테이지]');">
         </button>
     </div>
 
+    <!-- 도감 보상 알림 팝업 -->
     <div id="reward-popup">
         <h2 style="color: #333; margin-top:0;">🌴 스테이지 올 클리어 보상 🌴</h2>
         <p style="font-size: 18px; color: #555;">랜덤 하와이 도감 아이템 증정 완료!</p>
@@ -353,6 +346,7 @@
         <button class="close-btn" onclick="closeRewardPopup()">확인</button>
     </div>
 
+    <!-- 도감 UI 레이어 -->
     <div id="collection-modal" class="modal">
         <div class="modal-content">
             <h2>🎒 도구리의 하와이 도감 (총 9종)</h2>
@@ -369,15 +363,14 @@
     let currentStage = 1;
     let currentRound = 1;
 
-    let cursorPosition = 0;
-    let cursorDirection = 1;
-    let cursorSpeed = 2;
-    let gaugeAnimationId = null;
-    
-    // 방향키 시퀀스 추적용 배열 구조
+    // 타임아웃 제한 시간 제어 변수
+    let timerIntervalId = null;
+    let remainingTime = 100;         // 남은 시간 % (100 -> 0)
+    let timeDecreaseRate = 1.5;     // 난이도 및 개수별로 계산될 초당 감소 폭
+    let isTimerStarted = false;     // 방향키를 한 번이라도 누르면 타이머 작동
+
     let targetArrowSequence = [];
     let currentArrowIndex = 0; 
-    let isSequenceCleared = false;
     let isRoundFinished = false;
 
     const collectionItems = [
@@ -387,7 +380,6 @@
     ];
     let unlockedItems = new Set();
 
-    // 이미지 리소스 매핑 데이터 (질문 규격 그대로 설정)
     const BG_MAIN = "DD_Main_Image.png";
     const DOGURI_BASE = "doguri_image_base.png";
     const DOGURI_UPGRADE = "doguri_image_upgrade.png";
@@ -399,27 +391,44 @@
         document.getElementById('game-container').style.backgroundImage = `url('${BG_MAIN}')`;
         initCollectionUI();
         updateDoguriImage();
-        setupClickAnimations();
+        setupButtonClickEvents();
     };
 
-    // 마우스 물리 클릭 시 애니메이션 연동 처리
-    function setupClickAnimations() {
-        document.querySelectorAll('.img-btn').forEach(btn => {
-            btn.addEventListener('mousedown', () => btn.classList.add('pressed'));
-            btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
-            btn.addEventListener('mouseleave', () => btn.classList.remove('pressed'));
+    // 마우스 물리 클릭 & 애니메이션 통합 리스너 세팅
+    function setupButtonClickEvents() {
+        const btnConfigs = [
+            { id: 'btn-main-start', action: goToGameStart },
+            { id: 'btn-main-dance', action: startGameLoop },
+            { id: 'btn-main-back', action: goToIntro },
+            { id: 'btn-main-next', action: nextStageOrRound }
+        ];
+
+        btnConfigs.forEach(cfg => {
+            let btn = document.getElementById(cfg.id);
+            if(btn) {
+                btn.addEventListener('mousedown', () => btn.classList.add('pressed'));
+                btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
+                btn.addEventListener('mouseleave', () => btn.classList.remove('pressed'));
+                btn.addEventListener('click', () => {
+                    btn.classList.add('pressed');
+                    setTimeout(() => {
+                        btn.classList.remove('pressed');
+                        cfg.action();
+                    }, 100);
+                });
+            }
         });
     }
 
-    // 단축키(Space/ESC) 입력 시 시각효과 부여 후 로직 연동 트리거 함수
-    function triggerBtnAction(btnId, actionFunction) {
+    // 단축키 작동 대리 트리거 
+    function triggerActionById(btnId, actionFunction) {
         let btn = document.getElementById(btnId);
-        if (btn) {
+        if (btn && btn.offsetHeight > 0) { // 화면에 보이는 상태일 때만
             btn.classList.add('pressed');
             setTimeout(() => {
                 btn.classList.remove('pressed');
                 actionFunction();
-            }, 120);
+            }, 100);
         }
     }
 
@@ -435,16 +444,7 @@
     function selectDifficulty(diff) {
         currentDifficulty = diff;
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
-        if(diff === 'easy') {
-            document.getElementById('btn-easy').classList.add('selected');
-            cursorSpeed = 2;
-        } else if(diff === 'normal') {
-            document.getElementById('btn-normal').classList.add('selected');
-            cursorSpeed = 4.5;
-        } else if(diff === 'hard') {
-            document.getElementById('btn-hard').classList.add('selected');
-            cursorSpeed = 7.5;
-        }
+        document.getElementById(`btn-${diff}`).classList.add('selected');
     }
 
     function startGameLoop() {
@@ -456,9 +456,11 @@
 
     // --- 인게임 라운드 비즈니스 로직 ---
     function initRound() {
-        isSequenceCleared = false;
         isRoundFinished = false;
         currentArrowIndex = 0;
+        isTimerStarted = false;
+        remainingTime = 100;
+        clearInterval(timerIntervalId);
         
         let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
         document.getElementById('txt-difficulty').innerText = `난이도: ${diffKo}`;
@@ -469,29 +471,28 @@
         document.getElementById('dance-sequence-text').style.display = 'none';
         document.getElementById('btn-main-next').style.display = 'none';
         document.getElementById('rhythm-ui').style.display = 'flex';
+        document.getElementById('time-bar').style.width = '100%';
         
-        // 방향키 개수 계산: 최소 3개에서 시작하여 스테이지 증가할때마다 1개씩 추가됨
+        // 방향키 개수 산정 (최소 3개 시작, 스테이지당 +1)
         let arrowCount = 2 + currentStage; 
         targetArrowSequence = [];
         
         let sequenceArea = document.getElementById('arrow-sequence-area');
         sequenceArea.innerHTML = '';
 
-        // 시퀀스 난수 발생 및 Normal 이미지 초기 슬롯 세팅
+        // 화살표 리스트 생성
         for(let i=0; i<arrowCount; i++) {
             let randomKey = arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)];
             targetArrowSequence.push(randomKey);
 
             let slot = document.createElement('div');
             slot.className = 'arrow-icon-slot';
-            slot.id = `arrow-slot-${i}`;
             
             let img = document.createElement('img');
             img.src = `DD_${arrowNames[randomKey]}_Button_Normal.png`;
             img.id = `arrow-img-${i}`;
             img.alt = arrowNames[randomKey];
             
-            // 이미지 미발견 대비 대체 텍스트 삽입 구조 안정화
             img.onerror = function() {
                 this.style.display = 'none';
                 let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑'};
@@ -502,119 +503,119 @@
             sequenceArea.appendChild(slot);
         }
 
-        cursorPosition = 0;
-        cursorDirection = 1;
-        if(gaugeAnimationId) cancelAnimationFrame(gaugeAnimationId);
-        updateGauge();
+        // 난이도 및 키 개수 비례 감소율 설계 (개수가 많을수록, 보통/어려움일수록 시간이 빠르게 타이트해짐)
+        let baseDiffFactor = currentDifficulty === 'easy' ? 0.8 : currentDifficulty === 'normal' ? 1.4 : 2.2;
+        timeDecreaseRate = baseDiffFactor * (1 + (arrowCount * 0.1));
     }
 
-    function updateGauge() {
-        if (isRoundFinished) return;
-        cursorPosition += (cursorSpeed * cursorDirection);
-        
-        if (cursorPosition >= 100) {
-            cursorPosition = 100;
-            cursorDirection = -1;
-        } else if (cursorPosition <= 0) {
-            cursorPosition = 0;
-            cursorDirection = 1;
-        }
-        document.getElementById('gauge-pin').style.left = cursorPosition + '%';
-        gaugeAnimationId = requestAnimationFrame(updateGauge);
+    // 타임바 감소 실시간 루프
+    function startTimer() {
+        isTimerStarted = true;
+        timerIntervalId = setInterval(() => {
+            if (isRoundFinished) {
+                clearInterval(timerIntervalId);
+                return;
+            }
+            remainingTime -= timeDecreaseRate;
+            if (remainingTime <= 0) {
+                remainingTime = 0;
+                document.getElementById('time-bar').style.width = '0%';
+                clearInterval(timerIntervalId);
+                
+                // 타임아웃 실패 연출
+                let currentTargetKey = targetArrowSequence[currentArrowIndex];
+                let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
+                if(imgEl) imgEl.src = `DD_${arrowNames[currentTargetKey]}_Button_Fail.png`;
+                
+                showJudgment("TIME OVER! 시간 초과", "#f44336");
+                endRound(false);
+            } else {
+                document.getElementById('time-bar').style.width = remainingTime + '%';
+            }
+        }, 30); // 약 30ms 간격으로 갱신
     }
 
-    // --- 키보드 입력 매니저 (단축키 및 방향키 동시 제어) ---
+    // --- 키보드 입력 매니저 (단축키 및 실시간 화살표 입력 검증) ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
         let gameActive = document.getElementById('screen-game').classList.contains('active');
         let nextBtnVisible = document.getElementById('btn-main-next').style.display === 'block';
 
-        // 1. 일반 UI 제어 화면에서의 Space 키 및 ESC 키 매핑 연동
+        // 1. 단축키 핸들러 (Space 및 ESC)
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (introActive) {
                 e.preventDefault();
-                triggerBtnAction('btn-main-start', goToGameStart);
+                triggerActionById('btn-main-start', goToGameStart);
                 return;
             }
             if (startActive) {
                 e.preventDefault();
-                triggerBtnAction('btn-main-dance', startGameLoop);
+                triggerActionById('btn-main-dance', startGameLoop);
                 return;
             }
             if (gameActive && nextBtnVisible) {
                 e.preventDefault();
-                triggerBtnAction('btn-main-next', nextStageOrRound);
+                triggerActionById('btn-main-next', nextStageOrRound);
                 return;
             }
         }
 
         if (e.key === 'Escape' || e.key === 'Esc') {
             if (startActive) {
-                triggerBtnAction('btn-main-back', goToIntro);
+                triggerActionById('btn-main-back', goToIntro);
                 return;
             }
         }
 
-        // 2. 인게임 조작 판정 연동부
+        // 2. 방향키 연속 타격 시스템
         if (!gameActive || isRoundFinished) return;
 
-        // 2-A단계: 연속 화살표 입력 검증 처리
-        if (!isSequenceCleared) {
-            if (arrowKeyCodes.includes(e.key)) {
-                let targetKey = targetArrowSequence[currentArrowIndex];
-                let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
-
-                if (e.key === targetKey) {
-                    // 단일 방향키 성공 -> Success 이미지 노출
-                    if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
-                    currentArrowIndex++;
-
-                    // 전체 시퀀스를 완벽히 전부 순서대로 타이핑 성공 시 스페이스 단계 전환
-                    if (currentArrowIndex >= targetArrowSequence.length) {
-                        isSequenceCleared = true;
-                        showJudgment("Good! Perfect 타이밍에 SPACE 입력!", "#ffeb3b");
-                    }
-                } else {
-                    // 방향키 입력 불일치 -> 즉시 Fail 이미지 전환 및 라운드 낙선 처리
-                    if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
-                    showJudgment("Miss! 방향키 오류", "#f44336");
-                    endRound(false);
-                }
+        if (arrowKeyCodes.includes(e.key)) {
+            // 첫 방향키 입력 시점부터 촉박하게 제한 시간 작동 시작!
+            if (!isTimerStarted) {
+                startTimer();
             }
-            return;
-        }
 
-        // 2-B단계: 방향키 전체 타격 성공 상태에서 최종 스페이스 바 PERFECT 타이밍 타격 처리
-        if (e.key === ' ' || e.key === 'Spacebar') {
-            e.preventDefault();
-            // PERFECT 커서 도달 허용 유효 범위 세팅 (중앙 42% ~ 58%)
-            if (cursorPosition >= 42 && cursorPosition <= 58) {
-                showJudgment("PERFECT!!!", "#4caf50");
-                endRound(true);
+            let targetKey = targetArrowSequence[currentArrowIndex];
+            let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
+
+            if (e.key === targetKey) {
+                // 단일 입력 매칭 완료 -> Success 이미지 변경
+                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
+                currentArrowIndex++;
+
+                // 스페이스바 판정 없이, 마지막 방향키를 누르자마자 즉시 성공 판정!
+                if (currentArrowIndex >= targetArrowSequence.length) {
+                    clearInterval(timerIntervalId);
+                    showJudgment("PERFECT!!!", "#4caf50");
+                    endRound(true);
+                }
             } else {
-                showJudgment("MISS! 게이지 타이밍 실패", "#f44336");
+                // 방향키 타격 오류 -> 즉시 실패(Fail) 이미지 전환 및 패배 처리
+                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
+                clearInterval(timerIntervalId);
+                showJudgment("MISS! 틀린 방향키", "#f44336");
                 endRound(false);
             }
         }
     });
 
-    // 라운드 결과 피드백 맵핑
+    // 라운드 결과 세틀먼트
     function endRound(isSuccess) {
         isRoundFinished = true;
-        if(gaugeAnimationId) cancelAnimationFrame(gaugeAnimationId);
 
         if (isSuccess) {
             document.getElementById('rhythm-ui').style.display = 'none';
             let seqDisplay = document.getElementById('dance-sequence-text');
-            seqDisplay.innerText = Math.floor(Math.random() * 9) + 1; // 1~9 무작위 출력 시퀀스 이미지 대체
+            seqDisplay.innerText = Math.floor(Math.random() * 9) + 1; 
             seqDisplay.style.display = 'block';
             
-            // 승리했으므로 차기 이동을 유도하는 NEXT 스테이지/판수 이동 버튼 활성화
+            // 승리 시 다음 버튼 표출
             document.getElementById('btn-main-next').style.display = 'block';
         } else {
-            // 실패 시 1.5초 후 초기화 후 재도전 진행
-            setTimeout(() => { initRound(); }, 1500);
+            // 실패 시 1.2초 후 리트라이 초기화
+            setTimeout(() => { initRound(); }, 1200);
         }
     }
 
@@ -633,7 +634,7 @@
         }
     }
 
-    // --- 도감(Collection) 핵심 로직 시스템 ---
+    // --- 도감(Collection) 시스템 ---
     function initCollectionUI() {
         let grid = document.getElementById('book-grid-container');
         grid.innerHTML = '';
