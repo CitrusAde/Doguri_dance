@@ -2,600 +2,608 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <title>바나나 톡톡 (Banana Tok Tok)</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dongle:wght@400;700&family=Jua&display=swap" rel="stylesheet">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v3.8</title>
     <style>
-        html, body {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            touch-action: none;
-            -webkit-overflow-scrolling: touch;
+        :root {
+            --theme-bg: linear-gradient(180deg, #7ec8e3 0%, #ffeaa7 60%, #f5cd79 100%);
+            --theme-border: #e17055;
+            --theme-font: #4a3b32;
+            --podium-bg: #875742;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body {
-            margin: 0;
-            padding: 0;
-            background: #2c3e50;
-            font-family: 'Jua', sans-serif;
+            background-color: #f0e6d2;
+            color: var(--theme-font);
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            padding: 10px;
         }
-
+        
         #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 450px;
-            max-height: 850px;
-            background: linear-gradient(to bottom, 
-                #7dd3fc 0%, #7dd3fc 45%,   
-                #22d3ee 45%, #0891b2 65%,  
-                #fef08a 65%, #facc15 100%  
-            );
-            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 40px 20px 30px 20px;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        @media (min-width: 450px) {
-            #game-container {
-                height: 177.78vw;
-                border: 8px solid #fff;
-                border-radius: 24px;
-            }
-        }
-
-        .bg-cloud {
-            position: absolute;
-            font-size: 3rem;
-            color: rgba(255, 255, 255, 0.8);
-            top: 15%;
-            animation: floatCloud 15s linear infinite;
-            pointer-events: none;
-            z-index: 1;
-        }
-        .cloud-2 { top: 28%; animation-duration: 22s; animation-delay: -5s; font-size: 2.2rem; opacity: 0.6; }
-
-        #game-container::before {
-            content: '';
-            position: absolute;
-            top: 64.5%; left: 0; width: 200%; height: 15px;
-            background: radial-gradient(circle at 50% 100%, transparent 10px, #fff 11px);
-            background-size: 40px 20px;
-            opacity: 0.5;
-            animation: waveMotion 4s linear infinite alternate;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .bg-palm {
-            position: absolute;
-            font-size: 5.5rem;
-            bottom: 25%;
-            left: -15px;
-            opacity: 0.8;
-            filter: drop-shadow(0 4px 0px rgba(0,0,0,0.1));
-            pointer-events: none;
-            z-index: 1;
-        }
-        .palm-right { left: auto; right: -25px; font-size: 6.5rem; bottom: 22%; transform: scaleX(-1); }
-
-        #header { text-align: center; z-index: 2; pointer-events: auto; }
-        h1 {
-            font-family: 'Jua', sans-serif;
-            color: #ffeb3b;
-            font-size: 3.4rem;
-            margin: 0 0 5px 0;
-            font-weight: normal;
-            letter-spacing: 0px;
-            text-shadow: 2px 3px 0px #e65100, 4px 6px 10px rgba(0,0,0,0.15);
-        }
-        #info-panel {
-            background: #ffffff;
-            border: 4px solid #ff9800;
-            padding: 6px 20px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            color: #5d4037;
-            box-shadow: 0 6px 0px rgba(0,0,0,0.1);
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-        #touch-left { color: #e91e63; font-size: 1.4rem; }
-
-        #book-open-btn {
-            font-family: 'Jua', sans-serif;
-            background: #ff5722;
-            color: white;
-            border: 2px solid #fff;
+            width: 1024px;
+            height: 576px;
+            max-width: 100%;
+            aspect-ratio: 16 / 9;
+            /* 시작 화면과 난이도 화면을 위한 메인 배경 지정 */
+            background: url('DD_Main_Image.jpg') no-repeat center center;
+            background-size: cover;
+            border: 8px solid var(--theme-border);
+            box-shadow: 0 10px 30px rgba(74, 59, 50, 0.2);
             border-radius: 20px;
-            padding: 8px 22px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 0px #d84315;
-            display: inline-block;
-        }
-
-        #banana-stage {
-            width: 250px;
-            height: 250px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2;
-            filter: drop-shadow(0px 10px 0px rgba(0,0,0,0.12));
-            pointer-events: none;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-
-        #banana-view {
-            width: 250px;
-            height: 250px;
-            background-size: 1000px 1000px;
-            background-repeat: no-repeat;
-            background-position: 0px 0px;
-        }
-
-        #footer-text { font-family: 'Jua', sans-serif; font-size: 1.3rem; height: 20px; z-index: 2; color: #795548; pointer-events: none; }
-
-        #combo-panel {
-            position: absolute;
-            top: 48%;
-            font-size: 2rem;
-            color: #ffeb3b;
-            text-shadow: 2px 2px 0px #e65100;
-            pointer-events: none;
-            z-index: 3;
-            opacity: 0;
-            transform: scale(0.5);
-            transition: opacity 0.1s, transform 0.1s;
-        }
-        #combo-panel.active { opacity: 1; transform: scale(1) rotate(-5deg); }
-
-        .particle {
-            position: absolute;
-            font-size: 1.5rem;
-            pointer-events: none;
-            z-index: 99;
-            animation: explode 0.6s ease-out forwards;
-        }
-
-        .casual-btn {
-            font-family: 'Jua', sans-serif;
-            padding: 14px 45px;
-            font-size: 1.6rem;
-            color: white;
-            border: 4px solid #fff;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 8px 0px #388e3c, 0 15px 10px rgba(0,0,0,0.3);
-            text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-            pointer-events: auto;
-        }
-        .btn-green { background: #4caf50; box-shadow: 0 8px 0px #2e7d32; }
-        .btn-orange { background: #ff9800; box-shadow: 0 8px 0px #ef6c00; }
-
-        .overlay-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 10;
-            pointer-events: auto;
-        }
-
-        .start-title {
-            font-family: 'Jua', sans-serif;
-            font-size: 4.2rem;
-            color: #fffde7;
-            text-align: center;
-            margin-bottom: 40px;
-            line-height: 1.1;
-            text-shadow: 3px 4px 0px #d84315, 6px 10px 15px rgba(0,0,0,0.2);
-        }
-
-        #clear-screen { display: none; }
-        #clear-screen h2 { font-family: 'Jua', sans-serif; font-size: 3.5rem; color: #ffeb3b; text-shadow: 2px 3px 0px #e91e63; margin-bottom: 5px; }
-        
-        #final-banana-showcase {
-            width: 180px;
-            height: 180px;
-            margin-bottom: 15px;
-            filter: drop-shadow(0px 8px 0px rgba(0,0,0,0.15));
-            background-size: 720px 720px; 
-            background-repeat: no-repeat;
-            background-position: -540px -540px; 
-        }
-
-        #reward-msg {
-            font-family: 'Jua', sans-serif;
-            color: #fffde7;
-            font-size: 1.4rem;
-            text-align: center;
-            margin-bottom: 25px;
-            background: linear-gradient(135deg, #ff9800, #e91e63);
-            padding: 10px 20px;
-            border-radius: 24px;
-            border: 3px solid #fff;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-
-        #book-screen { display: none; background: rgba(44, 62, 80, 0.95); padding: 20px; box-sizing: border-box; }
-        .book-title { font-family: 'Jua', sans-serif; font-size: 2.5rem; color: #ffeb3b; margin-bottom: 15px; text-shadow: 2px 2px 0px #e65100; }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            width: 100%;
-            max-width: 380px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 16px;
-            border: 3px solid #ff9800;
-            box-sizing: border-box;
-            margin-bottom: 20px;
-        }
-
-        .skin-item {
-            background: #fff;
-            border: 3px solid #bdc3c7;
-            border-radius: 12px;
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
             position: relative;
-            box-shadow: 0 4px 0px #bdc3c7;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
-        .skin-item.active { border-color: #ff9800; background: #fffde7; box-shadow: 0 4px 0px #e65100; }
+
+        @media (max-aspect-ratio: 1/1) {
+            #game-container { width: 100%; height: auto; aspect-ratio: 9 / 16; max-height: 95vh; }
+        }
+
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; padding: 20px;
+        }
+        .hidden { display: none !important; }
+
+        /* 1번, 2번 화면에서 컨테이너의 메인 이미지가 보이도록 투명화 처리 */
+        #main-screen, #select-screen {
+            background: transparent !important;
+        }
+
+        .title-logo {
+            font-size: 44px; font-weight: bold; color: #d63031;
+            text-shadow: 2px 2px 0px #fff, 4px 4px 0px #fdcb6e; margin-bottom: 20px;
+        }
         
-        .skin-item.locked { background: #95a5a6; border-color: #7f8c8d; box-shadow: 0 4px 0px #7f8c8d; cursor: not-allowed; }
-        .skin-item.locked .skin-preview { filter: brightness(0.3) contrast(0.5); }
-        .skin-item.locked::after { content: '🔒'; position: absolute; font-size: 1.2rem; top: 25%; }
+        .btn-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 15px; }
+        
+        /* 이미지 버튼 공통 스타일 정의 */
+        .img-btn {
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.05s;
+        }
+        .img-btn:active, .img-btn.pressed { transform: scale(0.95); }
 
-        .skin-item.coming-soon { background: #555; border-color: #333; box-shadow: 0 4px 0px #333; cursor: not-allowed; }
-        .skin-item.coming-soon .skin-preview { display: none; }
-        .skin-item.coming-soon::after { content: '❌'; position: absolute; font-size: 1.2rem; top: 20%; }
-        .skin-item.coming-soon .skin-name { color: #aaa !important; font-size: 1rem; }
+        /* 이미지 리소스 연결 및 원본 비율용 규격 지정 */
+        .start-btn-asset {
+            width: 200px;
+            height: 66px;
+            background-image: url('DD_Main_Start_Button.png');
+        }
+        .dance-btn-asset {
+            width: 200px;
+            height: 66px;
+            background-image: url('DD_Main_Dance_Button.png');
+        }
+        .gift-btn-asset {
+            width: 160px;
+            height: 53px;
+            background-image: url('DD_Main_Gift_Button.png');
+        }
+        
+        .sub-btn {
+            background: linear-gradient(180deg, #74b9ff 0%, #0984e3 100%); border: 2px solid #4a3b32; color: white;
+            font-size: 14px; font-weight: bold; padding: 8px 16px; border-radius: 20px;
+            cursor: pointer; box-shadow: 0 3px 0 #4a3b32;
+        }
 
-        .skin-preview { width: 45px; height: 45px; background-size: 180px 180px; background-repeat: no-repeat; background-position: 0px 0px; }
-        .skin-name { font-family: 'Dongle', sans-serif; font-size: 1.1rem; font-weight: bold; line-height: 0.8; color: #5d4037; margin-top: 4px; }
+        .space-hint {
+            font-size: 11px; color: #636e72; font-weight: bold;
+            background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 4px; border: 1px solid #b2bec3;
+        }
 
-        @keyframes floatCloud { 0% { left: -100px; } 100% { left: 450px; } }
-        @keyframes waveMotion { 0% { transform: translateX(0) scaleY(1); } 100% { transform: translateX(-20px) scaleY(1.1); } }
-        @keyframes explode { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--mx), var(--my)) scale(0.2); opacity: 0; } }
+        .hawaii-podium {
+            width: 180px; height: 35px; background: var(--podium-bg); border: 3px solid #4a3b32;
+            border-radius: 8px; box-shadow: 0 6px 0 #4a3b32; position: relative; margin-bottom: 20px;
+        }
+        
+        .doguri-sprite {
+            width: 90px; height: 90px;
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            position: absolute; bottom: 20px; left: 41px;
+            animation: bounce 0.6s infinite alternate;
+        }
+        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+
+        .top-right-actions { position: absolute; top: 20px; right: 20px; }
+        .bottom-right-actions { position: absolute; bottom: 20px; right: 20px; }
+
+        .podium-container { display: flex; justify-content: center; width: 100%; gap: 25px; margin-top: 10px; }
+        .difficulty-card {
+            background: rgba(255, 255, 255, 0.8); border: 3px solid #4a3b32;
+            border-radius: 15px; padding: 15px; width: 140px; display: flex; flex-direction: column; align-items: center;
+            cursor: pointer; box-shadow: 0 4px 0 #4a3b32;
+        }
+        .difficulty-card.selected { background: #ffeaa7; border-color: #d63031; transform: scale(1.05); }
+        .diff-title { font-size: 18px; font-weight: bold; }
+
+        #game-hud {
+            width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 255, 255, 0.4); border-bottom: 3px solid #4a3b32;
+        }
+        .hud-block { font-size: 14px; font-weight: bold; background: #fff; padding: 6px 12px; border-radius: 8px; border: 2px solid #4a3b32; }
+        
+        .hud-heart-box {
+            position: absolute; bottom: 20px; left: 20px; z-index: 15;
+            background: rgba(255, 255, 255, 0.8); padding: 8px 12px; border-radius: 10px;
+            border: 2px solid #4a3b32; display: flex; flex-direction: column; gap: 4px;
+        }
+        .heart-container { display: flex; gap: 4px; align-items: center; }
+        .heart-icon { width: 22px; height: 22px; background-size: contain; background-repeat: no-repeat; }
+
+        #play-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px; position: relative; }
+        
+        #dance-sequence-box {
+            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+            font-size: 54px; font-weight: bold; color: #d63031; text-shadow: 2px 2px 0 #fff; display: none;
+        }
+        #dance-sequence-box.animating { display: block; animation: textDance 0.15s infinite alternate; }
+
+        #input-chain-area { display: flex; gap: 12px; min-height: 60px; align-items: center; }
+        .arrow-item {
+            width: 48px; height: 48px; border: 3px solid #4a3b32; border-radius: 8px; background: #fff;
+            display: flex; justify-content: center; align-items: center; position: relative;
+            background-size: 70% 70%; background-repeat: no-repeat; background-position: center;
+        }
+        .arrow-item.active { background-color: #ffeaa7; transform: scale(1.05); }
+        .arrow-item.cleared { background-color: #2ecc71; transform: scale(0.9); background-image: none !important; }
+        .arrow-item.cleared::after { content: '✓'; color: white; font-size: 20px; font-weight: bold; }
+        .arrow-item.invisible-gimmick { opacity: 0 !important; }
+        .double-tap-badge {
+            position: absolute; bottom: -6px; right: -6px; background: #e74c3c; color: white;
+            font-size: 9px; padding: 1px 3px; border-radius: 4px; border: 1px solid #4a3b32; font-weight: bold;
+        }
+
+        #spacebar-gauge { width: 320px; height: 18px; background: #fff; border: 3px solid #4a3b32; border-radius: 9px; position: relative; overflow: hidden; opacity: 0.3; }
+        #spacebar-gauge.active { opacity: 1; }
+        
+        #target-parry-zone { position: absolute; height: 100%; background: #ff7675; border-left: 2px solid #4a3b32; border-right: 2px solid #4a3b32; left: 75%; }
+        #gauge-pin { position: absolute; height: 100%; width: 6px; background: #4a3b32; left: 0%; }
+
+        #game-toast { font-size: 24px; font-weight: bold; color: #2ecc71; height: 30px; }
+        .gacha-item-box { font-size: 28px; font-weight: bold; color: #f1c40f; margin: 15px 0; padding: 10px 20px; background: #fff; border: 3px solid #4a3b32; border-radius: 10px; }
+        
+        .standard-dance-btn {
+            background: linear-gradient(180deg, #ff7675 0%, #d63031 100%); border: 3px solid #4a3b32; color: white;
+            font-size: 20px; font-weight: bold; padding: 10px 35px; border-radius: 30px;
+            cursor: pointer; box-shadow: 0 5px 0 #4a3b32; transition: transform 0.05s;
+        }
+        .standard-dance-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #4a3b32; }
     </style>
 </head>
 <body>
 
-    <div id="game-container" ontouchstart="handleGlobalTouch(event)" onmousedown="handleGlobalTouch(event)">
-        
-        <div class="bg-cloud">☁️</div>
-        <div class="bg-cloud cloud-2">☁️</div>
-
-        <div class="bg-palm">🌴</div>
-        <div class="bg-palm palm-right">🌴</div>
-
-        <div id="combo-panel">0 COMBO!</div>
-
-        <!-- 시작 화면 -->
-        <div id="start-screen" class="overlay-screen">
-            <div class="start-title">바나나<br>톡톡!</div>
-            <button class="casual-btn btn-green" ontouchstart="startGame(event)" onclick="startGame(event)">게임 시작</button>
+    <div id="game-container">
+        <!-- 1. 시작 화면 -->
+        <div id="main-screen" class="screen">
+            <div class="title-logo">도구리 댄스</div>
+            <div class="hawaii-podium"><div class="doguri-sprite" id="lobby-doguri"></div></div>
+            <div class="btn-wrapper">
+                <button class="img-btn start-btn-asset" id="lobby-dance-btn"></button>
+                <div class="space-hint" style="margin-top: 5px;">SPACE 키로 시작</div>
+            </div>
         </div>
 
-        <!-- 상단 UI -->
-        <div id="header">
-            <h1>바나나 톡톡</h1>
-            <div id="info-panel">다음 변신까지 <span id="touch-left">2</span>톡!</div>
-            <br>
-            <button id="book-open-btn" ontouchstart="openBook(event)" onclick="openBook(event)">📖 바나나 도감</button>
+        <!-- 2. 난이도 선택 화면 -->
+        <div id="select-screen" class="screen hidden">
+            <div class="top-right-actions">
+                <button class="sub-btn" id="select-back-btn">뒤로가기</button>
+            </div>
+
+            <div class="title-logo" style="font-size:32px; margin-bottom:15px;">난이도 선택</div>
+            
+            <div class="podium-container">
+                <div class="difficulty-card card-easy selected" data-diff="easy" data-idx="0"><div class="diff-title">쉬움</div></div>
+                <div class="difficulty-card card-normal" data-diff="normal" data-idx="1"><div class="diff-title">보통</div></div>
+                <div class="difficulty-card card-hard" data-diff="hard" data-idx="2"><div class="diff-title">어려움</div></div>
+            </div>
+            
+            <div class="btn-wrapper" style="margin-top: 25px;">
+                <button class="img-btn dance-btn-asset" id="select-start-btn"></button>
+                <div class="space-hint" style="margin-top: 5px;">SPACE 키로 시작 (방향키 이동)</div>
+            </div>
+
+            <div class="bottom-right-actions">
+                <button class="img-btn gift-btn-asset" id="select-collection-btn" onclick="alert('도감 시스템 준비 중!')"></button>
+            </div>
         </div>
 
-        <!-- 바나나 표시 영역 -->
-        <div id="banana-stage">
-            <div id="banana-view"></div>
+        <!-- 3. 플레이 화면 -->
+        <div id="play-screen" class="screen hidden" style="background: var(--theme-bg);">
+            <div id="game-hud">
+                <div class="hud-block" id="hud-stage-name">EASY - STAGE 1 (1/3)</div>
+                <div class="hud-block">남은 시간: <span id="hud-timer">15.0</span>s</div>
+            </div>
+
+            <div class="hud-heart-box">
+                <div style="font-size: 11px; font-weight: bold; color: #e74c3c;">LIFE</div>
+                <div class="heart-container" id="hud-hearts"></div>
+            </div>
+
+            <div id="play-zone">
+                <div id="game-toast"></div>
+                <div style="position: relative; height: 130px; width: 100%; display:flex; justify-content:center;">
+                    <div class="hawaii-podium" style="margin-top: 60px;">
+                        <div class="doguri-sprite" id="game-doguri" style="bottom: 15px; left: 41px;"></div>
+                    </div>
+                    <div id="dance-sequence-box">1</div>
+                </div>
+                <div id="input-chain-area"></div>
+                <div id="spacebar-gauge">
+                    <div id="target-parry-zone"></div>
+                    <div id="gauge-pin"></div>
+                </div>
+            </div>
         </div>
 
-        <div id="footer-text">아무 데나 톡톡!</div>
+        <!-- 4. 결과 및 라운드 클리어 화면 -->
+        <div id="result-screen" class="screen hidden" style="background: var(--theme-bg);">
+            <div class="title-logo" id="result-header" style="font-size:36px;">STAGE CLEAR</div>
+            <p id="result-message" style="font-weight: bold; color:#636e72;">축하합니다!</p>
+            
+            <div id="gacha-area" class="hidden">
+                <div style="font-size:14px; font-weight:bold; color:#ff7675;">🎁 전체 난이도 완포 보상 획득!</div>
+                <div class="gacha-item-box" id="gacha-item-name">일반 #3</div>
+            </div>
 
-        <!-- 게임 클리어 화면 -->
-        <div id="clear-screen" class="overlay-screen">
-            <h2>성공! 🎉</h2>
-            <div id="final-banana-showcase"></div>
-            <div id="reward-msg">도감 획득!</div>
-            <button class="casual-btn btn-orange" ontouchstart="resetGame(event)" onclick="resetGame(event)">다시 하기</button>
-        </div>
-
-        <!-- 바나나 도감 오버레이 화면 -->
-        <div id="book-screen" class="overlay-screen">
-            <div class="book-title">바나나 도감 📖</div>
-            <div class="grid-container" id="skin-grid"></div>
-            <button class="casual-btn btn-green" style="font-size: 1.3rem; padding: 8px 30px;" ontouchstart="closeBook(event)" onclick="closeBook(event)">닫기</button>
+            <div class="btn-wrapper">
+                <button class="standard-dance-btn" id="res-next-btn">다음 스테이지로</button>
+                <div class="space-hint">SPACE 키 또는 마우스 클릭</div>
+            </div>
         </div>
     </div>
 
     <script>
-        let currentFrame = 1;
-        let touchCount = 0;
-        const maxFrames = 16;
-        const touchesPerFrame = 2;
-        let currentSkinNumber = 1;
-        let isProcessingTouch = false;
-
-        let comboCount = 0;
-        let lastTouchTime = 0;
-        const comboTimeout = 800;
-
-        const skinImages = {
-            1: 'banana_4x4_1.png',
-            2: 'banana_4x4_2.png',
-            3: 'banana_4x4_3.png',
-            4: 'banana_4x4_4.png',
-            5: 'banana_4x4_5.png',
-            6: 'banana_4x4_6.png',
-            7: 'banana_4x4_7.png',
-            8: 'banana_4x4_8.png',
-            9: 'banana_4x4_9.png',
-            10: 'banana_4x4_10.png'
+        const IMAGE_SOURCES = {
+            doguri_default: 'doguri_image_base.png',
+            heart: '', arrow_Left: '', arrow_Up: '', arrow_Right: '', arrow_Down: '',
+            sequence: { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '', 9: '' }
         };
 
-        function getSkinImageUrl(num) {
-            return skinImages[num] || '';
-        }
+        const STAGE_CONFIGS = {
+            easy: [
+                { stage: 1, keys: 2, invisible: false, doubleTap: false },
+                { stage: 2, keys: 3, invisible: false, doubleTap: false },
+                { stage: 3, keys: 3, invisible: false, doubleTap: false },
+                { stage: 4, keys: 4, invisible: false, doubleTap: false },
+                { stage: 5, keys: 5, invisible: true, doubleTap: false }
+            ],
+            normal: [
+                { stage: 1, keys: 3, invisible: false, doubleTap: false },
+                { stage: 2, keys: 4, invisible: false, doubleTap: false },
+                { stage: 3, keys: 4, invisible: false, doubleTap: false },
+                { stage: 4, keys: 4, invisible: true, doubleTap: false },
+                { stage: 5, keys: 5, invisible: true, doubleTap: true }
+            ],
+            hard: [
+                { stage: 1, keys: 3, invisible: false, doubleTap: false },
+                { stage: 2, keys: 4, invisible: false, doubleTap: false },
+                { stage: 3, keys: 4, invisible: false, doubleTap: false },
+                { stage: 4, keys: 4, invisible: true, doubleTap: false },
+                { stage: 5, keys: 5, invisible: true, doubleTap: true }
+            ]
+        };
 
-        let unlockedSkins = {};
-        for(let i=1; i<=16; i++) {
-            unlockedSkins[i] = (i === 1);
-        }
+        const KEY_CODES = { 'ArrowLeft': '←', 'ArrowUp': '↑', 'ArrowRight': '→', 'ArrowDown': '↓' };
+        const DIRECTIONS = ['Left', 'Up', 'Right', 'Down'];
+        const CONFIG_LOOKUP_SYM = { 'Left': '←', 'Up': '↑', 'Right': '→', 'Down': '↓' };
 
-        const gameContainer = document.getElementById('game-container');
-        const bananaStage = document.getElementById('banana-stage');
-        const bananaView = document.getElementById('banana-view');
-        const touchLeftText = document.getElementById('touch-left');
-        const startScreen = document.getElementById('start-screen');
-        const clearScreen = document.getElementById('clear-screen');
-        const bookScreen = document.getElementById('book-screen');
-        const skinGrid = document.getElementById('skin-grid');
-        const rewardMsg = document.getElementById('reward-msg');
-        const comboPanel = document.getElementById('combo-panel');
-        const finalBananaShowcase = document.getElementById('final-banana-showcase');
-
-        function initBook() {
-            skinGrid.innerHTML = '';
-            for (let i = 1; i <= 16; i++) {
-                const item = document.createElement('div');
-                
-                if (i > 10) {
-                    item.className = `skin-item coming-soon`;
-                    item.setAttribute('ontouchstart', `event.stopPropagation();`);
-                    item.setAttribute('onclick', `event.stopPropagation();`);
-                    const name = document.createElement('div');
-                    name.className = 'skin-name';
-                    name.innerText = `업데이트 예정`;
-                    item.appendChild(name);
-                } else {
-                    if (unlockedSkins[i]) {
-                        item.className = `skin-item ${i === currentSkinNumber ? 'active' : ''}`;
-                        item.setAttribute('ontouchstart', `selectSkin(event, ${i})`);
-                        item.setAttribute('onclick', `selectSkin(event, ${i})`);
-                    } else {
-                        item.className = `skin-item locked`;
-                        item.setAttribute('ontouchstart', `event.stopPropagation();`);
-                        item.setAttribute('onclick', `event.stopPropagation();`);
-                    }
-
-                    const preview = document.createElement('div');
-                    preview.className = 'skin-preview';
-                    preview.style.backgroundImage = `url('${getSkinImageUrl(i)}')`;
-                    
-                    const name = document.createElement('div');
-                    name.className = 'skin-name';
-                    name.innerText = unlockedSkins[i] ? `스킨 ${i}` : `???`;
-
-                    item.appendChild(preview);
-                    item.appendChild(name);
-                }
-                skinGrid.appendChild(item);
-            }
-        }
-
-        function selectSkin(event, skinNum) {
-            event.stopPropagation();
-            event.preventDefault();
-            if (skinNum > 10 || !unlockedSkins[skinNum]) return;
-            
-            currentSkinNumber = skinNum;
-            bananaView.style.backgroundImage = `url('${getSkinImageUrl(skinNum)}')`;
-            initBook();
-            updateBananaSprite(); 
-        }
-
-        function updateBananaSprite() {
-            const idx = currentFrame - 1;
-            const col = idx % 4;
-            const row = Math.floor(idx / 4);
-            bananaView.style.backgroundPosition = `${-(col * 250)}px ${-(row * 250)}px`;
-
-            const progress = idx / (maxFrames - 1); 
-            const currentScale = 0.7 + (progress * 0.5); 
-
-            bananaStage.style.transform = `scale(${currentScale})`;
-            bananaStage.dataset.baseScale = currentScale; 
-        }
-
-        function startGame(event) { 
-            event.stopPropagation(); 
-            event.preventDefault();
-            startScreen.style.display = 'none'; 
-        }
+        let currentScreen = 'main-screen';
+        let selectedDifficulty = 'easy';
+        let diffMenuIndex = 0;
+        let currentStageIndex = 0;
+        let subRoundCounter = 1;
         
-        function openBook(event) { event.stopPropagation(); event.preventDefault(); bookScreen.style.display = 'flex'; }
-        function closeBook(event) { event.stopPropagation(); event.preventDefault(); bookScreen.style.display = 'none'; }
+        const REQ_SUB_ROUNDS = 3;
 
-        function createParticles(x, y) {
-            const baseAmount = 4;
-            const extraAmount = Math.min(Math.floor(comboCount / 2), 16);
-            const totalParticles = baseAmount + extraAmount;
-            const starEmojis = ['⭐', '✨', '🟡', '✨'];
+        let gameLoopActive = false;
+        let gameAnimationFrameId = null;
+        let timeLeft = 15.0;
+        let currentSequence = [];
+        let currentArrowIndex = 0;
+        let playPhase = 'INPUT';
+        let hearts = 3;
+        let perfectStreak = 0;
+        let gaugePos = 0;
 
-            for (let i = 0; i < totalParticles; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.innerText = starEmojis[Math.floor(Math.random() * starEmojis.length)];
-                particle.style.left = `${x}px`;
-                particle.style.top = `${y}px`;
+        const FIXED_GAUGE_SPEED = 0.7; 
+        const BASE_GAUGE_WIDTH = 24;
 
-                const angle = Math.random() * Math.PI * 2;
-                const distance = 60 + Math.random() * 80;
-                const mx = Math.cos(angle) * distance;
-                const my = Math.sin(angle) * distance;
+        let sequenceFrameCounter = 1;
+        let sequenceTimerId = null;
 
-                particle.style.setProperty('--mx', `${mx}px`);
-                particle.style.setProperty('--my', `${my}px`);
-                gameContainer.appendChild(particle);
-
-                particle.addEventListener('animationend', () => { particle.remove(); });
+        function applyImageToElement(elementId, imgSrc, isCssBg = false, fallbackColor = '#ff9ebb') {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            if (imgSrc) {
+                if (isCssBg) el.style.backgroundImage = `url('${imgSrc}')`;
+                else el.src = imgSrc;
+            } else {
+                if (isCssBg) el.style.backgroundColor = fallbackColor;
             }
         }
 
-        function handleGlobalTouch(event) {
-            if (event.target.tagName === 'BUTTON' || event.target.closest('.skin-item') || (event.target.closest('#book-screen') && event.target === bookScreen)) return;
-            if (startScreen.style.display !== 'none' || clearScreen.style.display === 'flex' || bookScreen.style.display === 'flex') return;
+        applyImageToElement('lobby-doguri', IMAGE_SOURCES.doguri_default, true, 'transparent');
+        applyImageToElement('game-doguri', IMAGE_SOURCES.doguri_default, true, 'transparent');
 
-            let touchX = 0, touchY = 0;
-            if (event.type === 'touchstart') {
-                touchX = event.touches[0].clientX;
-                touchY = event.touches[0].clientY;
-            } else {
-                touchX = event.clientX;
-                touchY = event.clientY;
+        function showScreen(screenId) {
+            currentScreen = screenId;
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+        }
+
+        function updateDiffSelectionUI() {
+            const cards = document.querySelectorAll('.difficulty-card');
+            cards.forEach((card, idx) => {
+                if (idx === diffMenuIndex) {
+                    card.classList.add('selected');
+                    selectedDifficulty = card.getAttribute('data-diff');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+
+        function drawHeartsUI() {
+            const container = document.getElementById('hud-hearts');
+            container.innerHTML = '';
+            for (let i = 0; i < hearts; i++) {
+                let h = document.createElement('div');
+                h.className = 'heart-icon';
+                if (IMAGE_SOURCES.heart) h.style.backgroundImage = `url('${IMAGE_SOURCES.heart}')`;
+                else { h.style.backgroundColor = '#e74c3c'; h.style.borderRadius = '50%'; }
+                container.appendChild(h);
+            }
+        }
+
+        document.getElementById('lobby-dance-btn').addEventListener('click', () => {
+            diffMenuIndex = 0; updateDiffSelectionUI(); showScreen('select-screen');
+        });
+
+        document.getElementById('select-back-btn').addEventListener('click', () => {
+            showScreen('main-screen');
+        });
+
+        document.getElementById('select-start-btn').addEventListener('click', () => {
+            currentStageIndex = 0; subRoundCounter = 1; hearts = 3; perfectStreak = 0;
+            initGameplay();
+        });
+
+        document.getElementById('res-next-btn').addEventListener('click', () => {
+            handleResultTransition();
+        });
+
+        document.querySelectorAll('.difficulty-card').forEach(card => {
+            card.addEventListener('click', () => {
+                diffMenuIndex = parseInt(card.getAttribute('data-idx'));
+                updateDiffSelectionUI();
+            });
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (currentScreen === 'main-screen' && e.key === ' ') {
+                e.preventDefault();
+                document.getElementById('lobby-dance-btn').classList.add('pressed');
+                setTimeout(() => {
+                    document.getElementById('lobby-dance-btn').classList.remove('pressed');
+                    document.getElementById('lobby-dance-btn').click();
+                }, 100);
+                return;
             }
 
-            const rect = gameContainer.getBoundingClientRect();
-            const relX = touchX - rect.left;
-            const relY = touchY - rect.top;
-
-            if (isProcessingTouch) return;
-            isProcessingTouch = true;
-            setTimeout(() => { isProcessingTouch = false; }, 50);
-
-            const now = Date.now();
-            if (now - lastTouchTime <= comboTimeout) { comboCount++; } else { comboCount = 1; }
-            lastTouchTime = now;
-
-            if (comboCount >= 3) {
-                comboPanel.innerText = `${comboCount} COMBO!🔥`;
-                comboPanel.className = 'active';
-            } else {
-                comboPanel.className = '';
+            if (currentScreen === 'select-screen') {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); diffMenuIndex = (diffMenuIndex - 1 + 3) % 3; updateDiffSelectionUI(); }
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); diffMenuIndex = (diffMenuIndex + 1) % 3; updateDiffSelectionUI(); }
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    document.getElementById('select-start-btn').classList.add('pressed');
+                    setTimeout(() => {
+                        document.getElementById('select-start-btn').classList.remove('pressed');
+                        document.getElementById('select-start-btn').click();
+                    }, 100);
+                }
+                return;
             }
 
-            createParticles(relX, relY);
+            if (currentScreen === 'play-screen' && gameLoopActive) {
+                if (playPhase === 'INPUT' && e.key in KEY_CODES) {
+                    e.preventDefault();
+                    let inputDir = KEY_CODES[e.key];
+                    let currentTarget = currentSequence[currentArrowIndex];
+                    let expectedDirSym = CONFIG_LOOKUP_SYM[currentTarget.dir];
 
-            const baseScale = parseFloat(bananaStage.dataset.baseScale) || 1.0;
-            bananaStage.style.transform = `scale(${baseScale * 0.88})`;
-            setTimeout(() => {  bananaStage.style.transform = `scale(${baseScale})`; }, 60);
+                    if (inputDir === expectedDirSym) {
+                        currentTarget.curTaps++;
+                        if (currentTarget.curTaps >= currentTarget.reqTaps) {
+                            let nodes = document.getElementById('input-chain-area').children;
+                            nodes[currentArrowIndex].classList.remove('active');
+                            nodes[currentArrowIndex].classList.add('cleared');
+                            
+                            currentArrowIndex++;
+                            if (currentArrowIndex >= currentSequence.length) {
+                                playPhase = 'SPACE';
+                                document.getElementById('spacebar-gauge').classList.add('active');
+                            } else { nodes[currentArrowIndex].classList.add('active'); }
+                        }
+                    } else { handleRoundFailure(); }
+                } else if (playPhase === 'SPACE' && e.key === ' ') {
+                    e.preventDefault();
+                    let minPerfectRange = 75;
+                    let maxPerfectRange = 75 + BASE_GAUGE_WIDTH;
 
-            if (currentFrame > maxFrames) return;
-            touchCount++;
+                    if (gaugePos >= minPerfectRange && gaugePos <= maxPerfectRange) {
+                        perfectStreak++;
+                        if (perfectStreak >= 3) { hearts++; perfectStreak = 0; triggerFeedbackFlash('PERFECT x3! HP +1', '#2ecc71'); }
+                        else { triggerFeedbackFlash('PERFECT!', '#2ecc71'); }
+                        drawHeartsUI();
+                        startDancePerformance();
+                    } else { handleRoundFailure(); }
+                }
+                return;
+            }
+
+            if (currentScreen === 'result-screen' && e.key === ' ') {
+                e.preventDefault();
+                handleResultTransition();
+            }
+        });
+
+        function handleResultTransition() {
+            const wasStageClear = document.getElementById('result-header').innerText === "STAGE CLEAR";
+            const wasGameOver = document.getElementById('result-header').innerText === "GAME OVER";
             
-            if (touchCount >= touchesPerFrame) {
-                touchCount = 0;
-                currentFrame++;
+            if (wasGameOver) { showScreen('main-screen'); return; }
+            if (wasStageClear) {
+                currentStageIndex++;
+                if (currentStageIndex >= 5) { showScreen('main-screen'); return; }
+            }
+            subRoundCounter = 1;
+            initGameplay();
+        }
+
+        function handleRoundFailure() {
+            perfectStreak = 0; hearts--; drawHeartsUI(); triggerFeedbackFlash('FAIL', '#e74c3c');
+            if (hearts <= 0) { 
+                gameLoopActive = false; 
+                if (gameAnimationFrameId) { cancelAnimationFrame(gameAnimationFrameId); gameAnimationFrameId = null; }
+                resolveStageEnd(false); 
+            } else { buildNewSequenceChain(); }
+        }
+
+        function initGameplay() {
+            if (gameAnimationFrameId) {
+                cancelAnimationFrame(gameAnimationFrameId);
+                gameAnimationFrameId = null;
+            }
+
+            showScreen('play-screen'); drawHeartsUI();
+            const config = STAGE_CONFIGS[selectedDifficulty][currentStageIndex];
+            
+            document.getElementById('target-parry-zone').style.width = BASE_GAUGE_WIDTH + '%';
+            document.getElementById('hud-stage-name').innerText = `${selectedDifficulty.toUpperCase()} - STAGE ${config.stage} (${subRoundCounter}/${REQ_SUB_ROUNDS}판)`;
+            document.getElementById('game-toast').innerText = '';
+            document.getElementById('game-doguri').classList.remove('hidden');
+            document.getElementById('dance-sequence-box').classList.remove('animating');
+            timeLeft = 15.0; document.getElementById('hud-timer').innerText = timeLeft.toFixed(1);
+            
+            clearInterval(sequenceTimerId); 
+            buildNewSequenceChain();
+            
+            gameLoopActive = true; 
+            gameAnimationFrameId = requestAnimationFrame(runGameFrame);
+        }
+
+        function buildNewSequenceChain() {
+            const config = STAGE_CONFIGS[selectedDifficulty][currentStageIndex];
+            currentArrowIndex = 0; playPhase = 'INPUT'; gaugePos = 0;
+            document.getElementById('spacebar-gauge').classList.remove('active');
+            document.getElementById('gauge-pin').style.left = '0%';
+            let length = config.keys; currentSequence = [];
+            for (let i = 0; i < length; i++) {
+                let randomDir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
+                let requiresTwoClicks = config.doubleTap && (i === length - 1 || Math.random() > 0.5);
+                currentSequence.push({ dir: randomDir, reqTaps: requiresTwoClicks ? 2 : 1, curTaps: 0 });
+            }
+            let invisibleIdx = config.invisible ? Math.floor(Math.random() * length) : -1;
+            const chainArea = document.getElementById('input-chain-area'); chainArea.innerHTML = '';
+            currentSequence.forEach((item, idx) => {
+                let arrowNode = document.createElement('div'); arrowNode.className = 'arrow-item';
+                if (idx === 0) arrowNode.classList.add('active');
+                let customImg = IMAGE_SOURCES[`arrow_${item.dir}`];
+                if (customImg) arrowNode.style.backgroundImage = `url('${customImg}')`;
+                else arrowNode.innerText = CONFIG_LOOKUP_SYM[item.dir];
+                if (item.reqTaps === 2) {
+                    let badge = document.createElement('span'); badge.className = 'double-tap-badge'; badge.innerText = 'x2';
+                    arrowNode.appendChild(badge);
+                }
+                if (idx === invisibleIdx) arrowNode.classList.add('invisible-gimmick');
+                chainArea.appendChild(arrowNode);
+            });
+        }
+
+        function triggerFeedbackFlash(txt, color) {
+            const t = document.getElementById('game-toast'); t.innerText = txt; t.style.color = color;
+            setTimeout(() => { if (t.innerText === txt) t.innerText = ''; }, 600);
+        }
+
+        function startDancePerformance() {
+            playPhase = 'DANCE'; document.getElementById('game-doguri').classList.add('hidden');
+            const danceDisplay = document.getElementById('dance-sequence-box');
+            danceDisplay.classList.add('animating'); sequenceFrameCounter = 1; danceDisplay.innerText = sequenceFrameCounter;
+            
+            sequenceTimerId = setInterval(() => {
+                sequenceFrameCounter++;
+                if (sequenceFrameCounter > 9) {
+                    clearInterval(sequenceTimerId);
+                    if (subRoundCounter >= REQ_SUB_ROUNDS) {
+                        gameLoopActive = false;
+                        if (gameAnimationFrameId) { cancelAnimationFrame(gameAnimationFrameId); gameAnimationFrameId = null; }
+                        resolveStageEnd(true);
+                    } else { subRoundCounter++; initGameplay(); }
+                } else { danceDisplay.innerText = sequenceFrameCounter; }
+            }, 60);
+        }
+
+        function runGameFrame() {
+            if (!gameLoopActive) return;
+            timeLeft -= 1/60;
+            if (timeLeft <= 0) { 
+                timeLeft = 0; 
+                document.getElementById('hud-timer').innerText = "0.0"; 
+                handleRoundFailure(); 
+                return; 
+            }
+            document.getElementById('hud-timer').innerText = timeLeft.toFixed(1);
+            if (playPhase === 'SPACE') {
+                gaugePos += FIXED_GAUGE_SPEED; 
+                if (gaugePos > 100) gaugePos = 0;
+                document.getElementById('gauge-pin').style.left = `${gaugePos}%`;
+            }
+            gameAnimationFrameId = requestAnimationFrame(runGameFrame);
+        }
+
+        function getRandomGachaReward() {
+            let rand = Math.random() * 100;
+            if (rand < 60) return `일반 도감 #${Math.floor(Math.random() * 4) + 1}`;
+            else if (rand < 90) return `레어 도감 #${Math.floor(Math.random() * 3) + 5}`;
+            else return `🔥 에픽 도감 #${Math.floor(Math.random() * 2) + 8}`;
+        }
+
+        function resolveStageEnd(isSuccess) {
+            gameLoopActive = false; showScreen('result-screen');
+            const header = document.getElementById('result-header'); const msg = document.getElementById('result-message');
+            const btn = document.getElementById('res-next-btn'); const gachaArea = document.getElementById('gacha-area');
+            
+            if (isSuccess) {
+                header.innerText = "STAGE CLEAR"; header.style.color = "#2ecc71";
                 
-                if (currentFrame > maxFrames) {
-                    currentFrame = maxFrames;
-                    updateBananaSprite();
-                    handleRewardUnlock();
-                    comboPanel.className = '';
-                    
-                    finalBananaShowcase.style.backgroundImage = `url('${getSkinImageUrl(currentSkinNumber)}')`;
-
-                    setTimeout(() => { clearScreen.style.display = 'flex'; }, 300);
-                    return;
+                if (currentStageIndex === 4) { 
+                    gachaArea.classList.remove('hidden');
+                    document.getElementById('gacha-item-name').innerText = getRandomGachaReward();
+                    msg.innerText = "축하합니다! 모든 스테이지를 돌파하여 난이도를 마스터하셨습니다!"; 
+                    btn.innerText = "로비로 복귀"; 
+                } else { 
+                    gachaArea.classList.add('hidden'); 
+                    msg.innerText = `스테이지 ${currentStageIndex + 1} 돌파 완료!`; 
+                    btn.innerText = "다음 스테이지로"; 
                 }
-            }
-            touchLeftText.innerText = touchesPerFrame - touchCount;
-            updateBananaSprite();
-        }
-
-        function handleRewardUnlock() {
-            let lockedList = [];
-            for (let i = 2; i <= 10; i++) { if (!unlockedSkins[i]) { lockedList.push(i); } }
-
-            if (lockedList.length > 0) {
-                const randomIndex = Math.floor(Math.random() * lockedList.length);
-                const newlyUnlockedSkin = lockedList[randomIndex];
-                unlockedSkins[newlyUnlockedSkin] = true;
-                rewardMsg.innerText = `도감 획득! [스킨 ${newlyUnlockedSkin}]이 열렸어용! 🎉`;
             } else {
-                rewardMsg.innerText = `현재 오픈된 모든 스킨을 수집했습니다! 🏆`;
+                header.innerText = "GAME OVER"; header.style.color = "#e74c3c"; gachaArea.classList.add('hidden');
+                msg.innerText = "하트를 모두 잃어 무대 뒤로 쫓겨났습니다."; btn.innerText = "로비로 돌아가기";
             }
-            initBook();
         }
-
-        // 🎲 [핵심 로직 변경] 다시 하기 실행 시 해금된 스킨 중 하나를 램덤으로 세팅하는 함수
-        function resetGame(event) {
-            event.stopPropagation();
-            event.preventDefault();
-            
-            currentFrame = 1; 
-            touchCount = 0; 
-            comboCount = 0;
-            touchLeftText.innerText = touchesPerFrame;
-            clearScreen.style.display = 'none';
-            comboPanel.className = '';
-
-            // 1. 현재까지 열려있는(true) 스킨 번호들만 모아서 배열 생성
-            let availableSkins = [];
-            for (let i = 1; i <= 10; i++) {
-                if (unlockedSkins[i]) {
-                    availableSkins.push(i);
-                }
-            }
-
-            // 2. 모인 해금 스킨 후보들 중에서 무작위로 하나 초이스
-            const randomIdx = Math.floor(Math.random() * availableSkins.length);
-            currentSkinNumber = availableSkins[randomIdx];
-
-            // 3. 인게임 바나나 뷰의 배경 이미지를 선택된 랜덤 스킨으로 변경
-            bananaView.style.backgroundImage = `url('${getSkinImageUrl(currentSkinNumber)}')`;
-
-            // 4. 스킨 데이터가 바뀌었으니 도감 및 스프라이트 크기 갱신
-            initBook();
-            updateBananaSprite();
-        }
-
-        bananaView.style.backgroundImage = `url('${getSkinImageUrl(1)}')`;
-        initBook();
-        updateBananaSprite();
     </script>
 </body>
 </html>
