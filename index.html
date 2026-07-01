@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v3.8</title>
+    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v3.9</title>
     <style>
         :root {
-            --theme-bg: linear-gradient(180deg, #7ec8e3 0%, #ffeaa7 60%, #f5cd79 100%);
             --theme-border: #e17055;
             --theme-font: #4a3b32;
             --podium-bg: #875742;
@@ -29,7 +28,7 @@
             height: 576px;
             max-width: 100%;
             aspect-ratio: 16 / 9;
-            /* 시작 화면과 난이도 화면을 위한 메인 배경 지정 */
+            /* 모든 화면의 공통 배경화면 설정 */
             background: url('DD_Main_Image.jpg') no-repeat center center;
             background-size: cover;
             border: 8px solid var(--theme-border);
@@ -45,26 +44,33 @@
             #game-container { width: 100%; height: auto; aspect-ratio: 9 / 16; max-height: 95vh; }
         }
 
+        /* 모든 화면 레이아웃 배경 투명화 통합 */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 10; padding: 20px;
-        }
-        .hidden { display: none !important; }
-
-        /* 1번, 2번 화면에서 컨테이너의 메인 이미지가 보이도록 투명화 처리 */
-        #main-screen, #select-screen {
             background: transparent !important;
         }
+        .hidden { display: none !important; }
 
         .title-logo {
             font-size: 44px; font-weight: bold; color: #d63031;
             text-shadow: 2px 2px 0px #fff, 4px 4px 0px #fdcb6e; margin-bottom: 20px;
         }
         
-        .btn-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 15px; }
+        /* 버튼 정중앙 하단 배치를 위한 컨테이너 조절 */
+        .btn-wrapper { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 4px; 
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
         
-        /* 이미지 버튼 공통 스타일 정의 */
+        /* 이미지 버튼 기본 정의 */
         .img-btn {
             background-size: contain;
             background-repeat: no-repeat;
@@ -76,7 +82,7 @@
         }
         .img-btn:active, .img-btn.pressed { transform: scale(0.95); }
 
-        /* 이미지 리소스 연결 및 원본 비율용 규격 지정 */
+        /* 모든 리소스 규격 및 경로 매핑 */
         .start-btn-asset {
             width: 200px;
             height: 66px;
@@ -92,11 +98,15 @@
             height: 53px;
             background-image: url('DD_Main_Gift_Button.png');
         }
-        
-        .sub-btn {
-            background: linear-gradient(180deg, #74b9ff 0%, #0984e3 100%); border: 2px solid #4a3b32; color: white;
-            font-size: 14px; font-weight: bold; padding: 8px 16px; border-radius: 20px;
-            cursor: pointer; box-shadow: 0 3px 0 #4a3b32;
+        .next-btn-asset {
+            width: 200px;
+            height: 66px;
+            background-image: url('DD_Main_Next_Button.png');
+        }
+        .back-btn-asset {
+            width: 140px;
+            height: 46px;
+            background-image: url('DD_Main_Back_Button.png');
         }
 
         .space-hint {
@@ -117,10 +127,11 @@
         }
         @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
 
-        .top-right-actions { position: absolute; top: 20px; right: 20px; }
-        .bottom-right-actions { position: absolute; bottom: 20px; right: 20px; }
+        /* 배치 전용 액션 구역 */
+        .top-right-actions { position: absolute; top: 20px; right: 20px; z-index: 20; }
+        .bottom-right-actions { position: absolute; bottom: 20px; right: 20px; z-index: 20; }
 
-        .podium-container { display: flex; justify-content: center; width: 100%; gap: 25px; margin-top: 10px; }
+        .podium-container { display: flex; justify-content: center; width: 100%; gap: 25px; margin-top: -30px; }
         .difficulty-card {
             background: rgba(255, 255, 255, 0.8); border: 3px solid #4a3b32;
             border-radius: 15px; padding: 15px; width: 140px; display: flex; flex-direction: column; align-items: center;
@@ -131,7 +142,7 @@
 
         #game-hud {
             width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.4); border-bottom: 3px solid #4a3b32;
+            background: rgba(255, 255, 255, 0.4); border-bottom: 3px solid #4a3b32; position: absolute; top: 0; left: 0;
         }
         .hud-block { font-size: 14px; font-weight: bold; background: #fff; padding: 6px 12px; border-radius: 8px; border: 2px solid #4a3b32; }
         
@@ -143,7 +154,8 @@
         .heart-container { display: flex; gap: 4px; align-items: center; }
         .heart-icon { width: 22px; height: 22px; background-size: contain; background-repeat: no-repeat; }
 
-        #play-zone { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: space-around; padding: 10px; position: relative; }
+        /* 플레이 구역 전체 정렬 조절 */
+        #play-zone { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
         
         #dance-sequence-box {
             position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
@@ -151,7 +163,12 @@
         }
         #dance-sequence-box.animating { display: block; animation: textDance 0.15s infinite alternate; }
 
-        #input-chain-area { display: flex; gap: 12px; min-height: 60px; align-items: center; }
+        /* 방향키 및 게이지 영역을 하단으로 대폭 다운 배치 */
+        #input-chain-area { 
+            position: absolute;
+            bottom: 95px;
+            display: flex; gap: 12px; min-height: 60px; align-items: center; 
+        }
         .arrow-item {
             width: 48px; height: 48px; border: 3px solid #4a3b32; border-radius: 8px; background: #fff;
             display: flex; justify-content: center; align-items: center; position: relative;
@@ -166,21 +183,18 @@
             font-size: 9px; padding: 1px 3px; border-radius: 4px; border: 1px solid #4a3b32; font-weight: bold;
         }
 
-        #spacebar-gauge { width: 320px; height: 18px; background: #fff; border: 3px solid #4a3b32; border-radius: 9px; position: relative; overflow: hidden; opacity: 0.3; }
+        #spacebar-gauge { 
+            position: absolute;
+            bottom: 45px;
+            width: 320px; height: 18px; background: #fff; border: 3px solid #4a3b32; border-radius: 9px; overflow: hidden; opacity: 0.3; 
+        }
         #spacebar-gauge.active { opacity: 1; }
         
         #target-parry-zone { position: absolute; height: 100%; background: #ff7675; border-left: 2px solid #4a3b32; border-right: 2px solid #4a3b32; left: 75%; }
         #gauge-pin { position: absolute; height: 100%; width: 6px; background: #4a3b32; left: 0%; }
 
-        #game-toast { font-size: 24px; font-weight: bold; color: #2ecc71; height: 30px; }
+        #game-toast { font-size: 24px; font-weight: bold; color: #2ecc71; margin-top: 80px; height: 30px; }
         .gacha-item-box { font-size: 28px; font-weight: bold; color: #f1c40f; margin: 15px 0; padding: 10px 20px; background: #fff; border: 3px solid #4a3b32; border-radius: 10px; }
-        
-        .standard-dance-btn {
-            background: linear-gradient(180deg, #ff7675 0%, #d63031 100%); border: 3px solid #4a3b32; color: white;
-            font-size: 20px; font-weight: bold; padding: 10px 35px; border-radius: 30px;
-            cursor: pointer; box-shadow: 0 5px 0 #4a3b32; transition: transform 0.05s;
-        }
-        .standard-dance-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #4a3b32; }
     </style>
 </head>
 <body>
@@ -189,8 +203,9 @@
         <!-- 1. 시작 화면 -->
         <div id="main-screen" class="screen">
             <div class="title-logo">도구리 댄스</div>
-            <div class="hawaii-podium"><div class="doguri-sprite" id="lobby-doguri"></div></div>
+            <div class="hawaii-podium" style="margin-top: 20px;"><div class="doguri-sprite" id="lobby-doguri"></div></div>
             <div class="btn-wrapper">
+                <!-- start 버튼 중간 하단 배치 -->
                 <button class="img-btn start-btn-asset" id="lobby-dance-btn"></button>
                 <div class="space-hint" style="margin-top: 5px;">SPACE 키로 시작</div>
             </div>
@@ -198,11 +213,12 @@
 
         <!-- 2. 난이도 선택 화면 -->
         <div id="select-screen" class="screen hidden">
+            <!-- 우측 상단 Back 버튼 배치 -->
             <div class="top-right-actions">
-                <button class="sub-btn" id="select-back-btn">뒤로가기</button>
+                <button class="img-btn back-btn-asset" id="select-back-btn"></button>
             </div>
 
-            <div class="title-logo" style="font-size:32px; margin-bottom:15px;">난이도 선택</div>
+            <div class="title-logo" style="font-size:32px; margin-bottom:40px;">난이도 선택</div>
             
             <div class="podium-container">
                 <div class="difficulty-card card-easy selected" data-diff="easy" data-idx="0"><div class="diff-title">쉬움</div></div>
@@ -210,18 +226,20 @@
                 <div class="difficulty-card card-hard" data-diff="hard" data-idx="2"><div class="diff-title">어려움</div></div>
             </div>
             
-            <div class="btn-wrapper" style="margin-top: 25px;">
+            <div class="btn-wrapper">
+                <!-- dance 버튼 중간 하단 배치 -->
                 <button class="img-btn dance-btn-asset" id="select-start-btn"></button>
                 <div class="space-hint" style="margin-top: 5px;">SPACE 키로 시작 (방향키 이동)</div>
             </div>
 
+            <!-- 우측 하단 Gift 버튼 배치 -->
             <div class="bottom-right-actions">
                 <button class="img-btn gift-btn-asset" id="select-collection-btn" onclick="alert('도감 시스템 준비 중!')"></button>
             </div>
         </div>
 
         <!-- 3. 플레이 화면 -->
-        <div id="play-screen" class="screen hidden" style="background: var(--theme-bg);">
+        <div id="play-screen" class="screen hidden">
             <div id="game-hud">
                 <div class="hud-block" id="hud-stage-name">EASY - STAGE 1 (1/3)</div>
                 <div class="hud-block">남은 시간: <span id="hud-timer">15.0</span>s</div>
@@ -234,13 +252,17 @@
 
             <div id="play-zone">
                 <div id="game-toast"></div>
-                <div style="position: relative; height: 130px; width: 100%; display:flex; justify-content:center;">
-                    <div class="hawaii-podium" style="margin-top: 60px;">
+                <div style="position: absolute; top: 130px; width: 100%; display:flex; justify-content:center;">
+                    <div class="hawaii-podium">
                         <div class="doguri-sprite" id="game-doguri" style="bottom: 15px; left: 41px;"></div>
                     </div>
                     <div id="dance-sequence-box">1</div>
                 </div>
+                
+                <!-- 방향키 세트 하단 이동 -->
                 <div id="input-chain-area"></div>
+                
+                <!-- 스페이스 게이지 하단 이동 -->
                 <div id="spacebar-gauge">
                     <div id="target-parry-zone"></div>
                     <div id="gauge-pin"></div>
@@ -249,9 +271,9 @@
         </div>
 
         <!-- 4. 결과 및 라운드 클리어 화면 -->
-        <div id="result-screen" class="screen hidden" style="background: var(--theme-bg);">
-            <div class="title-logo" id="result-header" style="font-size:36px;">STAGE CLEAR</div>
-            <p id="result-message" style="font-weight: bold; color:#636e72;">축하합니다!</p>
+        <div id="result-screen" class="screen hidden">
+            <div class="title-logo" id="result-header" style="font-size:36px; margin-top: -60px;">STAGE CLEAR</div>
+            <p id="result-message" style="font-weight: bold; color:#636e72; margin-bottom: 20px;">축하합니다!</p>
             
             <div id="gacha-area" class="hidden">
                 <div style="font-size:14px; font-weight:bold; color:#ff7675;">🎁 전체 난이도 완포 보상 획득!</div>
@@ -259,8 +281,9 @@
             </div>
 
             <div class="btn-wrapper">
-                <button class="standard-dance-btn" id="res-next-btn">다음 스테이지로</button>
-                <div class="space-hint">SPACE 키 또는 마우스 클릭</div>
+                <!-- 클리어 시 Next 버튼 에셋 단독 노출 -->
+                <button class="img-btn next-btn-asset" id="res-next-btn"></button>
+                <div class="space-hint" style="margin-top: 5px;">SPACE 키 또는 마우스 클릭</div>
             </div>
         </div>
     </div>
@@ -593,15 +616,13 @@
                     gachaArea.classList.remove('hidden');
                     document.getElementById('gacha-item-name').innerText = getRandomGachaReward();
                     msg.innerText = "축하합니다! 모든 스테이지를 돌파하여 난이도를 마스터하셨습니다!"; 
-                    btn.innerText = "로비로 복귀"; 
                 } else { 
                     gachaArea.classList.add('hidden'); 
                     msg.innerText = `스테이지 ${currentStageIndex + 1} 돌파 완료!`; 
-                    btn.innerText = "다음 스테이지로"; 
                 }
             } else {
                 header.innerText = "GAME OVER"; header.style.color = "#e74c3c"; gachaArea.classList.add('hidden');
-                msg.innerText = "하트를 모두 잃어 무대 뒤로 쫓겨났습니다."; btn.innerText = "로비로 돌아가기";
+                msg.innerText = "하트를 모두 잃어 무대 뒤로 쫓겨났습니다.";
             }
         }
     </script>
