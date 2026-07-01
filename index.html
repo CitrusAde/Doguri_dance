@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v4.2</title>
+    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v4.4</title>
     <style>
         :root {
-            --theme-border: #e17055;
             --theme-font: #4a3b32;
         }
 
@@ -21,47 +20,51 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 10px;
+            padding: 0;
+            position: relative;
         }
         
+        /* [레이어 1순위] 전체 공간을 채우는 절대 배경화면 지정 (비율 무시하고 가득 채움) */
+        #bg-canvas-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: url('DD_Main_Image.jpg') no-repeat center center;
+            background-size: 100% 100% !important; /* 비율 상관없이 창에 꽉 맞춤 */
+            z-index: 1;
+        }
+
+        /* [레이어 2순위] 게임 UI 콘텐츠를 담을 투명 컨테이너 조절 */
         #game-container {
             width: 1024px;
-            height: 576px;
-            max-width: 100%;
-            aspect-ratio: 16 / 9;
-            /* 이중 안전장치로 배경화면 지정 */
-            background-image: url('DD_Main_Image.jpg') !important;
-            background-repeat: no-repeat !important;
-            background-position: center center !important;
-            background-size: cover !important;
-            border: 8px solid var(--theme-border);
-            box-shadow: 0 10px 30px rgba(74, 59, 50, 0.2);
-            border-radius: 20px;
+            height: 584px;
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            background: transparent !important;
+            z-index: 5;
         }
 
-        @media (max-aspect-ratio: 1/1) {
-            #game-container { width: 100%; height: auto; aspect-ratio: 9 / 16; max-height: 95vh; }
-        }
-
-        /* 모든 화면 내부 레이아웃의 투명화 절대 유지 */
+        /* 개별 화면 투명화 세팅 */
         .screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10; padding: 20px;
+            padding: 20px;
             background: transparent !important;
-            background-color: transparent !important;
+            z-index: 10; 
         }
         .hidden { display: none !important; }
 
         .title-logo {
             font-size: 44px; font-weight: bold; color: #d63031;
             text-shadow: 2px 2px 0px #fff, 4px 4px 0px #fdcb6e; margin-bottom: 20px;
+            z-index: 11;
         }
         
+        /* 버튼 정중앙 하단 래퍼 조절 */
         .btn-wrapper { 
             display: flex; 
             flex-direction: column; 
@@ -71,6 +74,7 @@
             bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 15;
         }
         
         .img-btn {
@@ -81,6 +85,7 @@
             border: none;
             cursor: pointer;
             transition: transform 0.05s;
+            z-index: 16;
         }
         .img-btn:active, .img-btn.pressed { transform: scale(0.95); }
 
@@ -95,6 +100,7 @@
             background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 4px; border: 1px solid #b2bec3;
         }
 
+        /* 단상 이미지 테이블 */
         .hawaii-podium {
             width: 220px; 
             height: 73px; 
@@ -102,6 +108,7 @@
             background-size: contain;
             position: relative; 
             margin-bottom: 20px;
+            z-index: 11;
         }
         
         .doguri-sprite {
@@ -111,13 +118,14 @@
             bottom: 52px; 
             left: 65px;
             animation: bounce 0.6s infinite alternate;
+            z-index: 12;
         }
         @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
 
-        .top-right-actions { position: absolute; top: 20px; right: 20px; z-index: 20; }
-        .bottom-right-actions { position: absolute; bottom: 20px; right: 20px; z-index: 20; }
+        .top-right-actions { position: absolute; top: 20px; right: 20px; z-index: 25; }
+        .bottom-right-actions { position: absolute; bottom: 20px; right: 20px; z-index: 25; }
 
-        .podium-container { display: flex; justify-content: center; width: 100%; gap: 25px; margin-top: -30px; }
+        .podium-container { display: flex; justify-content: center; width: 100%; gap: 25px; margin-top: -30px; z-index: 15; }
         .difficulty-card {
             background: rgba(255, 255, 255, 0.8); border: 3px solid #4a3b32;
             border-radius: 15px; padding: 15px; width: 140px; display: flex; flex-direction: column; align-items: center;
@@ -128,30 +136,31 @@
 
         #game-hud {
             width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.4); border-bottom: 3px solid #4a3b32; position: absolute; top: 0; left: 0;
+            background: rgba(255, 255, 255, 0.4); border-bottom: 3px solid #4a3b32; position: absolute; top: 0; left: 0; z-index: 20;
         }
         .hud-block { font-size: 14px; font-weight: bold; background: #fff; padding: 6px 12px; border-radius: 8px; border: 2px solid #4a3b32; }
         
         .hud-heart-box {
-            position: absolute; bottom: 20px; left: 20px; z-index: 15;
+            position: absolute; bottom: 20px; left: 20px; z-index: 20;
             background: rgba(255, 255, 255, 0.8); padding: 8px 12px; border-radius: 10px;
             border: 2px solid #4a3b32; display: flex; flex-direction: column; gap: 4px;
         }
         .heart-container { display: flex; gap: 4px; align-items: center; }
         .heart-icon { width: 22px; height: 22px; background-size: contain; background-repeat: no-repeat; }
 
-        #play-zone { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; }
+        #play-zone { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 11; }
         
         #dance-sequence-box {
             position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%);
-            font-size: 54px; font-weight: bold; color: #d63031; text-shadow: 2px 2px 0 #fff; display: none;
+            font-size: 54px; font-weight: bold; color: #d63031; text-shadow: 2px 2px 0 #fff; display: none; z-index: 20;
         }
         #dance-sequence-box.animating { display: block; animation: textDance 0.15s infinite alternate; }
 
+        /* 하단 정렬 배치 유지 */
         #input-chain-area { 
             position: absolute;
             bottom: 95px;
-            display: flex; gap: 12px; min-height: 60px; align-items: center; 
+            display: flex; gap: 12px; min-height: 60px; align-items: center; z-index: 20;
         }
         .arrow-item {
             width: 48px; height: 48px; border: 3px solid #4a3b32; border-radius: 8px; background: #fff;
@@ -170,21 +179,24 @@
         #spacebar-gauge { 
             position: absolute;
             bottom: 45px;
-            width: 320px; height: 18px; background: #fff; border: 3px solid #4a3b32; border-radius: 9px; overflow: hidden; opacity: 0.3; 
+            width: 320px; height: 18px; background: #fff; border: 3px solid #4a3b32; border-radius: 9px; overflow: hidden; opacity: 0.3; z-index: 20;
         }
         #spacebar-gauge.active { opacity: 1; }
         
         #target-parry-zone { position: absolute; height: 100%; background: #ff7675; border-left: 2px solid #4a3b32; border-right: 2px solid #4a3b32; left: 75%; }
         #gauge-pin { position: absolute; height: 100%; width: 6px; background: #4a3b32; left: 0%; }
 
-        #game-toast { font-size: 24px; font-weight: bold; color: #2ecc71; margin-top: 80px; height: 30px; }
+        #game-toast { font-size: 24px; font-weight: bold; color: #2ecc71; margin-top: 80px; height: 30px; z-index: 20; }
         .gacha-item-box { font-size: 28px; font-weight: bold; color: #f1c40f; margin: 15px 0; padding: 10px 20px; background: #fff; border: 3px solid #4a3b32; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- HTML 태그 자체에 인라인 스타일로 배경을 직접 한 번 더 강제 고정합니다. -->
-    <div id="game-container" style="background-image: url('DD_Main_Image.jpg'); background-size: cover; background-position: center;">
+    <!-- 레이어 1순위: 오직 배경화면만 단독 출력 처리 -->
+    <div id="bg-canvas-layer"></div>
+
+    <!-- 레이어 2순위: 인게임 UI 콘텐츠 상위 컨테이너 -->
+    <div id="game-container">
         
         <!-- 1. 시작 화면 -->
         <div id="main-screen" class="screen">
