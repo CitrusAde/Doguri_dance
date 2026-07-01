@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V5 (작동 수정본)</title>
+    <title>도구리 하와이 댄스 게임 - V6 (입력 버그 완벽 수정)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -60,7 +60,7 @@
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 5;
+            z-index: 10;
         }
 
         /* 마우스 호버 및 클릭 애니메이션 (중앙 기준) */
@@ -168,7 +168,7 @@
             z-index: 3;
         }
 
-        /* 하단 리듬 제어 영역 (게이지 없음) */
+        /* 하단 리듬 제어 영역 */
         .rhythm-container {
             position: absolute;
             bottom: 80px;
@@ -326,7 +326,7 @@
             <div class="arrow-sequence-box" id="arrow-sequence-area"></div>
         </div>
 
-        <!-- NEXT 버튼 전용 독립 컨테이너 (부모 display none 간섭 제거) -->
+        <!-- NEXT 버튼 전용 독립 컨테이너 -->
         <div id="next-btn-container" class="bottom-center-position" style="display: none;">
             <button id="btn-main-next" class="img-btn origin-size-btn" onclick="nextStageOrRound()">
                 <img src="DD_Main_Next_Button.png" alt="NEXT" onerror="this.style.display='none'; this.after('[NEXT 스테이지]');">
@@ -384,7 +384,6 @@
         setupButtonEffects();
     };
 
-    // 마우스 누름 효과 애니메이션 핸들러 정밀 결합
     function setupButtonEffects() {
         const btns = document.querySelectorAll('.img-btn');
         btns.forEach(btn => {
@@ -394,7 +393,7 @@
         });
     }
 
-    // 단축키 매핑 연동용 가상 클릭 효과 함수
+    // 단축키 작동 트리거 (UI 버그 방지 강화)
     function simulateBtnClick(btnId, callback) {
         let btn = document.getElementById(btnId);
         if (btn) {
@@ -440,10 +439,10 @@
         
         document.getElementById('judgment-text').innerText = '';
         document.getElementById('dance-sequence-text').style.display = 'none';
-        document.getElementById('next-btn-container').style.display = 'none'; // NEXT 영역 완전 숨김
+        document.getElementById('next-btn-container').style.display = 'none'; 
         document.getElementById('rhythm-ui').style.display = 'flex';
         
-        // 방향키 개수 수식연산 (스테이지 1 -> 3개, 스테이지 5 -> 7개)
+        // 방향키 개수 설정 (최소 3개 시작, 스테이지당 +1)
         let arrowCount = 2 + currentStage; 
         targetArrowSequence = [];
         
@@ -508,8 +507,9 @@
             }
         }
 
-        // 2. 인게임 실시간 화살표 연타 판정 시스템
-        if (!gameActive || isRoundFinished || nextBtnVisible) return;
+        // 2. 인게임 실시간 화살표 입력 판정부
+        if (!gameActive) return;
+        if (isRoundFinished) return; // 방향키를 다 맞추고 난 후(시퀀스 화면)라면 화살표 입력 무시
 
         if (arrowKeyCodes.includes(e.key)) {
             let targetKey = targetArrowSequence[currentArrowIndex];
@@ -520,7 +520,7 @@
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
                 currentArrowIndex++;
 
-                // 방향키 모두 매칭 시 즉시 라운드 클리어 세틀먼트 작동
+                // 방향키 모두 매칭 시 즉시 라운드 클리어
                 if (currentArrowIndex >= targetArrowSequence.length) {
                     let jTxt = document.getElementById('judgment-text');
                     jTxt.innerText = "SUCCESS!";
@@ -528,7 +528,7 @@
                     endRound(true);
                 }
             } else {
-                // 입력 낙선 시 실패 상태 바인딩 후 즉시 자동 리트라이 페널티
+                // 입력 낙선 시 실패 상태 바인딩 후 즉시 자동 리트라이
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
                 let jTxt = document.getElementById('judgment-text');
                 jTxt.innerText = "FAIL! 다시 도전";
@@ -540,9 +540,8 @@
 
     // 라운드 종결 처리 정산문
     function endRound(isSuccess) {
-        isRoundFinished = true;
-
         if (isSuccess) {
+            isRoundFinished = true; // 방향키 완료 플래그 활성화
             document.getElementById('rhythm-ui').style.display = 'none';
             
             // 시퀀스 넘버(1~9) 출력 레이어 활성화
@@ -550,10 +549,11 @@
             seqDisplay.innerText = Math.floor(Math.random() * 9) + 1; 
             seqDisplay.style.display = 'block';
             
-            // NEXT 버튼 독립 컨테이너를 완벽 노출 (Space바 연동용)
+            // NEXT 버튼 독립 컨테이너 노출 (Space바 입력 대기)
             document.getElementById('next-btn-container').style.display = 'block';
         } else {
-            // 실패 시 1초 대기 후 자동으로 해당 판 깨끗하게 리셋
+            // 실패 시 흐름 끊김 방지를 위해 플래그를 세우지 않고 1초 뒤 바로 입력 초기화
+            isRoundFinished = false; 
             setTimeout(() => { initRound(); }, 1000);
         }
     }
