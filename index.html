@@ -2,620 +2,409 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>도구리 댄스 (Doguri Dance) - 하와이 에디션 v4.4</title>
+    <title>도구리 댄스 - 하와이 에디션</title>
     <style>
-        :root {
-            --theme-font: #4a3b32;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        /* CSS 스타일 최소화 및 테두리/그림자 완전 삭제 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; font-family: sans-serif; }
         
-        body {
-            background-color: #f0e6d2;
-            color: var(--theme-font);
-            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            position: relative;
-        }
-        
-        /* [레이어 1순위] 전체 공간을 채우는 절대 배경화면 지정 (비율 무시하고 가득 채움) */
-        #bg-canvas-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: url('DD_Main_Image.jpg') no-repeat center center;
-            background-size: 100% 100% !important; /* 비율 상관없이 창에 꽉 맞춤 */
-            z-index: 1;
-        }
-
-        /* [레이어 2순위] 게임 UI 콘텐츠를 담을 투명 컨테이너 조절 */
+        /* 1024x584 고정 화면 구성 */
         #game-container {
             width: 1024px;
             height: 584px;
             position: relative;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background: transparent !important;
-            z-index: 5;
+            background-color: #ffe066; /* DD_Main_Image.png 대체용 기본색 */
+            /* background-image: url('DD_Main_Image.png'); */
+            background-size: cover;
         }
 
-        /* 개별 화면 투명화 세팅 */
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 20px;
-            background: transparent !important;
-            z-index: 10; 
-        }
-        .hidden { display: none !important; }
+        /* 레이어 구조 정의 (Z-Index) */
+        .layer-bg { z-index: 1; position: absolute; width: 100%; height: 100%; }
+        .layer-obj { z-index: 2; position: absolute; width: 100%; height: 100%; pointer-events: none; }
+        .layer-ui { z-index: 3; position: absolute; width: 100%; height: 100%; }
 
-        .title-logo {
-            font-size: 44px; font-weight: bold; color: #d63031;
-            text-shadow: 2px 2px 0px #fff, 4px 4px 0px #fdcb6e; margin-bottom: 20px;
-            z-index: 11;
-        }
-        
-        /* 버튼 정중앙 하단 래퍼 조절 */
-        .btn-wrapper { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 4px; 
+        /* 오브젝트 배치 */
+        #game-table {
             position: absolute;
-            bottom: 40px;
             left: 50%;
+            top: 50%;
+            transform: translate(-50%, -20%);
+            width: 300px;
+            height: 120px;
+            background: #8b5a2b; /* DD_Game_Table.png 대체용 */
+            text-align: center;
+            line-height: 120px;
+            color: #fff;
+        }
+        #doguri {
+            position: absolute;
+            left: 50%;
+            bottom: 80px;
             transform: translateX(-50%);
-            z-index: 15;
+            width: 100px;
+            height: 120px;
+            background: #ff9999; /* 도구리 캐릭터 대체용 */
+            text-align: center;
+            line-height: 120px;
+            font-weight: bold;
         }
-        
-        .img-btn {
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-color: transparent;
+
+        /* 화면 제어 */
+        .screen { display: none; width: 100%; height: 100%; position: absolute; }
+        .screen.active { display: block; }
+
+        /* 공통 버튼 (기본 테두리/그림자 제거) */
+        .btn {
             border: none;
+            background: none;
             cursor: pointer;
-            transition: transform 0.05s;
-            z-index: 16;
+            padding: 0;
         }
-        .img-btn:active, .img-btn.pressed { transform: scale(0.95); }
-
-        .start-btn-asset { width: 200px; height: 66px; background-image: url('DD_Main_Start_Button.png'); }
-        .dance-btn-asset { width: 200px; height: 66px; background-image: url('DD_Main_Dance_Button.png'); }
-        .gift-btn-asset { width: 160px; height: 53px; background-image: url('DD_Main_Gift_Button.png'); }
-        .next-btn-asset { width: 200px; height: 66px; background-image: url('DD_Main_Next_Button.png'); }
-        .back-btn-asset { width: 140px; height: 46px; background-image: url('DD_Main_Back_Button.png'); }
-
-        .space-hint {
-            font-size: 11px; color: #636e72; font-weight: bold;
-            background: rgba(255,255,255,0.7); padding: 2px 6px; border-radius: 4px; border: 1px solid #b2bec3;
-        }
-
-        /* 단상 이미지 테이블 */
-        .hawaii-podium {
-            width: 220px; 
-            height: 73px; 
-            background: url('DD_Game_Table.png') no-repeat center center;
-            background-size: contain;
-            position: relative; 
-            margin-bottom: 20px;
-            z-index: 11;
-        }
+        .btn img { display: block; width: 100%; height: 100%; }
         
-        .doguri-sprite {
-            width: 90px; height: 90px;
-            background-size: contain; background-repeat: no-repeat; background-position: center;
-            position: absolute; 
-            bottom: 52px; 
-            left: 65px;
-            animation: bounce 0.6s infinite alternate;
-            z-index: 12;
-        }
-        @keyframes bounce { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+        /* 임시 텍스트 버튼 스타일 (리소스 없을 때 확인용) */
+        .btn-temp { background: #333; color: #fff; padding: 10px 20px; font-weight: bold; }
 
-        .top-right-actions { position: absolute; top: 20px; right: 20px; z-index: 25; }
-        .bottom-right-actions { position: absolute; bottom: 20px; right: 20px; z-index: 25; }
-
-        .podium-container { display: flex; justify-content: center; width: 100%; gap: 25px; margin-top: -30px; z-index: 15; }
-        .difficulty-card {
-            background: rgba(255, 255, 255, 0.8); border: 3px solid #4a3b32;
-            border-radius: 15px; padding: 15px; width: 140px; display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; box-shadow: 0 4px 0 #4a3b32;
-        }
-        .difficulty-card.selected { background: #ffeaa7; border-color: #d63031; transform: scale(1.05); }
-        .diff-title { font-size: 18px; font-weight: bold; }
-
-        #game-hud {
-            width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;
-            background: rgba(255, 255, 255, 0.4); border-bottom: 3px solid #4a3b32; position: absolute; top: 0; left: 0; z-index: 20;
-        }
-        .hud-block { font-size: 14px; font-weight: bold; background: #fff; padding: 6px 12px; border-radius: 8px; border: 2px solid #4a3b32; }
-        
-        .hud-heart-box {
-            position: absolute; bottom: 20px; left: 20px; z-index: 20;
-            background: rgba(255, 255, 255, 0.8); padding: 8px 12px; border-radius: 10px;
-            border: 2px solid #4a3b32; display: flex; flex-direction: column; gap: 4px;
-        }
-        .heart-container { display: flex; gap: 4px; align-items: center; }
-        .heart-icon { width: 22px; height: 22px; background-size: contain; background-repeat: no-repeat; }
-
-        #play-zone { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; position: relative; z-index: 11; }
-        
-        #dance-sequence-box {
-            position: absolute; bottom: 75px; left: 50%; transform: translateX(-50%);
-            font-size: 54px; font-weight: bold; color: #d63031; text-shadow: 2px 2px 0 #fff; display: none; z-index: 20;
-        }
-        #dance-sequence-box.animating { display: block; animation: textDance 0.15s infinite alternate; }
-
-        /* 하단 정렬 배치 유지 */
-        #input-chain-area { 
+        /* 1. 시작 화면 UI */
+        #start-screen .start-btn-area {
             position: absolute;
-            bottom: 95px;
-            display: flex; gap: 12px; min-height: 60px; align-items: center; z-index: 20;
-        }
-        .arrow-item {
-            width: 48px; height: 48px; border: 3px solid #4a3b32; border-radius: 8px; background: #fff;
-            display: flex; justify-content: center; align-items: center; position: relative;
-            background-size: 70% 70%; background-repeat: no-repeat; background-position: center;
-        }
-        .arrow-item.active { background-color: #ffeaa7; transform: scale(1.05); }
-        .arrow-item.cleared { background-color: #2ecc71; transform: scale(0.9); background-image: none !important; }
-        .arrow-item.cleared::after { content: '✓'; color: white; font-size: 20px; font-weight: bold; }
-        .arrow-item.invisible-gimmick { opacity: 0 !important; }
-        .double-tap-badge {
-            position: absolute; bottom: -6px; right: -6px; background: #e74c3c; color: white;
-            font-size: 9px; padding: 1px 3px; border-radius: 4px; border: 1px solid #4a3b32; font-weight: bold;
+            left: 50%;
+            bottom: 80px;
+            transform: translateX(-50%);
         }
 
-        #spacebar-gauge { 
-            position: absolute;
-            bottom: 45px;
-            width: 320px; height: 18px; background: #fff; border: 3px solid #4a3b32; border-radius: 9px; overflow: hidden; opacity: 0.3; z-index: 20;
+        /* 2. 난이도 선택 화면 UI */
+        #difficulty-screen .title { text-align: center; margin-top: 40px; font-size: 24px; font-weight: bold; }
+        #difficulty-screen .card-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 100px;
         }
-        #spacebar-gauge.active { opacity: 1; }
+        .diff-card {
+            width: 180px;
+            height: 120px;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .diff-card.selected {
+            outline: 5px solid #ff4d4d; /* 선택된 카드 표시 */
+        }
+        .back-btn-area { position: absolute; right: 20px; top: 20px; }
+        .gift-btn-area { position: absolute; right: 20px; bottom: 20px; }
+        .dance-btn-area { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); }
+
+        /* 3. 플레이 화면 UI (하단 정렬 구조) */
+        .hud-top { position: absolute; top: 20px; left: 40px; font-size: 20px; font-weight: bold; }
+        .timer-top { position: absolute; top: 20px; right: 40px; font-size: 20px; font-weight: bold; }
+        .life-area { position: absolute; left: 40px; bottom: 40px; font-size: 24px; }
         
-        #target-parry-zone { position: absolute; height: 100%; background: #ff7675; border-left: 2px solid #4a3b32; border-right: 2px solid #4a3b32; left: 75%; }
-        #gauge-pin { position: absolute; height: 100%; width: 6px; background: #4a3b32; left: 0%; }
+        /* 기획: 상단 연출 공간 확보를 위해 대폭 하향 배치 */
+        .input-chain-area {
+            position: absolute;
+            left: 50%;
+            bottom: 110px;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            padding: 10px 30px;
+            font-size: 24px;
+            letter-spacing: 5px;
+        }
+        .gauge-area {
+            position: absolute;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            width: 400px;
+            height: 30px;
+            background: #ccc;
+        }
+        .gauge-bar {
+            position: absolute;
+            left: 38%; /* 중앙 부근 24% 영역 타겟 (100% - 24% = 76%의 절반) */
+            width: 24%; /* 기획: 판정 크기 24% 동결 */
+            height: 100%;
+            background: #4caf50;
+        }
+        .gauge-pin {
+            position: absolute;
+            left: 0%;
+            width: 8px;
+            height: 100%;
+            background: #ff0000;
+        }
 
-        #game-toast { font-size: 24px; font-weight: bold; color: #2ecc71; margin-top: 80px; height: 30px; z-index: 20; }
-        .gacha-item-box { font-size: 28px; font-weight: bold; color: #f1c40f; margin: 15px 0; padding: 10px 20px; background: #fff; border: 3px solid #4a3b32; border-radius: 10px; }
+        /* 4. 결과 및 클리어 팝업 */
+        .popup-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .popup-content {
+            background: #fff;
+            padding: 40px;
+            text-align: center;
+            min-width: 300px;
+        }
+        .next-btn-area { margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- 레이어 1순위: 오직 배경화면만 단독 출력 처리 -->
-    <div id="bg-canvas-layer"></div>
+<div id="game-container">
+    <!-- 최하단 레이어: 고정 배경 -->
+    <div class="layer-bg"></div>
 
-    <!-- 레이어 2순위: 인게임 UI 콘텐츠 상위 컨테이너 -->
-    <div id="game-container">
-        
-        <!-- 1. 시작 화면 -->
-        <div id="main-screen" class="screen">
-            <div class="title-logo">도구리 댄스</div>
-            <div class="hawaii-podium" style="margin-top: 20px;"><div class="doguri-sprite" id="lobby-doguri"></div></div>
-            <div class="btn-wrapper">
-                <button class="img-btn start-btn-asset" id="lobby-dance-btn"></button>
-                <div class="space-hint" style="margin-top: 5px;">SPACE 키로 시작</div>
-            </div>
-        </div>
-
-        <!-- 2. 난이도 선택 화면 -->
-        <div id="select-screen" class="screen hidden">
-            <div class="top-right-actions">
-                <button class="img-btn back-btn-asset" id="select-back-btn"></button>
-            </div>
-
-            <div class="title-logo" style="font-size:32px; margin-bottom:40px;">난이도 선택</div>
-            
-            <div class="podium-container">
-                <div class="difficulty-card card-easy selected" data-diff="easy" data-idx="0"><div class="diff-title">쉬움</div></div>
-                <div class="difficulty-card card-normal" data-diff="normal" data-idx="1"><div class="diff-title">보통</div></div>
-                <div class="difficulty-card card-hard" data-diff="hard" data-idx="2"><div class="diff-title">어려움</div></div>
-            </div>
-            
-            <div class="btn-wrapper">
-                <button class="img-btn dance-btn-asset" id="select-start-btn"></button>
-                <div class="space-hint" style="margin-top: 5px;">SPACE 키로 시작 (방향키 이동)</div>
-            </div>
-
-            <div class="bottom-right-actions">
-                <button class="img-btn gift-btn-asset" id="select-collection-btn" onclick="alert('도감 시스템 준비 중!')"></button>
-            </div>
-        </div>
-
-        <!-- 3. 플레이 화면 -->
-        <div id="play-screen" class="screen hidden">
-            <div id="game-hud">
-                <div class="hud-block" id="hud-stage-name">EASY - STAGE 1 (1/3)</div>
-                <div class="hud-block">남은 시간: <span id="hud-timer">15.0</span>s</div>
-            </div>
-
-            <div class="hud-heart-box">
-                <div style="font-size: 11px; font-weight: bold; color: #e74c3c;">LIFE</div>
-                <div class="heart-container" id="hud-hearts"></div>
-            </div>
-
-            <div id="play-zone">
-                <div id="game-toast"></div>
-                <div style="position: absolute; top: 130px; width: 100%; display:flex; justify-content:center;">
-                    <div class="hawaii-podium">
-                        <div class="doguri-sprite" id="game-doguri"></div>
-                    </div>
-                    <div id="dance-sequence-box">1</div>
-                </div>
-                
-                <div id="input-chain-area"></div>
-                
-                <div id="spacebar-gauge">
-                    <div id="target-parry-zone"></div>
-                    <div id="gauge-pin"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. 결과 및 라운드 클리어 화면 -->
-        <div id="result-screen" class="screen hidden">
-            <div class="title-logo" id="result-header" style="font-size:36px; margin-top: -60px;">STAGE CLEAR</div>
-            <p id="result-message" style="font-weight: bold; color:#636e72; margin-bottom: 20px;">축하합니다!</p>
-            
-            <div id="gacha-area" class="hidden">
-                <div style="font-size:14px; font-weight:bold; color:#ff7675;">🎁 전체 난이도 완포 보상 획득!</div>
-                <div class="gacha-item-box" id="gacha-item-name">일반 #3</div>
-            </div>
-
-            <div class="btn-wrapper">
-                <button class="img-btn next-btn-asset" id="res-next-btn"></button>
-                <div class="space-hint" style="margin-top: 5px;">SPACE 키 또는 마우스 클릭</div>
-            </div>
+    <!-- 중간 레이어: 단상 및 도구리 캐릭터 오브젝트 -->
+    <div class="layer-obj">
+        <div id="game-table">단상 (DD_Game_Table.png)
+            <div id="doguri">도구리</div>
         </div>
     </div>
 
-    <script>
-        const IMAGE_SOURCES = {
-            doguri_default: 'doguri_image_base.png',
-            heart: '', arrow_Left: '', arrow_Up: '', arrow_Right: '', arrow_Down: '',
-            sequence: { 1: '', 2: '', 3: '', 4: '', 5: '', 6: '', 7: '', 8: '', 9: '' }
-        };
-
-        const STAGE_CONFIGS = {
-            easy: [
-                { stage: 1, keys: 2, invisible: false, doubleTap: false },
-                { stage: 2, keys: 3, invisible: false, doubleTap: false },
-                { stage: 3, keys: 3, invisible: false, doubleTap: false },
-                { stage: 4, keys: 4, invisible: false, doubleTap: false },
-                { stage: 5, keys: 5, invisible: true, doubleTap: false }
-            ],
-            normal: [
-                { stage: 1, keys: 3, invisible: false, doubleTap: false },
-                { stage: 2, keys: 4, invisible: false, doubleTap: false },
-                { stage: 3, keys: 4, invisible: false, doubleTap: false },
-                { stage: 4, keys: 4, invisible: true, doubleTap: false },
-                { stage: 5, keys: 5, invisible: true, doubleTap: true }
-            ],
-            hard: [
-                { stage: 1, keys: 3, invisible: false, doubleTap: false },
-                { stage: 2, keys: 4, invisible: false, doubleTap: false },
-                { stage: 3, keys: 4, invisible: false, doubleTap: false },
-                { stage: 4, keys: 4, invisible: true, doubleTap: false },
-                { stage: 5, keys: 5, invisible: true, doubleTap: true }
-            ]
-        };
-
-        const KEY_CODES = { 'ArrowLeft': '←', 'ArrowUp': '↑', 'ArrowRight': '→', 'ArrowDown': '↓' };
-        const DIRECTIONS = ['Left', 'Up', 'Right', 'Down'];
-        const CONFIG_LOOKUP_SYM = { 'Left': '←', 'Up': '↑', 'Right': '→', 'Down': '↓' };
-
-        let currentScreen = 'main-screen';
-        let selectedDifficulty = 'easy';
-        let diffMenuIndex = 0;
-        let currentStageIndex = 0;
-        let subRoundCounter = 1;
+    <!-- 최상단 레이어: 각 화면별 UI 및 인터랙션 -->
+    <div class="layer-ui">
         
-        const REQ_SUB_ROUNDS = 3;
+        <!-- ① 시작 화면 -->
+        <div id="start-screen" class="screen active">
+            <div class="start-btn-area">
+                <button class="btn btn-temp" onclick="goToDifficulty()">시작 버튼 (DD_Main_Start_Button.png)</button>
+            </div>
+        </div>
 
-        let gameLoopActive = false;
-        let gameAnimationFrameId = null;
-        let timeLeft = 15.0;
-        let currentSequence = [];
-        let currentArrowIndex = 0;
-        let playPhase = 'INPUT';
-        let hearts = 3;
-        let perfectStreak = 0;
-        let gaugePos = 0;
+        <!-- ② 난이도 선택 화면 -->
+        <div id="difficulty-screen" class="screen">
+            <div class="title">난이도 선택</div>
+            <div class="back-btn-area">
+                <button class="btn btn-temp" onclick="goToStart()">뒤로가기 (DD_Main_Back_Button.png)</button>
+            </div>
+            <div class="card-container">
+                <div class="diff-card selected" data-diff="easy">쉬움 (1)</div>
+                <div class="diff-card" data-diff="normal">보통 (2)</div>
+                <div class="diff-card" data-diff="hard">어려움 (3)</div>
+            </div>
+            <div class="dance-btn-area">
+                <button class="btn btn-temp" onclick="startGame()">게임 시작 (DD_Main_Dance_Button.png)</button>
+            </div>
+            <div class="gift-btn-area">
+                <button class="btn btn-temp" onclick="alert('도감 완료 시 오픈 가능')">도감 (DD_Main_Gift_Button.png)</button>
+            </div>
+        </div>
 
-        const FIXED_GAUGE_SPEED = 0.7; 
-        const BASE_GAUGE_WIDTH = 24;
-
-        let sequenceFrameCounter = 1;
-        let sequenceTimerId = null;
-
-        function applyImageToElement(elementId, imgSrc, isCssBg = false, fallbackColor = '#ff9ebb') {
-            const el = document.getElementById(elementId);
-            if (!el) return;
-            if (imgSrc) {
-                if (isCssBg) el.style.backgroundImage = `url('${imgSrc}')`;
-                else el.src = imgSrc;
-            } else {
-                if (isCssBg) el.style.backgroundColor = fallbackColor;
-            }
-        }
-
-        applyImageToElement('lobby-doguri', IMAGE_SOURCES.doguri_default, true, 'transparent');
-        applyImageToElement('game-doguri', IMAGE_SOURCES.doguri_default, true, 'transparent');
-
-        function showScreen(screenId) {
-            currentScreen = screenId;
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById(screenId).classList.remove('hidden');
-        }
-
-        function updateDiffSelectionUI() {
-            const cards = document.querySelectorAll('.difficulty-card');
-            cards.forEach((card, idx) => {
-                if (idx === diffMenuIndex) {
-                    card.classList.add('selected');
-                    selectedDifficulty = card.getAttribute('data-diff');
-                } else {
-                    card.classList.remove('selected');
-                }
-            });
-        }
-
-        function drawHeartsUI() {
-            const container = document.getElementById('hud-hearts');
-            container.innerHTML = '';
-            for (let i = 0; i < hearts; i++) {
-                let h = document.createElement('div');
-                h.className = 'heart-icon';
-                if (IMAGE_SOURCES.heart) h.style.backgroundImage = `url('${IMAGE_SOURCES.heart}')`;
-                else { h.style.backgroundColor = '#e74c3c'; h.style.borderRadius = '50%'; }
-                container.appendChild(h);
-            }
-        }
-
-        document.getElementById('lobby-dance-btn').addEventListener('click', () => {
-            diffMenuIndex = 0; updateDiffSelectionUI(); showScreen('select-screen');
-        });
-
-        document.getElementById('select-back-btn').addEventListener('click', () => {
-            showScreen('main-screen');
-        });
-
-        document.getElementById('select-start-btn').addEventListener('click', () => {
-            currentStageIndex = 0; subRoundCounter = 1; hearts = 3; perfectStreak = 0;
-            initGameplay();
-        });
-
-        document.getElementById('res-next-btn').addEventListener('click', () => {
-            handleResultTransition();
-        });
-
-        document.querySelectorAll('.difficulty-card').forEach(card => {
-            card.addEventListener('click', () => {
-                diffMenuIndex = parseInt(card.getAttribute('data-idx'));
-                updateDiffSelectionUI();
-            });
-        });
-
-        window.addEventListener('keydown', (e) => {
-            if (currentScreen === 'main-screen' && e.key === ' ') {
-                e.preventDefault();
-                document.getElementById('lobby-dance-btn').classList.add('pressed');
-                setTimeout(() => {
-                    document.getElementById('lobby-dance-btn').classList.remove('pressed');
-                    document.getElementById('lobby-dance-btn').click();
-                }, 100);
-                return;
-            }
-
-            if (currentScreen === 'select-screen') {
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); diffMenuIndex = (diffMenuIndex - 1 + 3) % 3; updateDiffSelectionUI(); }
-                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); diffMenuIndex = (diffMenuIndex + 1) % 3; updateDiffSelectionUI(); }
-                if (e.key === ' ') {
-                    e.preventDefault();
-                    document.getElementById('select-start-btn').classList.add('pressed');
-                    setTimeout(() => {
-                        document.getElementById('select-start-btn').classList.remove('pressed');
-                        document.getElementById('select-start-btn').click();
-                    }, 100);
-                }
-                return;
-            }
-
-            if (currentScreen === 'play-screen' && gameLoopActive) {
-                if (playPhase === 'INPUT' && e.key in KEY_CODES) {
-                    e.preventDefault();
-                    let inputDir = KEY_CODES[e.key];
-                    let currentTarget = currentSequence[currentArrowIndex];
-                    let expectedDirSym = CONFIG_LOOKUP_SYM[currentTarget.dir];
-
-                    if (inputDir === expectedDirSym) {
-                        currentTarget.curTaps++;
-                        if (currentTarget.curTaps >= currentTarget.reqTaps) {
-                            let nodes = document.getElementById('input-chain-area').children;
-                            nodes[currentArrowIndex].classList.remove('active');
-                            nodes[currentArrowIndex].classList.add('cleared');
-                            
-                            currentArrowIndex++;
-                            if (currentArrowIndex >= currentSequence.length) {
-                                playPhase = 'SPACE';
-                                document.getElementById('spacebar-gauge').classList.add('active');
-                            } else { nodes[currentArrowIndex].classList.add('active'); }
-                        }
-                    } else { handleRoundFailure(); }
-                } else if (playPhase === 'SPACE' && e.key === ' ') {
-                    e.preventDefault();
-                    let minPerfectRange = 75;
-                    let maxPerfectRange = 75 + BASE_GAUGE_WIDTH;
-
-                    if (gaugePos >= minPerfectRange && gaugePos <= maxPerfectRange) {
-                        perfectStreak++;
-                        if (perfectStreak >= 3) { hearts++; perfectStreak = 0; triggerFeedbackFlash('PERFECT x3! HP +1', '#2ecc71'); }
-                        else { triggerFeedbackFlash('PERFECT!', '#2ecc71'); }
-                        drawHeartsUI();
-                        startDancePerformance();
-                    } else { handleRoundFailure(); }
-                }
-                return;
-            }
-
-            if (currentScreen === 'result-screen' && e.key === ' ') {
-                e.preventDefault();
-                handleResultTransition();
-            }
-        });
-
-        function handleResultTransition() {
-            const wasStageClear = document.getElementById('result-header').innerText === "STAGE CLEAR";
-            const wasGameOver = document.getElementById('result-header').innerText === "GAME OVER";
+        <!-- ③ 플레이 화면 -->
+        <div id="play-screen" class="screen">
+            <div class="hud-top"><span id="hud-diff">EASY</span> - STAGE <span id="hud-stage">1</span> (<span id="hud-round">1</span>/3)</div>
+            <div class="timer-top">TIME: <span id="hud-timer">30</span></div>
             
-            if (wasGameOver) { showScreen('main-screen'); return; }
-            if (wasStageClear) {
-                currentStageIndex++;
-                if (currentStageIndex >= 5) { showScreen('main-screen'); return; }
-            }
-            subRoundCounter = 1;
-            initGameplay();
-        }
-
-        function handleRoundFailure() {
-            perfectStreak = 0; hearts--; drawHeartsUI(); triggerFeedbackFlash('FAIL', '#e74c3c');
-            if (hearts <= 0) { 
-                gameLoopActive = false; 
-                if (gameAnimationFrameId) { cancelAnimationFrame(gameAnimationFrameId); gameAnimationFrameId = null; }
-                resolveStageEnd(false); 
-            } else { buildNewSequenceChain(); }
-        }
-
-        function initGameplay() {
-            if (gameAnimationFrameId) {
-                cancelAnimationFrame(gameAnimationFrameId);
-                gameAnimationFrameId = null;
-            }
-
-            showScreen('play-screen'); drawHeartsUI();
-            const config = STAGE_CONFIGS[selectedDifficulty][currentStageIndex];
+            <div class="life-area">❤️ ❤️ ❤️</div>
             
-            document.getElementById('target-parry-zone').style.width = BASE_GAUGE_WIDTH + '%';
-            document.getElementById('hud-stage-name').innerText = `${selectedDifficulty.toUpperCase()} - STAGE ${config.stage} (${subRoundCounter}/${REQ_SUB_ROUNDS}판)`;
-            document.getElementById('game-toast').innerText = '';
-            document.getElementById('game-doguri').classList.remove('hidden');
-            document.getElementById('dance-sequence-box').classList.remove('animating');
-            timeLeft = 15.0; document.getElementById('hud-timer').innerText = timeLeft.toFixed(1);
+            <!-- 기획 반영: 대폭 하향 배치된 입력 공간 -->
+            <div class="input-chain-area">← → ↑ ↓</div>
             
-            clearInterval(sequenceTimerId); 
-            buildNewSequenceChain();
-            
-            gameLoopActive = true; 
-            gameAnimationFrameId = requestAnimationFrame(runGameFrame);
-        }
+            <div class="gauge-area">
+                <div class="gauge-bar"></div>
+                <div id="gauge-pin" class="gauge-pin"></div>
+            </div>
+        </div>
 
-        function buildNewSequenceChain() {
-            const config = STAGE_CONFIGS[selectedDifficulty][currentStageIndex];
-            currentArrowIndex = 0; playPhase = 'INPUT'; gaugePos = 0;
-            document.getElementById('spacebar-gauge').classList.remove('active');
-            document.getElementById('gauge-pin').style.left = '0%';
-            let length = config.keys; currentSequence = [];
-            for (let i = 0; i < length; i++) {
-                let randomDir = DIRECTIONS[Math.floor(Math.random() * DIRECTIONS.length)];
-                let requiresTwoClicks = config.doubleTap && (i === length - 1 || Math.random() > 0.5);
-                currentSequence.push({ dir: randomDir, reqTaps: requiresTwoClicks ? 2 : 1, curTaps: 0 });
-            }
-            let invisibleIdx = config.invisible ? Math.floor(Math.random() * length) : -1;
-            const chainArea = document.getElementById('input-chain-area'); chainArea.innerHTML = '';
-            currentSequence.forEach((item, idx) => {
-                let arrowNode = document.createElement('div'); arrowNode.className = 'arrow-item';
-                if (idx === 0) arrowNode.classList.add('active');
-                let customImg = IMAGE_SOURCES[`arrow_${item.dir}`];
-                if (customImg) arrowNode.style.backgroundImage = `url('${customImg}')`;
-                else arrowNode.innerText = CONFIG_LOOKUP_SYM[item.dir];
-                if (item.reqTaps === 2) {
-                    let badge = document.createElement('span'); badge.className = 'double-tap-badge'; badge.innerText = 'x2';
-                    arrowNode.appendChild(badge);
-                }
-                if (idx === invisibleIdx) arrowNode.classList.add('invisible-gimmick');
-                chainArea.appendChild(arrowNode);
-            });
-        }
+        <!-- ④ 결과 및 라운드 클리어 팝업 (배경 유지 상태로 노출) -->
+        <div id="result-popup" class="screen">
+            <div class="popup-overlay">
+                <div class="popup-content">
+                    <h2 id="result-title">STAGE CLEAR!</h2>
+                    <p id="result-desc">다음 라운드로 진행합니다.</p>
+                    <div class="next-btn-area">
+                        <button id="next-btn" class="btn btn-temp" onclick="nextStage()">다음 (DD_Main_Next_Button.png)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        function triggerFeedbackFlash(txt, color) {
-            const t = document.getElementById('game-toast'); t.innerText = txt; t.style.color = color;
-            setTimeout(() => { if (t.innerText === txt) t.innerText = ''; }, 600);
-        }
+    </div>
+</div>
 
-        function startDancePerformance() {
-            playPhase = 'DANCE'; document.getElementById('game-doguri').classList.add('hidden');
-            const danceDisplay = document.getElementById('dance-sequence-box');
-            danceDisplay.classList.add('animating'); sequenceFrameCounter = 1; danceDisplay.innerText = sequenceFrameCounter;
-            
-            sequenceTimerId = setInterval(() => {
-                sequenceFrameCounter++;
-                if (sequenceFrameCounter > 9) {
-                    clearInterval(sequenceTimerId);
-                    if (subRoundCounter >= REQ_SUB_ROUNDS) {
-                        gameLoopActive = false;
-                        if (gameAnimationFrameId) { cancelAnimationFrame(gameAnimationFrameId); gameAnimationFrameId = null; }
-                        resolveStageEnd(true);
-                    } else { subRoundCounter++; initGameplay(); }
-                } else { danceDisplay.innerText = sequenceFrameCounter; }
-            }, 60);
-        }
+<script>
+    // 게임 상태 관리 시스템 변수
+    let currentScreen = 'start-screen';
+    let currentDiffIdx = 0; // 0: 쉬움, 1: 보통, 2: 어려움
+    const diffs = ['EASY', 'NORMAL', 'HARD'];
+    
+    let currentStage = 1;
+    let currentRound = 1; // REQ_SUB_ROUNDS 최대 3
+    const REQ_SUB_ROUNDS = 3;
+    
+    // 기획: 개발용 밸런스 데이터 동결
+    const GAUGE_SPEED = 0.7; // 핀 이동 속도
+    let pinPosition = 0;
+    let pinDirection = 1;
+    
+    // 애니메이션 루프 ID 관리 (버그 방지 핵심)
+    let mainLoopId = null;
 
-        function runGameFrame() {
-            if (!gameLoopActive) return;
-            timeLeft -= 1/60;
-            if (timeLeft <= 0) { 
-                timeLeft = 0; 
-                document.getElementById('hud-timer').innerText = "0.0"; 
-                handleRoundFailure(); 
-                return; 
-            }
-            document.getElementById('hud-timer').innerText = timeLeft.toFixed(1);
-            if (playPhase === 'SPACE') {
-                gaugePos += FIXED_GAUGE_SPEED; 
-                if (gaugePos > 100) gaugePos = 0;
-                document.getElementById('gauge-pin').style.left = `${gaugePos}%`;
-            }
-            gameAnimationFrameId = requestAnimationFrame(runGameFrame);
+    // 키보드 매핑 인터랙션
+    window.addEventListener('keydown', (e) => {
+        if (currentScreen === 'start-screen') {
+            if (e.code === 'Space') { goToDifficulty(); }
+        } 
+        else if (currentScreen === 'difficulty-screen') {
+            if (e.key === '1') { selectDifficulty(0); }
+            else if (e.key === '2') { selectDifficulty(1); }
+            else if (e.key === '3') { selectDifficulty(2); }
+            else if (e.code === 'ArrowLeft') { selectDifficulty((currentDiffIdx + 2) % 3); }
+            else if (e.code === 'ArrowRight') { selectDifficulty((currentDiffIdx + 1) % 3); }
+            else if (e.code === 'Space') { startGame(); }
         }
-
-        function getRandomGachaReward() {
-            let rand = Math.random() * 100;
-            if (rand < 60) return `일반 도감 #${Math.floor(Math.random() * 4) + 1}`;
-            else if (rand < 90) return `레어 도감 #${Math.floor(Math.random() * 3) + 5}`;
-            else return `🔥 에픽 도감 #${Math.floor(Math.random() * 2) + 8}`;
-        }
-
-        function resolveStageEnd(isSuccess) {
-            gameLoopActive = false; showScreen('result-screen');
-            const header = document.getElementById('result-header'); const msg = document.getElementById('result-message');
-            const btn = document.getElementById('res-next-btn'); const gachaArea = document.getElementById('gacha-area');
-            
-            if (isSuccess) {
-                header.innerText = "STAGE CLEAR"; header.style.color = "#2ecc71";
-                
-                if (currentStageIndex === 4) { 
-                    gachaArea.classList.remove('hidden');
-                    document.getElementById('gacha-item-name').innerText = getRandomGachaReward();
-                    msg.innerText = "축하합니다! 모든 스테이지를 돌파하여 난이도를 마스터하셨습니다!"; 
-                } else { 
-                    gachaArea.classList.add('hidden'); 
-                    msg.innerText = `스테이지 ${currentStageIndex + 1} 돌파 완료!`; 
-                }
-            } else {
-                header.innerText = "GAME OVER"; header.style.color = "#e74c3c"; gachaArea.classList.add('hidden');
-                msg.innerText = "하트를 모두 잃어 무대 뒤로 쫓겨났습니다.";
+        else if (currentScreen === 'play-screen') {
+            if (e.code === 'Space') {
+                handleSpaceInput();
             }
         }
-    </script>
+        else if (currentScreen === 'result-popup') {
+            if (e.code === 'Space') {
+                nextStage(); // 스페이스바와 마우스 클릭 이벤트 동기화
+            }
+        }
+    });
+
+    // 화면 전환 함수
+    function changeScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        currentScreen = screenId;
+    }
+
+    function goToDifficulty() { changeScreen('difficulty-screen'); updateCardVisual(); }
+    function goToStart() { changeScreen('start-screen'); }
+
+    function selectDifficulty(idx) {
+        currentDiffIdx = idx;
+        updateCardVisual();
+    }
+
+    function updateCardVisual() {
+        const cards = document.querySelectorAll('.diff-card');
+        cards.forEach((c, i) => {
+            if(i === currentDiffIdx) c.classList.add('selected');
+            else c.classList.remove('selected');
+        });
+    }
+
+    // ③ 게임 플레이 기동
+    function startGame() {
+        currentStage = 1;
+        currentRound = 1;
+        initRound();
+    }
+
+    function initRound() {
+        changeScreen('play-screen');
+        document.getElementById('hud-diff').innerText = diffs[currentDiffIdx];
+        document.getElementById('hud-stage').innerText = currentStage;
+        document.getElementById('hud-round').innerText = currentRound;
+        
+        // 기획 반영: 프레임 중첩 버그 방지를 위해 기존 루프 완전 파괴 후 재시작
+        if (mainLoopId) {
+            cancelAnimationFrame(mainLoopId);
+            mainLoopId = null;
+        }
+        
+        pinPosition = 0;
+        pinDirection = 1;
+        
+        // 애니메이션 루프 구동
+        updateGauge();
+    }
+
+    // 게이지 핀 이동 로직 (requestAnimationFrame 방식)
+    function updateGauge() {
+        pinPosition += GAUGE_SPEED * pinDirection * 4; // 속도 보정값
+        if (pinPosition >= 100) { pinPosition = 100; pinDirection = -1; }
+        if (pinPosition <= 0) { pinPosition = 0; pinDirection = 1; }
+        
+        document.getElementById('gauge-pin').style.left = pinPosition + '%';
+        
+        mainLoopId = requestAnimationFrame(updateGauge);
+    }
+
+    // 스페이스 판정 인터랙션
+    function handleSpaceInput() {
+        // 기획: 판정 범위 24% 고정 (중앙 38% ~ 62% 영역)
+        if (pinPosition >= 38 && pinPosition <= 62) {
+            triggerDoguriDance();
+        } else {
+            alert("판정 실패!");
+            // 실패 루틴 처리 가능
+        }
+    }
+
+    // 기획 반영: 성공 후 딱 9번(9장)까지만 춤추게 고정
+    function triggerDoguriDance() {
+        const doguri = document.getElementById('doguri');
+        let danceCount = 0;
+        
+        // 게이지 잠시 정지
+        cancelAnimationFrame(mainLoopId);
+        
+        const danceInterval = setInterval(() => {
+            danceCount++;
+            doguri.innerText = `💃 댄스 ${danceCount}`; // 실제 연출 프레임 9장 교체 지점
+            
+            if (danceCount >= 9) {
+                clearInterval(danceInterval);
+                doguri.innerText = "도구리";
+                processRoundEnd();
+            }
+        }, 150); // 프레임 속도 연출
+    }
+
+    function processRoundEnd() {
+        if (currentRound < REQ_SUB_ROUNDS) {
+            currentRound++;
+            initRound();
+        } else {
+            // 3판 다 채웠을 때 스테이지 클리어 팝업 노출 (배경 상시 유지)
+            showResultPopup();
+        }
+    }
+
+    function showResultPopup() {
+        changeScreen('result-popup');
+        const title = document.getElementById('result-title');
+        const desc = document.getElementById('result-desc');
+        
+        if (currentStage === 5) {
+            // 기획 반영: 스테이지 5 최종 완포 시에만 도감 보상 가차 결과창 연출
+            title.innerText = "★최종 완포 스페셜 클리어!★";
+            desc.innerText = "모든 스테이지를 정복하셨습니다! 하와이 에디션 한정 도감 보상 가차가 오픈됩니다!";
+            document.getElementById('next-btn').innerText = "보상 가차 오픈 (DD_Main_Gift_Button)";
+        } else {
+            title.innerText = `STAGE ${currentStage} CLEAR`;
+            desc.innerText = "다음 스테이지로 이동하려면 스페이스바나 다음 버튼을 누르세요.";
+            document.getElementById('next-btn').innerText = "다음 단계 (DD_Main_Next_Button.png)";
+        }
+    }
+
+    function nextStage() {
+        if (currentStage === 5) {
+            alert("🎉 도감 가차 결과: 하와이안 도구리 획득!");
+            goToStart();
+        } else {
+            currentStage++;
+            currentRound = 1;
+            initRound();
+        }
+    }
+</script>
+
 </body>
 </html>
