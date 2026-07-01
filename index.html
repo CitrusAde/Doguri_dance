@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V12 (실제 서버 연동본)</title>
+    <title>도구리 하와이 댄스 게임 - V14 (난이도 이미지화)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -73,7 +73,7 @@
             font-weight: bold;
         }
 
-        /* 중심점이 중앙인 이미지 버튼 */
+        /* 중심점이 중앙인 이미지 버튼 공통 */
         .img-btn {
             cursor: pointer;
             border: none;
@@ -113,18 +113,16 @@
             width: auto;
         }
 
-        /* [구조 변경] 우측 하단 레이아웃 제어 그룹 (DANCE 우측 컴팩트 랭킹 배치) */
+        /* 우측 하단 레이아웃 제어 그룹 */
         .bottom-right-container {
             position: absolute;
             bottom: 40px;
             right: 40px;
             display: flex;
             align-items: flex-end;
-            gap: 20px;
+            gap: 15px;
             z-index: 10;
         }
-
-        /* 미니 버튼 묶음 (도감, 초기화) */
         .mini-btn-group {
             display: flex;
             flex-direction: column;
@@ -143,61 +141,27 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.9); }
 
-        /* [요청 반영] DANCE 버튼 오른쪽 옆으로 컴팩트하게 이동한 랭킹 보드 패널 */
-        .leaderboard-panel {
-            width: 280px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 2px solid #ffeb3b;
-            border-radius: 12px;
-            padding: 12px 15px;
-            color: white;
-            box-shadow: 0 0 15px rgba(255,235,59,0.2);
-        }
-        .leaderboard-panel h3 {
-            margin: 0 0 10px 0;
-            text-align: center;
-            color: #ffeb3b;
-            font-size: 15px;
-            border-bottom: 1px solid rgba(255,235,59,0.3);
-            padding-bottom: 6px;
-        }
-        .leaderboard-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 120px;
-            overflow-y: auto;
-        }
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        .leaderboard-item.top-user {
-            color: #ffeb3b;
-        }
-
-        /* 난이도 버튼 그룹 */
+        /* [구조 변경] 난이도 이미지 버튼 그룹 */
         .difficulty-group {
             display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
+            gap: 25px;
+            margin-bottom: 60px;
+            align-items: center;
+            justify-content: center;
         }
-        .diff-btn {
-            padding: 15px 40px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 3px solid #fff;
-            border-radius: 15px;
-            background: rgba(0,0,0,0.6);
-            color: white;
+        
+        /* 난이도 이미지 버튼 전용 스타일 */
+        .diff-img-btn {
+            border: 3px solid transparent;
+            border-radius: 12px;
+            padding: 4px;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
         }
-        .diff-btn.selected {
-            background: #ffeb3b;
-            color: #000;
+        /* 어떤 난이도가 클릭되어 선택 중인지 직관적으로 보여주는 노란색 발광 연출 */
+        .diff-img-btn.selected {
             border-color: #ffeb3b;
+            box-shadow: 0 0 15px #ffeb3b;
+            background: rgba(255, 235, 59, 0.1);
         }
 
         /* 상단 상태 판넬 */
@@ -324,7 +288,7 @@
         .rank-a { color: #ff9100; }
         .rank-b { color: #00e676; }
 
-        /* 도감 팝업 */
+        /* 공통 모달 디자인 */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -366,7 +330,37 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
         }
+
+        /* 랭킹 모달 전용 리스트 디자인 */
+        .leaderboard-modal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 25px 0;
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            min-height: 200px;
+        }
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            padding: 4px 15px;
+            border-radius: 6px;
+        }
+        .leaderboard-row.my-row {
+            background: #fff59d;
+            color: #000;
+            border: 2px dashed #fbc02d;
+        }
+
         #reward-popup {
             position: absolute;
             top: 50%; left: 50%;
@@ -383,12 +377,11 @@
         }
     </style>
 
-    <!-- 🚀 파이어베이스 실제 주소 기반 연동부 모듈화 장착 -->
+    <!-- 파이어베이스 SDK 바인딩 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // 입력해주신 실제 프로젝트 인증 정보 바인딩
         const firebaseConfig = {
             apiKey: "AIzaSyDL0ytMkp9lhXKNETfo_phU2mYybWSMLrc",
             authDomain: "doguridance.firebaseapp.com",
@@ -434,16 +427,23 @@
         </div>
     </div>
 
-    <!-- 2. 게임 시작화면 (DANCE 우측에 미니 랭킹보드 합본 배치) -->
+    <!-- 2. 게임 시작화면 (난이도 선택창 이미지 패치 완료) -->
     <div id="screen-start" class="screen">
         <button id="btn-main-back" class="img-btn top-right-back" onclick="goToIntro()">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
+        <!-- 요청 반영: 난이도 선택 텍스트를 이미지 버튼으로 전면 전치 -->
         <div class="difficulty-group">
-            <button id="btn-easy" class="diff-btn selected" onclick="selectDifficulty('easy')">쉬움</button>
-            <button id="btn-normal" class="diff-btn" onclick="selectDifficulty('normal')">보통</button>
-            <button id="btn-hard" class="diff-btn" onclick="selectDifficulty('hard')">어려움</button>
+            <button id="btn-easy" class="img-btn diff-img-btn selected" onclick="selectDifficulty('easy')">
+                <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
+            </button>
+            <button id="btn-normal" class="img-btn diff-img-btn" onclick="selectDifficulty('normal')">
+                <img src="DD_Normal_Button.png" alt="보통" onerror="this.style.display='none'; this.after('보통');">
+            </button>
+            <button id="btn-hard" class="img-btn diff-img-btn" onclick="selectDifficulty('hard')">
+                <img src="DD_Hard_Button.png" alt="어려움" onerror="this.style.display='none'; this.after('어려움');">
+            </button>
         </div>
 
         <div class="bottom-center-position">
@@ -452,22 +452,18 @@
             </button>
         </div>
 
-        <!-- 🤝 [구조 개편] DANCE 오른쪽 그룹으로 정렬된 통합 패널 유닛 -->
+        <!-- 우측 하단 유닛 그룹 -->
         <div class="bottom-right-container">
-            <!-- 🏆 실시간 글로벌 서버 TOP 10 랭킹 보드 (DANCE 우측 안착) -->
-            <div class="leaderboard-panel">
-                <h3 id="leaderboard-title">쉬움 TOP 10</h3>
-                <div class="leaderboard-list" id="leaderboard-content">
-                    <div style="text-align:center; color:#999; font-size:12px; padding:10px 0;">서버 연결 중...</div>
-                </div>
-            </div>
+            <button id="btn-main-rank" class="img-btn origin-size-btn" onclick="openLeaderboardModal()">
+                <img src="DD_Rank_Button.png" alt="RANK" onerror="this.style.display='none'; this.after('[RANK]');">
+            </button>
 
-            <!-- 미니 컨트롤 버튼 세트 -->
+            <button id="btn-main-gift" class="img-btn origin-size-btn" onclick="openCollection()">
+                <img src="DD_Main_Gift_Button.png" alt="도감" onerror="this.style.display='none'; this.after('[도감]');">
+            </button>
+
             <div class="mini-btn-group">
                 <button class="dummy-reset-btn" onclick="resetAllLocalData()">도감 초기화</button>
-                <button id="btn-main-gift" class="img-btn origin-size-btn" onclick="openCollection()">
-                    <img src="DD_Main_Gift_Button.png" alt="도감" onerror="this.style.display='none'; this.after('[도감]');">
-                </button>
             </div>
         </div>
     </div>
@@ -515,6 +511,20 @@
         <div id="reward-item-name" style="font-size: 24px; font-weight: bold; color: #2196f3; margin-bottom: 25px;">[아이템]</div>
         
         <button class="close-btn" onclick="closeRewardPopup()">확인</button>
+    </div>
+
+    <!-- 🏆 글로벌 실시간 TOP 10 랭킹 모달 레이어 -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-rank-title" style="color: #333; margin-top: 0; margin-bottom: 5px;">🏆 글로벌 실시간 랭킹</h2>
+            <p style="color: #666; font-size: 14px; margin: 0;">현재 선택된 난이도의 TOP 10 기록입니다.</p>
+            
+            <div class="leaderboard-modal-list" id="modal-rank-rows">
+                <div style="text-align:center; color:#999; padding-top:80px;">서버 데이터 수신 중...</div>
+            </div>
+            
+            <button class="close-btn" onclick="closeLeaderboardModal()">닫기</button>
+        </div>
     </div>
 
     <!-- 도감 모달 -->
@@ -571,13 +581,6 @@
         initCollectionUI();
         updateDoguriImage();
         setupButtonEffects();
-        
-        let checkFb = setInterval(() => {
-            if (window.isFirebaseReady) {
-                clearInterval(checkFb);
-                loadFirebaseLeaderboard();
-            }
-        }, 100);
     };
 
     function loadLocalStorageData() {
@@ -593,38 +596,38 @@
         } catch(e) { console.error("로컬 세이브 저장 실패:", e); }
     }
 
-    // --- 🏆 파이어베이스 서버 연동 실시간 오름차순 랭킹 리스너 ---
-    function loadFirebaseLeaderboard() {
+    // --- 🏆 파이어베이스 10명 서버 랭킹 연동 모듈 ---
+    function fetchServerLeaderboard() {
         if (!window.isFirebaseReady) return;
         
         let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
-        document.getElementById('leaderboard-title').innerText = `${diffKo} TOP 10`;
+        document.getElementById('modal-rank-title').innerText = `🏆 글로벌 실시간 TOP 10 (${diffKo})`;
 
         const scoreRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
         const rankQuery = window.dbQuery(scoreRef, window.dbOrderBy('playTime'), window.dbLimit(10));
 
         window.dbOnValue(rankQuery, (snapshot) => {
-            let listContainer = document.getElementById('leaderboard-content');
-            listContainer.innerHTML = '';
+            let rowsContainer = document.getElementById('modal-rank-rows');
+            rowsContainer.innerHTML = '';
 
             if (!snapshot.exists()) {
-                listContainer.innerHTML = '<div style="text-align:center; color:#999; font-size:12px; padding:10px 0;">기록이 없습니다!</div>';
+                rowsContainer.innerHTML = '<div style="text-align:center; color:#999; padding-top:80px;">등록된 기록이 없습니다. 최초의 명예를 얻으세요!</div>';
                 return;
             }
 
             let rankIndex = 1;
             snapshot.forEach((childSnapshot) => {
                 let data = childSnapshot.val();
-                let item = document.createElement('div');
-                item.className = 'leaderboard-item';
+                let row = document.createElement('div');
+                row.className = 'leaderboard-row';
                 
                 if(data.name === globalNickname) {
-                    item.classList.add('top-user');
+                    row.classList.add('my-row');
                 }
 
                 let timeSec = (data.playTime / 1000).toFixed(2);
-                item.innerHTML = `<span>${rankIndex}. ${data.name}</span> <span>${timeSec}초</span>`;
-                listContainer.appendChild(item);
+                row.innerHTML = `<span>${rankIndex}등. ${data.name}</span> <span>${timeSec}초</span>`;
+                rowsContainer.appendChild(row);
                 rankIndex++;
             });
         });
@@ -693,8 +696,6 @@
     function goToGameStart() { 
         let inputVal = document.getElementById('user-name-input').value.trim();
         globalNickname = inputVal ? inputVal : "도구리";
-        
-        loadFirebaseLeaderboard();
         showScreen('screen-start'); 
     }
 
@@ -704,12 +705,11 @@
         showScreen('screen-intro'); 
     }
 
-    // 난이도 클릭 시 파이어베이스 실시간 랭킹 즉각 갱신 연동
+    // 난이도 클릭 인터페이스 세팅 (이미지 전용 시각 보정 추가)
     function selectDifficulty(diff) {
         currentDifficulty = diff;
-        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelectorAll('.diff-img-btn').forEach(b => b.classList.remove('selected'));
         document.getElementById(`btn-${diff}`).classList.add('selected');
-        loadFirebaseLeaderboard();
     }
 
     function startGameLoop() {
@@ -865,6 +865,8 @@
         let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
 
         if(document.activeElement === document.getElementById('user-name-input')) return;
+        if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
+        if(document.getElementById('collection-modal').style.display === 'flex') return;
 
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (introActive) {
@@ -972,7 +974,6 @@
         badgeEl.innerText = rankLetter;
         badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
 
-        // 🚀 파이어베이스 실시간 데이터베이스 연동 트리거
         uploadScoreToServer(globalNickname, totalElapsedTime);
 
         let randomIndex = Math.floor(Math.random() * collectionItems.length);
@@ -1022,7 +1023,14 @@
         }
     }
 
-    // 도감 모달 열기/닫기
+    function openLeaderboardModal() {
+        fetchServerLeaderboard();
+        document.getElementById('leaderboard-modal').style.display = 'flex';
+    }
+    function closeLeaderboardModal() {
+        document.getElementById('leaderboard-modal').style.display = 'none';
+    }
+
     function openCollection() {
         initCollectionUI();
         document.getElementById('collection-modal').style.display = 'flex';
