@@ -14,9 +14,6 @@
             height: 584px;
             position: relative;
             overflow: hidden;
-            background-color: #ffe066; /* DD_Main_Image.png 대체용 기본색 */
-            /* background-image: url('DD_Main_Image.png'); */
-            background-size: cover;
         }
 
         /* 레이어 구조 정의 (Z-Index) */
@@ -24,85 +21,93 @@
         .layer-obj { z-index: 2; position: absolute; width: 100%; height: 100%; pointer-events: none; }
         .layer-ui { z-index: 3; position: absolute; width: 100%; height: 100%; }
 
+        /* 배경 이미지 레이어 */
+        #bg-image { width: 100%; height: 100%; object-fit: cover; }
+
         /* 오브젝트 배치 */
-        #game-table {
+        #game-table-container {
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -20%);
-            width: 300px;
-            height: 120px;
-            background: #8b5a2b; /* DD_Game_Table.png 대체용 */
-            text-align: center;
-            line-height: 120px;
-            color: #fff;
+            width: 400px; /* 이미지 규격에 맞게 조정 가능 */
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
+        #game-table { width: 100%; height: auto; display: block; }
+        
+        /* 단상 위에 배치되는 도구리 캐릭터 */
         #doguri {
             position: absolute;
-            left: 50%;
-            bottom: 80px;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 120px;
-            background: #ff9999; /* 도구리 캐릭터 대체용 */
-            text-align: center;
-            line-height: 120px;
-            font-weight: bold;
+            bottom: 40px; /* 단상(Table) 위에 자연스럽게 안착하도록 피팅 */
+            width: 120px; /* 도구리 리소스 크기에 맞게 조절 */
+            height: auto;
         }
 
         /* 화면 제어 */
         .screen { display: none; width: 100%; height: 100%; position: absolute; }
         .screen.active { display: block; }
 
-        /* 공통 버튼 (기본 테두리/그림자 제거) */
+        /* 공통 버튼 (기본 테두리/그림자 완전 삭제, 이미지 원본 사용) */
         .btn {
             border: none;
             background: none;
             cursor: pointer;
             padding: 0;
+            outline: none;
         }
-        .btn img { display: block; width: 100%; height: 100%; }
-        
-        /* 임시 텍스트 버튼 스타일 (리소스 없을 때 확인용) */
-        .btn-temp { background: #333; color: #fff; padding: 10px 20px; font-weight: bold; }
+        .btn img { display: block; max-width: 100%; height: auto; }
 
-        /* 1. 시작 화면 UI */
+        /* ① 시작 화면 UI */
         #start-screen .start-btn-area {
             position: absolute;
             left: 50%;
             bottom: 80px;
             transform: translateX(-50%);
+            width: 200px; /* 버튼 이미지 적정 크기 */
         }
 
-        /* 2. 난이도 선택 화면 UI */
-        #difficulty-screen .title { text-align: center; margin-top: 40px; font-size: 24px; font-weight: bold; }
+        /* ② 난이도 선택 화면 UI */
+        #difficulty-screen .title { 
+            text-align: center; 
+            margin-top: 40px; 
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #333; 
+        }
         #difficulty-screen .card-container {
             display: flex;
             justify-content: center;
             gap: 30px;
-            margin-top: 100px;
+            margin-top: 80px;
         }
         .diff-card {
             width: 180px;
             height: 120px;
-            background: #fff;
+            background: rgba(255, 255, 255, 0.9);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 22px;
+            font-weight: bold;
             cursor: pointer;
+            border-radius: 8px;
         }
+        /* 방향키 선택 시 시각 피드백 (기획서에 맞춰 깔끔한 라인만 추가) */
         .diff-card.selected {
-            outline: 5px solid #ff4d4d; /* 선택된 카드 표시 */
+            outline: 5px solid #ff4d4d;
         }
-        .back-btn-area { position: absolute; right: 20px; top: 20px; }
-        .gift-btn-area { position: absolute; right: 20px; bottom: 20px; }
-        .dance-btn-area { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); }
+        
+        .back-btn-area { position: absolute; right: 20px; top: 20px; width: 60px; }
+        .gift-btn-area { position: absolute; right: 20px; bottom: 20px; width: 80px; }
+        .dance-btn-area { position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%); width: 180px; }
 
-        /* 3. 플레이 화면 UI (하단 정렬 구조) */
-        .hud-top { position: absolute; top: 20px; left: 40px; font-size: 20px; font-weight: bold; }
-        .timer-top { position: absolute; top: 20px; right: 40px; font-size: 20px; font-weight: bold; }
-        .life-area { position: absolute; left: 40px; bottom: 40px; font-size: 24px; }
+        /* ③ 플레이 화면 UI (정렬 다운 구조) */
+        .hud-top { position: absolute; top: 20px; left: 40px; font-size: 20px; font-weight: bold; color: #333; }
+        .timer-top { position: absolute; top: 20px; right: 40px; font-size: 20px; font-weight: bold; color: #333; }
+        .life-area { position: absolute; left: 40px; bottom: 40px; font-size: 28px; display: flex; gap: 5px; }
         
         /* 기획: 상단 연출 공간 확보를 위해 대폭 하향 배치 */
         .input-chain-area {
@@ -110,24 +115,28 @@
             left: 50%;
             bottom: 110px;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             color: #fff;
-            padding: 10px 30px;
-            font-size: 24px;
-            letter-spacing: 5px;
+            padding: 12px 40px;
+            font-size: 26px;
+            letter-spacing: 8px;
+            border-radius: 30px;
         }
         .gauge-area {
             position: absolute;
             left: 50%;
             bottom: 40px;
             transform: translateX(-50%);
-            width: 400px;
-            height: 30px;
-            background: #ccc;
+            width: 450px;
+            height: 24px;
+            background: #e0e0e0;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
         }
         .gauge-bar {
             position: absolute;
-            left: 38%; /* 중앙 부근 24% 영역 타겟 (100% - 24% = 76%의 절반) */
+            left: 38%; /* 중앙 부근 24% 영역 타겟 (100% - 24% = 76%의 절반인 38% 지점부터) */
             width: 24%; /* 기획: 판정 크기 24% 동결 */
             height: 100%;
             background: #4caf50;
@@ -135,16 +144,16 @@
         .gauge-pin {
             position: absolute;
             left: 0%;
-            width: 8px;
+            width: 6px;
             height: 100%;
-            background: #ff0000;
+            background: #ff2a2a;
         }
 
-        /* 4. 결과 및 클리어 팝업 */
+        /* ④ 결과 및 클리어 팝업 (배경 상시 유지) */
         .popup-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.4);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -154,21 +163,31 @@
             background: #fff;
             padding: 40px;
             text-align: center;
-            min-width: 300px;
+            min-width: 360px;
+            border-radius: 16px;
         }
-        .next-btn-area { margin-top: 20px; }
+        .next-btn-area { 
+            margin-top: 25px; 
+            display: flex;
+            justify-content: center;
+        }
+        .next-btn-area .btn { width: 160px; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- 최하단 레이어: 고정 배경 -->
-    <div class="layer-bg"></div>
+    <!-- 최하단 레이어: 고정 배경 (기획: DD_Main_Image.png) -->
+    <div class="layer-bg">
+        <img id="bg-image" src="DD_Main_Image.png" alt="Background">
+    </div>
 
-    <!-- 중간 레이어: 단상 및 도구리 캐릭터 오브젝트 -->
+    <!-- 중간 레이어: 단상 및 도구리 캐릭터 오브젝트 (기획: DD_Game_Table.png) -->
     <div class="layer-obj">
-        <div id="game-table">단상 (DD_Game_Table.png)
-            <div id="doguri">도구리</div>
+        <div id="game-table-container">
+            <!-- 임시 텍스트를 빼고 도구리 캐릭터 이미지를 배치할 수 있도록 img 태그로 가공했습니다 -->
+            <img id="doguri-char" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='120'><rect width='100' height='120' fill='%23ff9999'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-weight='bold'>도구리</text></svg>" id="doguri-sprite" alt="도구리">
+            <img id="game-table" src="DD_Game_Table.png" alt="단상">
         </div>
     </div>
 
@@ -178,26 +197,38 @@
         <!-- ① 시작 화면 -->
         <div id="start-screen" class="screen active">
             <div class="start-btn-area">
-                <button class="btn btn-temp" onclick="goToDifficulty()">시작 버튼 (DD_Main_Start_Button.png)</button>
+                <button class="btn" onclick="goToDifficulty()">
+                    <img src="DD_Main_Start_Button.png" alt="시작하기">
+                </button>
             </div>
         </div>
 
         <!-- ② 난이도 선택 화면 -->
         <div id="difficulty-screen" class="screen">
             <div class="title">난이도 선택</div>
+            
             <div class="back-btn-area">
-                <button class="btn btn-temp" onclick="goToStart()">뒤로가기 (DD_Main_Back_Button.png)</button>
+                <button class="btn" onclick="goToStart()">
+                    <img src="DD_Main_Back_Button.png" alt="뒤로가기">
+                </button>
             </div>
+            
             <div class="card-container">
                 <div class="diff-card selected" data-diff="easy">쉬움 (1)</div>
                 <div class="diff-card" data-diff="normal">보통 (2)</div>
                 <div class="diff-card" data-diff="hard">어려움 (3)</div>
             </div>
+            
             <div class="dance-btn-area">
-                <button class="btn btn-temp" onclick="startGame()">게임 시작 (DD_Main_Dance_Button.png)</button>
+                <button class="btn" onclick="startGame()">
+                    <img src="DD_Main_Dance_Button.png" alt="게임 시작">
+                </button>
             </div>
+            
             <div class="gift-btn-area">
-                <button class="btn btn-temp" onclick="alert('도감 완료 시 오픈 가능')">도감 (DD_Main_Gift_Button.png)</button>
+                <button class="btn" onclick="alert('도감 완료 시 오픈 가능')">
+                    <img src="DD_Main_Gift_Button.png" alt="도감">
+                </button>
             </div>
         </div>
 
@@ -206,9 +237,10 @@
             <div class="hud-top"><span id="hud-diff">EASY</span> - STAGE <span id="hud-stage">1</span> (<span id="hud-round">1</span>/3)</div>
             <div class="timer-top">TIME: <span id="hud-timer">30</span></div>
             
-            <div class="life-area">❤️ ❤️ ❤️</div>
+            <!-- 라이프 하트 표기 영역 -->
+            <div id="life-container" class="life-area">❤️ ❤️ ❤️</div>
             
-            <!-- 기획 반영: 대폭 하향 배치된 입력 공간 -->
+            <!-- 기획 반영: 대폭 하향 배치된 입력 영역 및 게이지 -->
             <div class="input-chain-area">← → ↑ ↓</div>
             
             <div class="gauge-area">
@@ -217,14 +249,16 @@
             </div>
         </div>
 
-        <!-- ④ 결과 및 라운드 클리어 팝업 (배경 유지 상태로 노출) -->
+        <!-- ④ 결과 및 라운드 클리어 팝업 (배경 상시 유지) -->
         <div id="result-popup" class="screen">
             <div class="popup-overlay">
                 <div class="popup-content">
                     <h2 id="result-title">STAGE CLEAR!</h2>
                     <p id="result-desc">다음 라운드로 진행합니다.</p>
                     <div class="next-btn-area">
-                        <button id="next-btn" class="btn btn-temp" onclick="nextStage()">다음 (DD_Main_Next_Button.png)</button>
+                        <button id="next-btn" class="btn" onclick="nextStage()">
+                            <img src="DD_Main_Next_Button.png" alt="다음">
+                        </button>
                     </div>
                 </div>
             </div>
@@ -234,24 +268,22 @@
 </div>
 
 <script>
-    // 게임 상태 관리 시스템 변수
+    // 시스템 제어 변수
     let currentScreen = 'start-screen';
-    let currentDiffIdx = 0; // 0: 쉬움, 1: 보통, 2: 어려움
+    let currentDiffIdx = 0; 
     const diffs = ['EASY', 'NORMAL', 'HARD'];
     
     let currentStage = 1;
-    let currentRound = 1; // REQ_SUB_ROUNDS 최대 3
+    let currentRound = 1; 
     const REQ_SUB_ROUNDS = 3;
     
-    // 기획: 개발용 밸런스 데이터 동결
-    const GAUGE_SPEED = 0.7; // 핀 이동 속도
+    // 기획: 개발용 밸런스 데이터 동결 (속도 0.7, 판정 24%)
+    const GAUGE_SPEED = 0.7; 
     let pinPosition = 0;
     let pinDirection = 1;
-    
-    // 애니메이션 루프 ID 관리 (버그 방지 핵심)
     let mainLoopId = null;
 
-    // 키보드 매핑 인터랙션
+    // 키보드 핸들러 동기화
     window.addEventListener('keydown', (e) => {
         if (currentScreen === 'start-screen') {
             if (e.code === 'Space') { goToDifficulty(); }
@@ -265,18 +297,13 @@
             else if (e.code === 'Space') { startGame(); }
         }
         else if (currentScreen === 'play-screen') {
-            if (e.code === 'Space') {
-                handleSpaceInput();
-            }
+            if (e.code === 'Space') { handleSpaceInput(); }
         }
         else if (currentScreen === 'result-popup') {
-            if (e.code === 'Space') {
-                nextStage(); // 스페이스바와 마우스 클릭 이벤트 동기화
-            }
+            if (e.code === 'Space') { nextStage(); }
         }
     });
 
-    // 화면 전환 함수
     function changeScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
@@ -285,11 +312,7 @@
 
     function goToDifficulty() { changeScreen('difficulty-screen'); updateCardVisual(); }
     function goToStart() { changeScreen('start-screen'); }
-
-    function selectDifficulty(idx) {
-        currentDiffIdx = idx;
-        updateCardVisual();
-    }
+    function selectDifficulty(idx) { currentDiffIdx = idx; updateCardVisual(); }
 
     function updateCardVisual() {
         const cards = document.querySelectorAll('.diff-card');
@@ -299,7 +322,6 @@
         });
     }
 
-    // ③ 게임 플레이 기동
     function startGame() {
         currentStage = 1;
         currentRound = 1;
@@ -312,7 +334,7 @@
         document.getElementById('hud-stage').innerText = currentStage;
         document.getElementById('hud-round').innerText = currentRound;
         
-        // 기획 반영: 프레임 중첩 버그 방지를 위해 기존 루프 완전 파괴 후 재시작
+        // 기획 반영: 프레임 중첩 파괴 (cancelAnimationFrame)
         if (mainLoopId) {
             cancelAnimationFrame(mainLoopId);
             mainLoopId = null;
@@ -320,51 +342,44 @@
         
         pinPosition = 0;
         pinDirection = 1;
-        
-        // 애니메이션 루프 구동
         updateGauge();
     }
 
-    // 게이지 핀 이동 로직 (requestAnimationFrame 방식)
     function updateGauge() {
-        pinPosition += GAUGE_SPEED * pinDirection * 4; // 속도 보정값
+        pinPosition += GAUGE_SPEED * pinDirection * 4; 
         if (pinPosition >= 100) { pinPosition = 100; pinDirection = -1; }
         if (pinPosition <= 0) { pinPosition = 0; pinDirection = 1; }
         
         document.getElementById('gauge-pin').style.left = pinPosition + '%';
-        
         mainLoopId = requestAnimationFrame(updateGauge);
     }
 
-    // 스페이스 판정 인터랙션
     function handleSpaceInput() {
-        // 기획: 판정 범위 24% 고정 (중앙 38% ~ 62% 영역)
+        // 판정 범위 24% 고정 (38% ~ 62%)
         if (pinPosition >= 38 && pinPosition <= 62) {
             triggerDoguriDance();
         } else {
             alert("판정 실패!");
-            // 실패 루틴 처리 가능
         }
     }
 
-    // 기획 반영: 성공 후 딱 9번(9장)까지만 춤추게 고정
+    // 기획: 커맨드 성공 시 정확히 9번만 춤추도록 로직 설계
     function triggerDoguriDance() {
-        const doguri = document.getElementById('doguri');
+        const doguriChar = document.getElementById('doguri-char');
         let danceCount = 0;
-        
-        // 게이지 잠시 정지
-        cancelAnimationFrame(mainLoopId);
+        cancelAnimationFrame(mainLoopId); // 게이지 정지
         
         const danceInterval = setInterval(() => {
             danceCount++;
-            doguri.innerText = `💃 댄스 ${danceCount}`; // 실제 연출 프레임 9장 교체 지점
+            
+            // [TIP] 실제 스프라이트 시트 나 이미지가 준비되면 파일명을 바꾸어 매핑할 수 있습니다.
+            // 예: doguriChar.src = `doguri_dance_${danceCount}.png`;
             
             if (danceCount >= 9) {
                 clearInterval(danceInterval);
-                doguri.innerText = "도구리";
                 processRoundEnd();
             }
-        }, 150); // 프레임 속도 연출
+        }, 120); 
     }
 
     function processRoundEnd() {
@@ -372,7 +387,6 @@
             currentRound++;
             initRound();
         } else {
-            // 3판 다 채웠을 때 스테이지 클리어 팝업 노출 (배경 상시 유지)
             showResultPopup();
         }
     }
@@ -381,22 +395,21 @@
         changeScreen('result-popup');
         const title = document.getElementById('result-title');
         const desc = document.getElementById('result-desc');
+        const nextBtnImg = document.querySelector('#next-btn img');
         
         if (currentStage === 5) {
-            // 기획 반영: 스테이지 5 최종 완포 시에만 도감 보상 가차 결과창 연출
             title.innerText = "★최종 완포 스페셜 클리어!★";
-            desc.innerText = "모든 스테이지를 정복하셨습니다! 하와이 에디션 한정 도감 보상 가차가 오픈됩니다!";
-            document.getElementById('next-btn').innerText = "보상 가차 오픈 (DD_Main_Gift_Button)";
+            desc.innerText = "모든 스테이지를 정복하셨습니다! 하와이 에디션 도감 가차가 오픈됩니다.";
+            // 완포 시 버튼 이미지 혹은 UI 변경 트리거 영역
         } else {
             title.innerText = `STAGE ${currentStage} CLEAR`;
-            desc.innerText = "다음 스테이지로 이동하려면 스페이스바나 다음 버튼을 누르세요.";
-            document.getElementById('next-btn').innerText = "다음 단계 (DD_Main_Next_Button.png)";
+            desc.innerText = "스페이스바 혹은 Next 버튼을 눌러 다음 단계로 진행하세요.";
         }
     }
 
     function nextStage() {
         if (currentStage === 5) {
-            alert("🎉 도감 가차 결과: 하와이안 도구리 획득!");
+            alert("🎉 도감 보상 가차 결과창 오픈! 한정판 도구리를 획득했습니다!");
             goToStart();
         } else {
             currentStage++;
