@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V28 (세로형 팝업 및 연습모드 추가)</title>
+    <title>도구리 하와이 댄스 게임 - V29 (팝업 비율 복구 & 신나는 BGM & 올클리어 스케일업)</title>
     <style>
         /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -240,7 +240,7 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.8); }
 
-        /* 연습 모드 영역 (난이도 선택창 상단) */
+        /* 연습 모드 영역 */
         #practice-ui {
             position: absolute;
             top: 150px;
@@ -367,11 +367,15 @@
             height: auto;
             z-index: 1;
         }
+        /* 👑 도구리 중심점 변경 (바닥 기준) 및 크기 전환 부드럽게 설정 */
         #doguri-char {
             position: absolute;
             bottom: 195px; 
             left: 50%;
-            transform: translateX(-50%);
+            /* translate와 scale을 JS에서 제어할 것이므로 여기엔 기본값 지정 */
+            transform: translateX(-50%) scale(1);
+            transform-origin: bottom center; 
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             width: 180px;
             height: auto;
             z-index: 2;
@@ -465,41 +469,45 @@
             color: #000;
         }
 
-        /* 👑 세로형 9:16 팝업 (하이스코어, 도감) */
+        /* 👑 세로형 원본 비율 복구 (688x854px) */
         .modal-content-vertical {
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center center;
-            width: 384px; 
-            height: 688px; 
+            width: 688px; 
+            height: 854px; 
+            /* 720px 화면에 맞춰 약 80% 크기로 스케일링하여 표시 */
+            transform: scale(0.8); 
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
         }
         .popup-safe-box-vertical {
-            width: 279px; 
-            height: 520px; 
+            width: 500px; /* 원본 비율에 맞게 넉넉해진 세이프존 */
+            height: 640px; 
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
             color: #fff;
+            padding-top: 20px;
         }
 
         /* 랭킹 탭 버튼 */
         .rank-tabs {
             display: flex;
-            gap: 5px;
+            gap: 10px;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 25px;
             justify-content: center;
         }
         .rank-tab-btn {
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid #fff;
             color: #fff;
-            padding: 5px 12px;
+            padding: 8px 18px;
+            font-size: 16px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
@@ -511,22 +519,22 @@
             border-color: #ffeb3b;
         }
 
-        /* 랭킹 리스트 (배경 투명화) */
+        /* 랭킹 리스트 */
         .leaderboard-modal-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 12px;
             width: 100%;
             height: 100%;
             overflow-y: auto;
-            padding-right: 5px;
+            padding-right: 10px;
         }
         .leaderboard-row {
             display: flex;
             justify-content: space-between;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
-            padding: 5px 8px;
+            padding: 10px 12px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
             text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
@@ -538,9 +546,9 @@
         .square-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 15px;
             width: 100%;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         .square-item {
             width: 100%;
@@ -552,22 +560,23 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         .square-item img {
-            width: 100%;
-            height: 100%;
+            width: 90%;
+            height: 90%;
             object-fit: contain;
         }
 
         .modal-space-hint {
             position: absolute;
-            bottom: -30px;
+            bottom: -50px;
             width: 100%;
             text-align: center;
-            color: rgba(255,255,255,0.7);
-            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+            font-size: 20px;
             font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
         }
 
         #next-btn-container {
@@ -658,7 +667,6 @@
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
-        <!-- 👑 연습(Practice) 모드 UI 추가 -->
         <div id="practice-ui">
             <div class="practice-title">🎮 연습 모드 (화살표를 눌러보세요)</div>
             <div class="arrow-sequence-box" id="practice-sequence-area"></div>
@@ -737,7 +745,7 @@
         </div>
     </div>
 
-    <!-- 리워드 팝업 (가로형 유지) -->
+    <!-- 리워드 팝업 -->
     <div id="reward-popup" class="modal">
         <div class="modal-content-horizontal">
             <div class="popup-safe-box-horizontal">
@@ -755,7 +763,7 @@
         </div>
     </div>
 
-    <!-- 👑 세로형 리더보드 팝업 -->
+    <!-- 세로형 688x854 리더보드 팝업 -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content-vertical" style="background-image: url('DD_Highscore_popup.png');">
             <div class="popup-safe-box-vertical">
@@ -770,7 +778,7 @@
         </div>
     </div>
 
-    <!-- 👑 세로형 도감 팝업 -->
+    <!-- 세로형 688x854 도감 팝업 -->
     <div id="collection-modal" class="modal">
         <div class="modal-content-vertical" style="background-image: url('DD_Gift_popup.png');">
             <div class="popup-safe-box-vertical">
@@ -846,7 +854,6 @@
     const STORAGE_KEY_ITEMS = "doguri_unlocked_items_firebase_v1";
 
     const DOGURI_BASE = "doguri_image_base.png";
-    const DOGURI_UPGRADE = "doguri_image_upgrade.png";
 
     const arrowKeyCodes = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp'];
     const arrowNames = { 'ArrowLeft': 'Left', 'ArrowRight': 'Right', 'ArrowDown': 'Down', 'ArrowUp': 'Up' };
@@ -862,7 +869,6 @@
         document.body.addEventListener('keydown', () => { initAudioContext(); }, { once: true });
     };
 
-    // 팝업 외부(배경 어두운 부분) 클릭 시 닫기
     function setupModalOutsideClick() {
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(e) {
@@ -919,6 +925,24 @@
         updateMasterVolume();
     }
 
+    // 🔊 드럼 비트(신나는 BGM용)
+    function playDrumKick() {
+        if (!audioCtx || isAudioMuted) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        
+        let kickVol = 0.5 * globalVolumeValue;
+        gain.gain.setValueAtTime(kickVol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        
+        osc.connect(gain);
+        gain.connect(masterGainNode);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+    }
+
     function createOceanWaveSound() {
         try {
             let bufferSize = audioCtx.sampleRate * 5; 
@@ -950,7 +974,11 @@
             function waveLoop() {
                 if (!isBgmPlaying) return;
                 let now = audioCtx.currentTime;
-                waveGain.gain.linearRampToValueAtTime(0.1, now + 2.0); 
+                // 인게임 시 파도소리를 좀 줄여서 BGM이 잘 들리게 함
+                let isGame = document.getElementById('screen-game').classList.contains('active');
+                let maxVol = isGame ? 0.03 : 0.1;
+
+                waveGain.gain.linearRampToValueAtTime(maxVol, now + 2.0); 
                 waveGain.gain.linearRampToValueAtTime(0.01, now + 4.5); 
                 setTimeout(waveLoop, 4500);
             }
@@ -958,40 +986,57 @@
         } catch (e) { console.error("파도 생성 실패:", e); }
     }
 
+    // 👑 동적 BGM 엔진 (인게임 시 신나는 모드)
     function startHawaiiBgmEngine() {
         isBgmPlaying = true;
         createOceanWaveSound(); 
 
-        const chords = [
+        // 대기 화면 잔잔한 화음
+        const introChords = [
             [261.63, 329.63, 392.00, 523.25], 
             [220.00, 261.63, 329.63, 440.00], 
             [174.61, 218.27, 261.63, 349.23], 
             [196.00, 246.94, 293.66, 392.00]  
         ];
 
+        // 인게임 신나는 화음 (빠르고 통통 튀는)
+        const gameChords = [
+            [261.63, 392.00, 523.25, 659.25], 
+            [261.63, 392.00, 523.25, 659.25], 
+            [349.23, 440.00, 523.25, 698.46], 
+            [196.00, 293.66, 392.00, 587.33]  
+        ];
+
         let chordIndex = 0;
         let noteIndex = 0;
-        let tempoMs = 180; 
 
         function playNextBgmNote() {
             if (!isBgmPlaying) return;
 
-            let currentGameActive = document.getElementById('screen-game').classList.contains('active');
-            let isRhythmUiVisible = document.getElementById('rhythm-ui').style.display !== 'none';
-            let bgmVolumeScale = (currentGameActive && isRhythmUiVisible) ? 0.35 : 0.8;
-
-            let currentChord = chords[chordIndex];
+            let isGameActive = document.getElementById('screen-game').classList.contains('active');
+            
+            // 인게임일 땐 템포업 & 파형 변경
+            let tempoMs = isGameActive ? 120 : 180;
+            let type = isGameActive ? 'square' : 'triangle';
+            
+            let currentChordsList = isGameActive ? gameChords : introChords;
+            let currentChord = currentChordsList[chordIndex % currentChordsList.length];
             let noteFreq = currentChord[noteIndex];
+
+            // 인게임 땐 주기적으로 드럼 비트 추가
+            if (isGameActive && (noteIndex === 0 || noteIndex === 2)) {
+                playDrumKick();
+            }
 
             let osc = audioCtx.createOscillator();
             let gainNode = audioCtx.createGain();
 
-            osc.type = 'triangle'; 
+            osc.type = type; 
             osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
 
-            let noteVolume = 0.12 * globalVolumeValue * bgmVolumeScale; 
+            let noteVolume = isGameActive ? (0.07 * globalVolumeValue) : (0.12 * globalVolumeValue); 
             gainNode.gain.setValueAtTime(noteVolume, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4); 
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (isGameActive ? 0.2 : 0.4)); 
 
             osc.connect(gainNode);
             gainNode.connect(masterGainNode);
@@ -1002,8 +1047,8 @@
             noteIndex++;
             if (noteIndex >= 4) {
                 noteIndex = 0;
-                if (Math.random() > 0.7) { 
-                    chordIndex = (chordIndex + 1) % chords.length;
+                if (Math.random() > 0.3) { 
+                    chordIndex++;
                 }
             }
             
@@ -1068,11 +1113,9 @@
         } catch(e) { console.error("로컬 세이브 저장 실패:", e); }
     }
 
-    // 👑 탭을 통해 난이도별로 리더보드 호출
     window.fetchServerLeaderboard = function(diffLevel) {
         if (!window.isFirebaseReady) return;
         
-        // 탭 스타일 활성화 갱신
         document.querySelectorAll('.rank-tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-${diffLevel}`).classList.add('active');
 
@@ -1199,11 +1242,10 @@
         document.getElementById('game-container').style.backgroundImage = `url('${randBg}')`;
     }
 
-    // 👑 연습 모드 초기화
     function initPracticeMode() {
         isPracticeProcessing = false;
         practiceIndex = 0;
-        let count = Math.floor(Math.random() * 3) + 3; // 3~5개
+        let count = Math.floor(Math.random() * 3) + 3; 
         practiceSequence = [];
         
         let area = document.getElementById('practice-sequence-area');
@@ -1234,7 +1276,6 @@
         }
     }
 
-    // 👑 연습 모드 키보드 판정
     function handlePracticeInput(key) {
         if(isPracticeProcessing) return;
         
@@ -1254,13 +1295,13 @@
             
             if(practiceIndex >= practiceSequence.length) {
                 isPracticeProcessing = true;
-                setTimeout(initPracticeMode, 500); // 0.5초 뒤 새 연습 생성
+                setTimeout(initPracticeMode, 500); 
             }
         } else {
             if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
             playFailSound();
             isPracticeProcessing = true;
-            setTimeout(initPracticeMode, 500); // 실패 시에도 새 연습 생성
+            setTimeout(initPracticeMode, 500); 
         }
     }
 
@@ -1446,7 +1487,6 @@
         showScreen('screen-start');
     }
 
-    // --- 키보드 이벤트 핸들러 ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1477,7 +1517,6 @@
             if (startActive) { simulateBtnClick('btn-main-back', goToIntro); return; }
         }
 
-        // 화면 2: 난이도 단축키 및 연습모드
         if (startActive) {
             if (e.key === '1') { simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy')); return; }
             if (e.key === '2') { simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal')); return; }
@@ -1490,7 +1529,6 @@
 
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
-        // 인게임 판정
         if (arrowKeyCodes.includes(e.key)) {
             let targetKey = targetArrowSequence[currentArrowIndex];
             let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
@@ -1604,26 +1642,23 @@
         }
     }
 
-    // 👑 3x3 정사각형 도감 이미지 렌더링
     function initCollectionUI() {
         let grid = document.getElementById('book-grid-container');
         if (!grid) return;
         grid.innerHTML = '';
         
-        // 9개 강제 배치
         for (let i = 0; i < 9; i++) {
             let box = document.createElement('div');
             box.className = 'square-item';
             
             let img = document.createElement('img');
             if (unlockedItems.has(i)) {
-                img.src = `DD_Item_${i}.png`; // 획득한 아이템 이미지
+                img.src = `DD_Item_${i}.png`; 
                 img.alt = collectionItems[i];
             } else {
-                img.src = 'DD_Item_Locked.png'; // 미획득 자물쇠 또는 실루엣
+                img.src = 'DD_Item_Locked.png'; 
                 img.alt = '미획득 아이템';
             }
-            // fallback (이미지 없을 시 텍스트 렌더링)
             img.onerror = function() {
                 this.style.display = 'none';
                 let fallback = document.createElement('span');
@@ -1639,16 +1674,24 @@
         }
     }
 
+    // 👑 올클리어 시 크기 1.8배 스케일 업! (이미지 변경 제거)
     function updateDoguriImage() {
-        if (unlockedItems.size === 9) {
-            setCharacterImage(DOGURI_UPGRADE, '👑 하와이안 도구리 업그레이드 완료');
-        } else {
-            setCharacterImage(DOGURI_BASE, '도구리 기본 상태');
+        // 무조건 원본 이미지를 할당
+        setCharacterImage(DOGURI_BASE, '도구리 기본 상태');
+        
+        let charImg = document.getElementById('doguri-char');
+        if (charImg) {
+            // 올클리어면 스케일을 1.8배로, 아니면 1배로 적용 (transform-origin은 CSS에서 bottom center로 지정됨)
+            if (unlockedItems.size === 9) {
+                charImg.style.transform = "translateX(-50%) scale(1.8)";
+            } else {
+                charImg.style.transform = "translateX(-50%) scale(1)";
+            }
         }
     }
 
     function openLeaderboardModal() {
-        fetchServerLeaderboard(currentDifficulty); // 선택된 난이도를 디폴트로 호출
+        fetchServerLeaderboard(currentDifficulty); 
         document.getElementById('leaderboard-modal').style.display = 'flex';
     }
     
