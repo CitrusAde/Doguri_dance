@@ -2,12 +2,25 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V24 (사운드 복구 및 팝업 규격 수정)</title>
-    <!-- 👑 게임 전체의 감성을 살려줄 귀엽고 동글동글한 구글 웹폰트 'Gamja Flower' 임포트 -->
-    <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
-    
+    <title>도구리 하와이 댄스 게임 - V26 (배경 복구 및 NPS 폰트 연동)</title>
     <style>
-        * { box-sizing: border-box; user-select: none; }
+        /* 👑 [신규] 가지고 계신 NPSfont_bold 커스텀 폰트를 브라우저에 영리하게 등록하는 구문 */
+        @font-face {
+            font-family: 'NPSfont_bold';
+            /* 같은 폴더 또는 깃허브 리포지토리에 있는 폰트 파일 경로 매핑 */
+            src: url('NPSfont_bold.woff2') format('woff2'),
+                 url('NPSfont_bold.woff') format('woff'),
+                 url('NPSfont_bold.ttf') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            user-select: none; 
+            /* 게임 전체 서체를 가독성 좋은 국민연금 둥근 서체로 강제 고정 */
+            font-family: 'NPSfont_bold', 'LINESeedKR-Bd', 'Malgun Gothic', sans-serif; 
+        }
         body {
             margin: 0;
             padding: 0;
@@ -16,16 +29,15 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            /* 👑 글로벌 폰트 변경 사항 전치 반영 */
-            font-family: 'Gamja Flower', 'Malgun Gothic', sans-serif;
             overflow: hidden;
         }
 
-        /* 16:9 고정 해상도 컨테이너 */
+        /* 16:9 고정 해상도 컨테이너 (👑 배경 이미지 출력 유실 버그 완벽 복구) */
         #game-container {
             width: 1280px;
             height: 720px;
             position: relative;
+            background-image: url('DD_Main_Image.png'); /* 배경 리소스 재결합 */
             background-size: cover;
             background-position: center;
             overflow: hidden;
@@ -46,28 +58,26 @@
         }
         .screen.active { display: flex; }
 
-        /* 🔊 [구조 변경] 좌측 상단 소리 제어 패널 - DD_Nick_Bg.png를 미니 축소 배경으로 교체 */
+        /* 🔊 좌측 상단 소리 제어 패널 */
         .audio-controller-panel {
             position: absolute;
             top: 30px;
             left: 40px;
             background: url('DD_Nick_Bg.png') no-repeat center center;
-            background-size: cover;
+            background-size: 100% 100%; 
             border-radius: 12px;
-            padding: 8px 15px;
+            padding: 12px 18px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
             z-index: 100;
-            width: 160px;
-            height: 48px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         .audio-toggle-btn {
             background: none;
             border: none;
-            color: #000; /* 어두운 배경 아이콘 감도 유지 */
-            font-size: 22px;
+            color: #000; 
+            font-size: 20px;
             cursor: pointer;
             padding: 0;
             display: flex;
@@ -80,9 +90,9 @@
         .volume-slider {
             -webkit-appearance: none;
             appearance: none;
-            width: 75px;
+            width: 85px;
             height: 6px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0,0,0,0.2);
             border-radius: 3px;
             outline: none;
             cursor: pointer;
@@ -93,7 +103,8 @@
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            background: #ff1744;
+            background: #fff;
+            border: 2px solid #000;
             cursor: pointer;
         }
 
@@ -142,13 +153,12 @@
             border: none;
             outline: none;
             color: #000;
-            font-size: 28px; 
+            font-size: 26px; 
             font-weight: bold;
             text-align: center;
-            font-family: 'Gamja Flower', sans-serif;
         }
 
-        /* 버튼 가이드 래퍼 세트 */
+        /* 버튼 가이드 세트 */
         .btn-with-guide-container {
             display: flex;
             flex-direction: column;
@@ -157,13 +167,13 @@
         }
         .space-shortcut-guide {
             color: rgba(255, 255, 255, 0.8);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
 
-        /* 중심점이 중앙인 이미지 버튼 공통 */
+        /* 이미지 버튼 기본 지침 */
         .img-btn {
             cursor: pointer;
             border: none;
@@ -185,7 +195,7 @@
 
         .bottom-dance-position {
             position: absolute;
-            bottom: 30px;
+            bottom: 45px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -227,12 +237,11 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
-            font-family: 'Gamja Flower', sans-serif;
+            font-size: 12px;
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.8); }
 
-        /* [요청 반영] 난이도 이미지 버튼 그룹 위치 대폭 하향 수리 (기존 200px -> 100px 하향 조정) */
+        /* 난이도 이미지 버튼 그룹 좌표 100px 하향 고정 */
         .difficulty-group {
             position: absolute;
             bottom: 100px; 
@@ -288,7 +297,7 @@
             color: white;
             padding: 10px 20px;
             border-radius: 10px;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             z-index: 5;
             display: flex;
@@ -341,7 +350,6 @@
             height: auto;
             z-index: 1;
         }
-        
         #doguri-char {
             position: absolute;
             bottom: 195px; 
@@ -408,14 +416,14 @@
             bottom: 210px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 36px;
+            font-size: 34px;
             font-weight: bold;
             text-shadow: 0 3px 6px rgba(0,0,0,0.9);
             z-index: 4;
         }
 
         .rank-badge {
-            font-size: 64px;
+            font-size: 54px;
             font-weight: 900;
             margin: 5px 0;
         }
@@ -423,7 +431,7 @@
         .rank-a { color: #ff9100; }
         .rank-b { color: #00e676; }
 
-        /* 👑 [구조 대수정] 요청반영: 826px x 461px 외곽 해상도 팝업 모달 하우징 구축 */
+        /* 팝업 이미지 픽셀 매칭 및 텍스트 강제 안전 격리 가이드 세팅 */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -433,60 +441,60 @@
             align-items: center;
             z-index: 120;
         }
+        /* 외부 프레임 크기 정밀 락: 826px x 461px */
         .modal-content {
             background: url('DD_Popup.png') no-repeat center center;
-            background-size: contain;
-            width: 826px;  /* 팝업 전체 가로 고정 크기 */
-            height: 461px; /* 팝업 전체 세로 고정 크기 */
-            position: relative;
+            background-size: 100% 100%;
+            width: 826px; 
+            height: 461px; 
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 0;
+            border: none;
+            position: relative;
         }
-        /* 👑 [핵심] 요청반영: 695px x 305px 안전 격리 구역 전용 콘텐츠 배치 래퍼 박스 */
-        .popup-safe-content-zone {
-            width: 695px;  /* 안전 구역 가로 고정 */
-            height: 305px; /* 안전 구역 세로 고정 */
+        /* 내부 세이프 크기 박스 락: 695px x 305px 공간 내부에만 글자, 표, 버튼 강제 배치 */
+        .popup-safe-box {
+            width: 695px;
+            height: 305px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between; /* 텍스트와 하단 닫기 버튼 배치의 균형 유지 */
+            justify-content: center;
             overflow: hidden;
-            text-align: center;
+            position: relative;
             color: #000;
-            padding: 10px;
         }
-        
-        .popup-safe-content-zone h2 {
+        .popup-safe-box h2 {
             margin: 0 0 5px 0;
-            color: #111;
-            font-size: 32px;
+            color: #000;
+            font-size: 24px;
             font-weight: bold;
         }
-        .popup-safe-content-zone p {
-            font-size: 18px;
+        .popup-safe-box p {
+            font-size: 14px;
             color: #333;
-            margin: 0;
+            margin: 0 0 5px 0;
         }
-        
+
         .book-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin: 5px 0;
+            margin: 10px 0;
             width: 100%;
-            max-height: 190px;
+            max-height: 180px;
             overflow-y: auto;
         }
         .book-item {
-            border: 2px solid #888;
+            border: 2px solid #666;
             padding: 8px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.9);
             font-weight: bold;
-            font-size: 16px;
-            color: #222;
+            font-size: 13px;
+            color: #000;
         }
         .book-item.unlocked {
             background: #e3f2fd;
@@ -494,6 +502,7 @@
             color: #1565c0;
         }
 
+        /* 랭킹 모달 컨텐츠 영역 보정 */
         .leaderboard-modal-list {
             display: flex;
             flex-direction: column;
@@ -501,23 +510,23 @@
             background: rgba(255, 255, 255, 0.9);
             padding: 10px;
             border-radius: 10px;
-            border: 1px solid #999;
-            height: 190px;
-            width: 100%;
+            border: 2px solid #555;
+            height: 180px;
             overflow-y: auto;
+            width: 100%;
         }
         .leaderboard-row {
             display: flex;
             justify-content: space-between;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
-            color: #222;
-            padding: 2px 10px;
-            border-bottom: 1px dashed #bbb;
+            color: #111;
+            padding: 3px 8px;
+            border-bottom: 1px dashed #aaa;
         }
         .leaderboard-row.my-row {
             background: #ffeb3b;
-            border-radius: 6px;
+            border-radius: 4px;
             border-bottom: none;
         }
 
@@ -529,37 +538,24 @@
             z-index: 50;
         }
 
-        /* 👑 요청반영: 스테이지 결과창 리워드 팝업 역시 동일한 안전지대 규격 분할 적용 */
+        /* 스테이지 보상 결과창 826x461 외경 및 695x305 내경 가이드 동일 전치 */
         #reward-popup {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: url('DD_Popup.png') no-repeat center center;
-            background-size: contain;
+            background-size: 100% 100%;
             width: 826px;
             height: 461px;
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 150;
             padding: 0;
+            z-index: 150;
+            text-align: center;
         }
-        .close-btn {
-            padding: 6px 20px;
-            background: #333;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 18px;
-            font-family: 'Gamja Flower', sans-serif;
-            margin-top: 5px;
-        }
-        .close-btn:hover { background: #000; }
     </style>
 
-    <!-- 파이어베이스 SDK 바인딩 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -594,13 +590,11 @@
 
 <div id="game-container">
 
-    <!-- 🔊 오디오 제어 판넬 -->
     <div class="audio-controller-panel">
         <button class="audio-toggle-btn" id="btn-audio-mute" onclick="toggleAudioMute()">🔊</button>
         <input type="range" class="volume-slider" id="slider-volume" min="0" max="100" value="50" oninput="changeVolumeValue(this.value)">
     </div>
     
-    <!-- 1. 인트로 화면 -->
     <div id="screen-intro" class="screen active">
         <img id="main-logo" src="DD_Logo.png" alt="도구리 로고" onerror="this.style.display='none'; this.after('[DD_Logo]');">
         
@@ -621,13 +615,11 @@
         </div>
     </div>
 
-    <!-- 2. 게임 시작 화면 -->
     <div id="screen-start" class="screen">
         <button id="btn-main-back" class="img-btn top-right-back" onclick="goToIntro()">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
-        <!-- 난이도 이미지 버튼 그룹 (100px 완벽 하향 정렬 가시성 확보) -->
         <div class="difficulty-group">
             <div id="slot-easy" class="diff-btn-slot selected" onclick="selectDifficulty('easy')">
                 <img class="diff-glow-layer" src="DD_Easy_Button_Glow.png" alt="쉬움 글로우" onerror="this.style.display='none';">
@@ -658,7 +650,6 @@
             <span class="space-shortcut-guide">(space)</span>
         </div>
 
-        <!-- 우측 하단 레이아웃 제어 컨테이너 -->
         <div class="bottom-right-container">
             <button id="btn-main-rank" class="img-btn origin-size-btn" onclick="openLeaderboardModal()">
                 <img src="DD_Highscore.png" alt="HIGHSCORE" onerror="this.style.display='none'; this.after('[HIGHSCORE]');">
@@ -674,7 +665,6 @@
         </div>
     </div>
 
-    <!-- 3. 인게임 화면 -->
     <div id="screen-game" class="screen">
         <div class="game-status">
             <span id="txt-difficulty">난이도: 쉬움</span> | 
@@ -683,7 +673,6 @@
             <span id="txt-playtime" style="color: #ffeb3b;">시간: 0.00초</span>
         </div>
 
-        <!-- 라이프 하트 컨테이너 -->
         <div class="life-container-wrapper">
             <img class="life-bg-asset" src="DD_Nick_Bg.png" alt="라이프 배경">
             <div class="life-hearts-overlay" id="hearts-display-images"></div>
@@ -708,36 +697,34 @@
         </div>
     </div>
 
-    <!-- 👑 요청반영: 695px x 305px 격리 안착형 스테이지 결과창 리워드 팝업 -->
     <div id="reward-popup">
-        <div class="popup-safe-content-zone">
+        <div class="popup-safe-box">
             <h2>🌴 스테이지 클리어! 🌴</h2>
-            <p style="font-size: 20px; font-weight: bold;">최종 순위 산출 등급: <span id="popup-rank-badge" style="color:#ff1744; font-size:24px;">S</span></p>
-            <p id="popup-playtime-result" style="font-weight: bold;">기록: 0.00초</p>
-            <p id="popup-firebase-status" style="color: #1565c0; font-weight: bold; font-size:16px;">순위 판단 중...</p>
-            <div style="font-size: 16px; font-weight: bold; color: #555;">🎁 하와이 기념 도감 보상: <span id="reward-item-name" style="color: #4caf50; font-size:18px;">[아이템]</span></div>
+            <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
+            <p id="popup-playtime-result" style="font-weight: bold; margin: 0;">기록: 0.00초</p>
+            <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
+            <p style="margin: 3px 0 0 0; font-weight: bold; font-size:13px;">🎁 하와이 기념 도감 보상 🎁</p>
+            <div id="reward-item-name" style="font-size: 20px; font-weight: bold; color: #1565c0; margin-bottom: 8px;">[아이템]</div>
             <button class="close-btn" onclick="closeRewardPopup()">확인</button>
         </div>
     </div>
 
-    <!-- 🏆 글로벌 실시간 TOP 10 랭킹 모달 레이어 (요청반영: 695px x 305px 안전지대 격리식 적용 완료) -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content">
-            <div class="popup-safe-content-zone">
-                <h2 id="modal-rank-title" style="font-size:24px;">🏆 글로벌 실시간 랭킹</h2>
-                <div class="leaderboard-modal-list" id="modal-rank-rows">
-                    <div style="text-align:center; color:#999; padding-top:60px;">서버 데이터 수신 중...</div>
-                </div>
+            <div class="popup-safe-box">
+                <h2 id="modal-rank-title" style="font-size:22px;">🏆 글로벌 실시간 랭킹</h2>
+                <p style="margin-bottom:6px;">현재 선택된 난이도의 TOP 10 기록입니다.</p>
+                <div class="leaderboard-modal-list" id="modal-rank-rows"></div>
                 <button class="close-btn" onclick="closeLeaderboardModal()">닫기</button>
             </div>
         </div>
     </div>
 
-    <!-- 🎒 도구리 도감 모달 (요청반영: 695px x 305px 안전지대 격리식 적용 완료) -->
     <div id="collection-modal" class="modal">
         <div class="modal-content">
-            <div class="popup-safe-content-zone">
-                <h2 style="font-size:24px;">🎒 도구리의 하와이 도감</h2>
+            <div class="popup-safe-box">
+                <h2 style="font-size:22px;">🎒 도구리의 하와이 도감</h2>
+                <p style="margin-bottom:6px;">총 9가지 기념품을 모두 모아보세요!</p>
                 <div class="book-grid" id="book-grid-container"></div>
                 <button class="close-btn" onclick="closeCollection()">닫기</button>
             </div>
@@ -800,7 +787,7 @@
         setupButtonEffects();
     };
 
-    // --- 🔊 오디오 코어 및 BGM 루프 엔진 (비트음 강제 구동 보강) ---
+    // --- 🔊 오디오 코어 및 BGM 루프 엔진 ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -939,7 +926,6 @@
         playNextBgmNote();
     }
 
-    // 👑 효과음 고유 피크 파워 가이드 안정화 (비트음 연동)
     function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
         try {
             initAudioContext();
@@ -977,8 +963,6 @@
         playBeep(440, 0.05, 'triangle');
     }
 
-    document.addEventListener('click', () => { initAudioContext(); }); // 전역 안전 잠금 장치 해제 트리거
-
     function playStageClearSound() {
         playBeep(523.25, 0.1, 'square'); 
         setTimeout(() => { playBeep(659.25, 0.25, 'square'); }, 80);
@@ -1011,7 +995,7 @@
             rowsContainer.innerHTML = '';
 
             if (!snapshot.exists()) {
-                rowsContainer.innerHTML = '<div style="text-align:center; color:#999; padding-top:40px; font-size:22px;">등록된 기록이 없습니다.</div>';
+                rowsContainer.innerHTML = '<div style="text-align:center; color:#999; padding-top:40px;">등록된 기록이 없습니다. 최초의 명예를 얻으세요!</div>';
                 return;
             }
 
@@ -1066,8 +1050,8 @@
                     statusText.style.color = "#f44336";
                 });
             } else {
-                statusText.innerText = "아쉽게도 아케이드 10위권 진입 실패";
-                statusText.style.color = "#555";
+                statusText.innerText = "아쉽게도 아케이드 10위권 순위 내에 진입하지 못했습니다.";
+                statusText.style.color = "#444";
             }
         }).catch((err) => {
             console.error("판독 스레드 오류:", err);
@@ -1132,7 +1116,6 @@
         showScreen('screen-start'); 
     }
 
-    // 뒤로가기
     function goToIntro() { 
         stopRoundTimer();
         stopStopwatch();
@@ -1212,304 +1195,4 @@
         
         updateDoguriImage();
         
-        let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
-        document.getElementById('txt-difficulty').innerText = `난이도: ${diffKo}`;
-        document.getElementById('txt-stage').innerText = `스테이지: ${currentStage}/3`;
-        document.getElementById('txt-round').innerText = `판수: ${currentRound}/5`;
-        
-        document.getElementById('judgment-text').innerText = '';
-        document.getElementById('next-btn-container').style.display = 'none'; 
-        document.getElementById('rhythm-ui').style.display = 'flex';
-        
-        let arrowCount = 2 + currentRound; 
-        targetArrowSequence = [];
-        
-        let sequenceArea = document.getElementById('arrow-sequence-area');
-        sequenceArea.innerHTML = '';
-
-        for(let i=0; i<arrowCount; i++) {
-            let randomKey = arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)];
-            targetArrowSequence.push(randomKey);
-
-            let slot = document.createElement('div');
-            slot.className = 'arrow-icon-slot';
-            slot.id = `arrow-slot-${i}`;
-            
-            let img = document.createElement('img');
-            img.src = `DD_${arrowNames[randomKey]}_Button_Normal.png`;
-            img.id = `arrow-img-${i}`;
-            img.alt = arrowNames[randomKey];
-            
-            img.onerror = function() {
-                this.style.display = 'none';
-                let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑'};
-                this.parentElement.innerText = sym[randomKey];
-            };
-
-            slot.appendChild(img);
-            sequenceArea.appendChild(slot);
-        }
-
-        startRoundTimer();
-    }
-
-    function startRoundTimer() {
-        timeRemaining = timeLimit;
-        document.getElementById('timer-bar').style.width = '100%';
-
-        roundTimerId = setInterval(() => {
-            if (isRoundFinished || isStageClearedWait) {
-                stopRoundTimer();
-                return;
-            }
-            timeRemaining -= 50;
-            let percent = (timeRemaining / timeLimit) * 100;
-            document.getElementById('timer-bar').style.width = percent + '%';
-
-            if (timeRemaining <= 0) {
-                stopRoundTimer();
-                playFailSound(); 
-                handleRoundFailure("TIME OVER!");
-            }
-        }, 50);
-    }
-
-    function stopRoundTimer() {
-        if (roundTimerId) {
-            clearInterval(roundTimerId);
-            roundTimerId = null;
-        }
-    }
-
-    function handleRoundFailure(reasonText) {
-        userLives--;
-        updateHeartsUI();
-        setCharacterImage('DD_Dance_Fail.png', '도구리 실패 연출');
-
-        if (userLives <= 0) {
-            stopRoundTimer();
-            stopStopwatch();
-            setTimeout(() => {
-                alert("GAME OVER! 모든 하트를 잃었습니다.");
-                showScreen('screen-start');
-            }, 100);
-            return;
-        }
-
-        let jTxt = document.getElementById('judgment-text');
-        jTxt.innerText = reasonText;
-        jTxt.style.color = "#f44336";
-
-        initRound();
-    }
-
-    // --- 키보드 인터럽트 처리기 ---
-    window.addEventListener('keydown', function(e) {
-        let introActive = document.getElementById('screen-intro').classList.contains('active');
-        let startActive = document.getElementById('screen-start').classList.contains('active');
-        let gameActive = document.getElementById('screen-game').classList.contains('active');
-        
-        let nextContainer = document.getElementById('next-btn-container');
-        let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
-
-        if(document.activeElement === document.getElementById('user-name-input')) return;
-        if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
-        if(document.getElementById('collection-modal').style.display === 'flex') return;
-
-        // 👑 키보드 다운 스트로크 시점에 사운드 재생 상태 한 번 더 체크해서 안전 복구
-        initAudioContext(); 
-
-        if (e.key === ' ' || e.key === 'Spacebar') {
-            if (introActive) {
-                e.preventDefault();
-                simulateBtnClick('btn-main-start', goToGameStart);
-                return;
-            }
-            if (startActive) {
-                e.preventDefault();
-                simulateBtnClick('btn-main-dance', startGameLoop);
-                return;
-            }
-            if (gameActive && nextBtnVisible && isStageClearedWait) {
-                e.preventDefault();
-                simulateBtnClick('btn-main-next', handleNextStageClick);
-                return;
-            }
-        }
-
-        if (e.key === 'Escape' || e.key === 'Esc') {
-            if (startActive) {
-                simulateBtnClick('btn-main-back', goToIntro);
-                return;
-            }
-        }
-
-        if (startActive) {
-            if (e.key === '1') {
-                simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy'));
-                return;
-            }
-            if (e.key === '2') {
-                simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal'));
-                return;
-            }
-            if (e.key === '3') {
-                simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard'));
-                return;
-            }
-        }
-
-        if (!gameActive || isRoundFinished || isStageClearedWait) return;
-
-        if (arrowKeyCodes.includes(e.key)) {
-            let targetKey = targetArrowSequence[currentArrowIndex];
-            let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
-            let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
-
-            if(slotEl) {
-                slotEl.classList.add('hit');
-                setTimeout(() => slotEl.classList.remove('hit'), 80);
-            }
-
-            if (e.key === targetKey) {
-                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
-                
-                // 👑 오디오 서브시스템으로 정타 비트음 주파수 발사!
-                playHitSound(currentArrowIndex);
-                currentArrowIndex++;
-
-                let randomDanceNum = Math.floor(Math.random() * 4) + 1;
-                setCharacterImage(`DD_Dance_${randomDanceNum}.png`, `도구리 댄스 ${randomDanceNum}`);
-
-                if (currentArrowIndex >= targetArrowSequence.length) {
-                    stopRoundTimer();
-                    handleRoundSuccess();
-                }
-            } else {
-                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
-                stopRoundTimer();
-                playFailSound(); 
-                handleRoundFailure("FAIL!");
-            }
-        }
-    });
-
-    function handleRoundSuccess() {
-        if (currentRound >= 5) {
-            isStageClearedWait = true;
-            document.getElementById('rhythm-ui').style.display = 'none';
-            document.getElementById('next-btn-container').style.display = 'block';
-            
-            let jTxt = document.getElementById('judgment-text');
-            jTxt.innerText = "STAGE CLEAR!";
-            jTxt.style.color = "#4caf50";
-            
-            playStageClearSound(); 
-        } else {
-            currentRound++;
-            initRound();
-        }
-    }
-
-    function handleNextStageClick() {
-        if (currentStage < 3) {
-            currentStage++;
-            currentRound = 1;
-            initRound();
-        } else {
-            stopStopwatch();
-            giveRandomRewardAndRank();
-        }
-    }
-
-    function giveRandomRewardAndRank() {
-        if (isRewardGivenThisGame) return;
-        isRewardGivenThisGame = true; 
-
-        let finalTimeSec = totalElapsedTime / 1000;
-        document.getElementById('popup-playtime-result').innerText = `최종 클리어 시간: ${finalTimeSec.toFixed(2)}초`;
-
-        let rankLetter = 'B';
-        let badgeEl = document.getElementById('popup-rank-badge');
-        
-        if (currentDifficulty === 'easy') {
-            if (finalTimeSec <= 22) rankLetter = 'S';
-            else if (finalTimeSec <= 32) rankLetter = 'A';
-        } else if (currentDifficulty === 'normal') {
-            if (finalTimeSec <= 26) rankLetter = 'S';
-            else if (finalTimeSec <= 38) rankLetter = 'A';
-        } else { 
-            if (finalTimeSec <= 30) rankLetter = 'S';
-            else if (finalTimeSec <= 45) rankLetter = 'A';
-        }
-
-        badgeEl.innerText = rankLetter;
-
-        checkAndUploadScore(globalNickname, totalElapsedTime);
-
-        let randomIndex = Math.floor(Math.random() * collectionItems.length);
-        unlockedItems.add(randomIndex);
-        
-        saveGameDataToStorage();
-        initCollectionUI();
-        updateDoguriImage();
-
-        document.getElementById('reward-item-name').innerText = collectionItems[randomIndex];
-        document.getElementById('reward-popup').style.display = 'flex';
-    }
-
-    function closeRewardPopup() {
-        document.getElementById('reward-popup').style.display = 'none';
-        goToGameStart();
-    }
-
-    function resetAllLocalData() {
-        if (confirm("도감 데이터가 전면 초기화됩니다. 진행하시겠습니까?")) {
-            unlockedItems.clear();
-            isRewardGivenThisGame = false;
-            saveGameDataToStorage();
-            initCollectionUI();
-            updateDoguriImage();
-            alert('도감이 완전히 초기화되었습니다.');
-        }
-    }
-
-    function initCollectionUI() {
-        let grid = document.getElementById('book-grid-container');
-        grid.innerHTML = '';
-        collectionItems.forEach((item, index) => {
-            let box = document.createElement('div');
-            box.id = `book-item-${index}`;
-            box.className = `book-item ${unlockedItems.has(index) ? 'unlocked' : ''}`;
-            box.innerText = unlockedItems.has(index) ? item : `🔒 미획득 (${index + 1})`;
-            grid.appendChild(box);
-        });
-    }
-
-    function updateDoguriImage() {
-        if (unlockedItems.size === 9) {
-            setCharacterImage(DOGURI_UPGRADE, '👑 하와이안 도구리 업그레이드 완료');
-        } else {
-            setCharacterImage(DOGURI_BASE, '도구리 기본 상태');
-        }
-    }
-
-    function openLeaderboardModal() {
-        fetchServerLeaderboard();
-        document.getElementById('leaderboard-modal').style.display = 'flex';
-    }
-    function closeLeaderboardModal() {
-        document.getElementById('leaderboard-modal').style.display = 'none';
-    }
-
-    function openCollection() {
-        initCollectionUI();
-        document.getElementById('collection-modal').style.display = 'flex';
-    }
-    function closeCollection() {
-        document.getElementById('collection-modal').style.display = 'none';
-    }
-</script>
-
-</body>
-</html>
+        let diffKo = currentDifficulty === 'easy' ? '
