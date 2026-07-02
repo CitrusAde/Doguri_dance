@@ -684,7 +684,10 @@
             <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
             <p style="margin: 3px 0 0 0; font-weight: bold; font-size:13px;">🎁 하와이 기념 도감 보상 🎁</p>
             <div id="reward-item-name" style="font-size: 20px; font-weight: bold; color: #1565c0; margin-bottom: 8px;">[아이템]</div>
-            <button class="close-btn" onclick="closeRewardPopup()">확인</button>
+            
+            <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
+                <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
+            </button>
         </div>
     </div>
 
@@ -715,8 +718,8 @@
 <script>
     // --- 글로벌 상태 제어 변수 ---
     let currentDifficulty = 'easy';
-    let currentStage = 1;           
-    let currentRound = 1;           
+    let currentStage = 1;            
+    let currentRound = 1;            
     let userLives = 5;              
     let globalNickname = "도구리";
 
@@ -727,16 +730,16 @@
     let isRewardGivenThisGame = false; 
 
     let roundTimerId = null;
-    let timeLimit = 5000;           
+    let timeLimit = 5000;            
     let timeRemaining = 5000;
 
-    let totalStartTime = 0;         
-    let totalElapsedTime = 0;       
+    let totalStartTime = 0;          
+    let totalElapsedTime = 0;        
     let stopwatchIntervalId = null; 
 
     // --- 🎵 오디오 제어 변수군 ---
     let audioCtx = null;
-    let globalVolumeValue = 0.5;    
+    let globalVolumeValue = 0.5;   
     let isAudioMuted = false;       
     let masterGainNode = null;      
 
@@ -1263,6 +1266,7 @@
         let startActive = document.getElementById('screen-start').classList.contains('active');
         let gameActive = document.getElementById('screen-game').classList.contains('active');
         
+        let rewardPopupVisible = document.getElementById('reward-popup').style.display === 'flex';
         let nextContainer = document.getElementById('next-btn-container');
         let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
 
@@ -1286,6 +1290,12 @@
             if (gameActive && nextBtnVisible && isStageClearedWait) {
                 e.preventDefault();
                 simulateBtnClick('btn-main-next', handleNextStageClick);
+                return;
+            }
+            // [수정된 부분] 보상 팝업에서 Space 키 대응
+            if (rewardPopupVisible) {
+                e.preventDefault();
+                simulateBtnClick('btn-reward-ok', closeRewardPopup);
                 return;
             }
         }
