@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V19 (에셋 및 단축키 대규모 업데이트)</title>
+    <title>도구리 하와이 댄스 게임 - V20 (볼륨 증폭 및 글로우 버그 수정)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -128,7 +128,6 @@
             align-items: center;
             gap: 8px;
         }
-        /* 버튼 하단 (space) 조그마한 서브 가이드 타이포 */
         .space-shortcut-guide {
             color: rgba(255, 255, 255, 0.7);
             font-size: 16px;
@@ -197,7 +196,7 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.9); }
 
-        /* 👑 [구조 대개편] 난이도 버튼 및 백그라운드 글로우 레이어 묶음 컴포넌트 */
+        /* 난이도 버튼 그룹 */
         .difficulty-group {
             display: flex;
             gap: 40px;
@@ -206,39 +205,48 @@
             justify-content: center;
         }
         
-        /* 개별 버튼 슬롯 (이 내부에서 앞뒤로 이미지가 겹치게 배치) */
+        /* [버그 수정] 글로우와 버튼 이미지가 정확히 동일한 가로세로 비율로 1:1로 겹치도록 정밀 매핑 */
         .diff-btn-slot {
             position: relative;
-            width: auto;
-            height: auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
+            transition: transform 0.1s ease;
+            transform-origin: center center;
+        }
+        /* 슬롯 자체에 호버 마우스를 올릴 때 동반 스케일 업 처리하여 간격 어긋남 완전 원천 차단 */
+        .diff-btn-slot:hover {
+            transform: scale(1.05);
+        }
+        .diff-btn-slot:active {
+            transform: scale(0.95);
         }
 
-        /* 요청 반영: 난이도 버튼 뒤에 깔아줄 글로우 백그라운드 레이어 */
+        /* 글로우 이미지 레이어 (버튼 크기와 완전히 똑같이 포개어지도록 100% 매핑 고정) */
         .diff-glow-layer {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1; /* 버튼보다 뒤에 배치 */
-            pointer-events: none; /* 클릭 방해 금지 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+            pointer-events: none;
             opacity: 0;
             transition: opacity 0.15s ease;
-            max-width: none;
-            width: calc(100% + 40px); /* 버튼 원본보다 살짝 넉넉하게 감싸도록 보정 */
-            height: auto;
         }
-        /* 오직 선택된(selected 클래스를 지닌) 노드의 백글로우만 가시화 */
         .diff-btn-slot.selected .diff-glow-layer {
             opacity: 1;
         }
 
-        /* 실제 앞쪽에 배치되어 클릭을 받는 난이도 이미지 버튼 */
+        /* 실제 앞쪽에 배치되어 클릭을 받는 난이도 버튼 이미지 */
         .diff-img-btn {
             position: relative;
-            z-index: 2; /* 글로우보다 위로 상향 조정 */
+            z-index: 2;
+            display: block;
+        }
+        .diff-img-btn img {
+            display: block;
+            max-width: 100%;
+            height: auto;
         }
 
         /* 상단 상태 판넬 */
@@ -411,7 +419,7 @@
             margin-top: 10px;
         }
 
-        /* 랭킹 모달 전용 리스트 디자인 */
+        /* 랭킹 모달 리스트 디자인 */
         .leaderboard-modal-list {
             display: flex;
             flex-direction: column;
@@ -454,7 +462,6 @@
         }
     </style>
 
-    <!-- 파이어베이스 SDK 바인딩 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -489,13 +496,11 @@
 
 <div id="game-container">
 
-    <!-- 🔊 오디오 제어 판넬 -->
     <div class="audio-controller-panel">
         <button class="audio-toggle-btn" id="btn-audio-mute" onclick="toggleAudioMute()">🔊</button>
         <input type="range" class="volume-slider" id="slider-volume" min="0" max="100" value="50" oninput="changeVolumeValue(this.value)">
     </div>
     
-    <!-- 1. 인트로 화면 -->
     <div id="screen-intro" class="screen active">
         <img id="main-logo" src="DD_Logo.png" alt="도구리 로고" onerror="this.style.display='none'; this.after('[DD_Logo]');">
         
@@ -504,7 +509,6 @@
             <input type="text" id="user-name-input" placeholder="닉네임 (최대 8자)" maxlength="8" value="도구리">
         </div>
 
-        <!-- 요청 반영: 버튼 아래 가이드 텍스트 장착 그룹화 -->
         <div class="bottom-center-position btn-with-guide-container">
             <button id="btn-main-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
                 <img src="DD_Main_Start_Button.png" alt="START" onerror="this.style.display='none'; this.after('[START 버튼]');">
@@ -513,40 +517,34 @@
         </div>
     </div>
 
-    <!-- 2. 게임 시작화면 -->
     <div id="screen-start" class="screen">
         <button id="btn-main-back" class="img-btn top-right-back" onclick="goToIntro()">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
-        <!-- 👑 [구조 개편] 개별 난이도 버튼 뒤에 발광 이미지를 레이어로 겹쳐서 까는 래퍼 슬롯 설계 -->
         <div class="difficulty-group">
-            <!-- 쉬움 슬롯 -->
-            <div id="slot-easy" class="diff-btn-slot selected">
+            <div id="slot-easy" class="diff-btn-slot selected" onclick="selectDifficulty('easy')">
                 <img class="diff-glow-layer" src="DD_Easy_Button_Glow.png" alt="쉬움 글로우" onerror="this.style.display='none';">
-                <button class="img-btn diff-img-btn" onclick="selectDifficulty('easy')">
+                <div class="diff-img-btn">
                     <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
-                </button>
+                </div>
             </div>
             
-            <!-- 보통 슬롯 -->
-            <div id="slot-normal" class="diff-btn-slot">
+            <div id="slot-normal" class="diff-btn-slot" onclick="selectDifficulty('normal')">
                 <img class="diff-glow-layer" src="DD_Normal_Button_Glow.png" alt="보통 글로우" onerror="this.style.display='none';">
-                <button class="img-btn diff-img-btn" onclick="selectDifficulty('normal')">
+                <div class="diff-img-btn">
                     <img src="DD_Normal_Button.png" alt="보통" onerror="this.style.display='none'; this.after('보통');">
-                </button>
+                </div>
             </div>
             
-            <!-- 어려움 슬롯 -->
-            <div id="slot-hard" class="diff-btn-slot">
+            <div id="slot-hard" class="diff-btn-slot" onclick="selectDifficulty('hard')">
                 <img class="diff-glow-layer" src="DD_Hard_Button_Glow.png" alt="어려움 글로우" onerror="this.style.display='none';">
-                <button class="img-btn diff-img-btn" onclick="selectDifficulty('hard')">
+                <div class="diff-img-btn">
                     <img src="DD_Hard_Button.png" alt="어려움" onerror="this.style.display='none'; this.after('어려움');">
-                </button>
+                </div>
             </div>
         </div>
 
-        <!-- 요청 반영: 버튼 아래 가이드 텍스트 장착 그룹화 -->
         <div class="bottom-center-position btn-with-guide-container">
             <button id="btn-main-dance" class="img-btn origin-size-btn" onclick="startGameLoop()">
                 <img src="DD_Main_Dance_Button.png" alt="DANCE" onerror="this.style.display='none'; this.after('[DANCE 버튼]');">
@@ -554,9 +552,7 @@
             <span class="space-shortcut-guide">(space)</span>
         </div>
 
-        <!-- 우측 하단 유닛 그룹 -->
         <div class="bottom-right-container">
-            <!-- 요청 반영: RANK 이미지 및 변수명 구조를 전면 DD_Highscore.png 로 변경 치환 완료 -->
             <button id="btn-main-rank" class="img-btn origin-size-btn" onclick="openLeaderboardModal()">
                 <img src="DD_Highscore.png" alt="HIGHSCORE" onerror="this.style.display='none'; this.after('[HIGHSCORE]');">
             </button>
@@ -571,7 +567,6 @@
         </div>
     </div>
 
-    <!-- 3. 인게임 화면 -->
     <div id="screen-game" class="screen">
         <div class="game-status">
             <span id="txt-difficulty">난이도: 쉬움</span> | 
@@ -601,7 +596,6 @@
         </div>
     </div>
 
-    <!-- 결산 팝업 보드 -->
     <div id="reward-popup">
         <h2 style="color: #333; margin-top:0; margin-bottom:5px;">🌴 스테이지 클리어! 🌴</h2>
         
@@ -616,7 +610,6 @@
         <button class="close-btn" onclick="closeRewardPopup()">확인</button>
     </div>
 
-    <!-- 🏆 글로벌 실시간 TOP 10 랭킹 모달 레이어 -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content">
             <h2 id="modal-rank-title" style="color: #333; margin-top: 0; margin-bottom: 5px;">🏆 글로벌 실시간 랭킹</h2>
@@ -630,7 +623,6 @@
         </div>
     </div>
 
-    <!-- 도감 모달 -->
     <div id="collection-modal" class="modal">
         <div class="modal-content">
             <h2>🎒 도구리의 하와이 도감 (총 9종)</h2>
@@ -665,7 +657,7 @@
 
     // --- 🎵 오디오 시스템 변수군 ---
     let audioCtx = null;
-    let globalVolumeValue = 0.5;    
+    let globalVolumeValue = 0.5;    // 디폴트 음량 슬라이더 위치 비례값 (50%)
     let isAudioMuted = false;       
     let masterGainNode = null;      
 
@@ -697,7 +689,7 @@
         setupButtonEffects();
     };
 
-    // --- 🔊 오디오 코어 및 BGM 루프 엔진 ---
+    // --- 🔊 오디오 코어 및 BGM 루프 엔진 (볼륨 2배 증폭 완료) ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -761,7 +753,7 @@
             lowpassFilter.frequency.setValueAtTime(350, audioCtx.currentTime); 
 
             let waveGain = audioCtx.createGain();
-            waveGain.gain.setValueAtTime(0.04, audioCtx.currentTime); 
+            waveGain.gain.setValueAtTime(0.06, audioCtx.currentTime); // 파도소리 감도 소폭 상향
 
             noiseSource.connect(lowpassFilter);
             lowpassFilter.connect(waveGain);
@@ -773,8 +765,8 @@
             function waveLoop() {
                 if (!isBgmPlaying) return;
                 let now = audioCtx.currentTime;
-                waveGain.gain.linearRampToValueAtTime(0.05, now + 2.0); 
-                waveGain.gain.linearRampToValueAtTime(0.005, now + 4.5); 
+                waveGain.gain.linearRampToValueAtTime(0.07, now + 2.0); 
+                waveGain.gain.linearRampToValueAtTime(0.008, now + 4.5); 
                 setTimeout(waveLoop, 4500);
             }
             waveLoop();
@@ -812,7 +804,7 @@
             osc.type = 'triangle'; 
             osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
 
-            let noteVolume = 0.05 * globalVolumeValue * bgmVolumeScale;
+            let noteVolume = 0.08 * globalVolumeValue * bgmVolumeScale; // BGM 베이스 음량 최적화 상향
             gainNode.gain.setValueAtTime(noteVolume, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4); 
 
@@ -836,6 +828,7 @@
         playNextBgmNote();
     }
 
+    // [소리 증폭]: 이펙트 효과음 고유 gain 선명도 계수를 0.22에서 0.44로 정확히 2배 상향 증폭
     function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
         try {
             initAudioContext();
@@ -849,7 +842,7 @@
                 osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
             }
 
-            gainNode.gain.setValueAtTime(0.22, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(0.44, audioCtx.currentTime); // 2배 파워 증폭 완료
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
             osc.connect(gainNode);
@@ -869,7 +862,6 @@
         playBeep(220, 0.35, 'square', 80); 
     }
 
-    // 통통 튀는 글로우 선택 알림 피치 효과음
     function playSelectTickSound() {
         playBeep(440, 0.05, 'triangle');
     }
@@ -993,6 +985,18 @@
         }
     }
 
+    function simulateSlotKeyClick(slotId, callback) {
+        let slot = document.getElementById(slotId);
+        if (slot) {
+            slot.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                slot.style.transform = "none";
+                callback();
+            }, 80);
+        }
+    }
+
+    // 화면 페이드 제어
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
@@ -1022,7 +1026,6 @@
         showScreen('screen-intro'); 
     }
 
-    // 요청 반영: 슬롯 구조의 백그라운드 글로우 바인딩 처리
     function selectDifficulty(diff) {
         currentDifficulty = diff;
         document.querySelectorAll('.diff-btn-slot').forEach(b => b.classList.remove('selected'));
@@ -1176,7 +1179,7 @@
         initRound();
     }
 
-    // --- 키보드 인터럽트 감지부 ---
+    // --- 키보드 라우터 리스너 ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1185,14 +1188,12 @@
         let nextContainer = document.getElementById('next-btn-container');
         let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
 
-        // 닉네임 입력란 및 모달창 활성화 상태 가드 처리
         if(document.activeElement === document.getElementById('user-name-input')) return;
         if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
         if(document.getElementById('collection-modal').style.display === 'flex') return;
 
         initAudioContext(); 
 
-        // 1. 공통 화면 Space 단축키 매핑
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (introActive) {
                 e.preventDefault();
@@ -1211,7 +1212,6 @@
             }
         }
 
-        // 2. ESC 단축키 매핑
         if (e.key === 'Escape' || e.key === 'Esc') {
             if (startActive) {
                 simulateBtnClick('btn-main-back', goToIntro);
@@ -1219,23 +1219,22 @@
             }
         }
 
-        // 3. [요청 반영] 숫자 단축키 1, 2, 3 난이도 실시간 선택 및 글로우 레이어 바인딩
+        // 숫자 단축키 슬롯 바인딩 연출 보정
         if (startActive) {
             if (e.key === '1') {
-                selectDifficulty('easy');
+                simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy'));
                 return;
             }
             if (e.key === '2') {
-                selectDifficulty('normal');
+                simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal'));
                 return;
             }
             if (e.key === '3') {
-                selectDifficulty('hard');
+                simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard'));
                 return;
             }
         }
 
-        // 4. 인게임 방향키 콤보 처리부
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
         if (arrowKeyCodes.includes(e.key)) {
