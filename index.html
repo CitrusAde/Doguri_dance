@@ -1,13 +1,10 @@
-index.html
-```eof
-```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V29 (엔진 완전 복구 및 최적화 패치)</title>
+    <title>도구리 하와이 댄스 게임 - V31 (게임오버 에셋 및 연출 적용본)</title>
     <style>
-        /* 👑 국민연금 둥근 서체 가이드라인 최상단 등록 */
+        /* 커스텀 NPS 폰트 등록 */
         @font-face {
             font-family: 'NPSfont_bold';
             src: url('NPSfont_bold.woff2') format('woff2'),
@@ -20,7 +17,6 @@ index.html
         * { 
             box-sizing: border-box; 
             user-select: none; 
-            /* 가독성 최우선 NPS 및 라인시드 폰트 순위 지정 */
             font-family: 'NPSfont_bold', 'LINESeedKR-Bd', 'Malgun Gothic', sans-serif; 
         }
         body {
@@ -60,7 +56,16 @@ index.html
         }
         .screen.active { display: flex; }
 
-        /* 🔊 좌측 상단 소리 제어 패널 (배경 DD_Nick_Bg.png 연동) */
+        /* 👑 [신규] DD_GAMEOVER.png 연출을 위한 화면 스타일 정의 */
+        #screen-gameover {
+            background-image: url('DD_GAMEOVER.png');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer; /* 아무데나 누를 수 있다는 시각 피드백 유도 */
+            z-index: 200;
+        }
+
+        /* 🔊 좌측 상단 소리 제어 패널 */
         .audio-controller-panel {
             position: absolute;
             top: 30px;
@@ -290,7 +295,7 @@ index.html
             height: auto;
         }
 
-        /* 상단 상태 판넬 */
+        /* 요청 반영: 난이도/시간 패널 스케일 정밀 70% 압축화 */
         .game-status {
             position: absolute;
             top: 35px;
@@ -304,6 +309,8 @@ index.html
             z-index: 5;
             display: flex;
             gap: 15px;
+            transform: scale(0.7);
+            transform-origin: left center;
         }
 
         /* 하트 라이프 패널 그래픽 전치화 (0.7배 축소형) */
@@ -424,7 +431,7 @@ index.html
             z-index: 4;
         }
 
-        /* 글로벌 및 도감 모달의 팝업 크기 가이드라인 지정 (826px x 461px 외경) */
+        /* 글로벌 및 도감 모달 외경 */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -446,7 +453,7 @@ index.html
             border: none;
             position: relative;
         }
-        /* 글로벌/도감 전용 내경 세이프 가이드 박스 (695px x 305px) */
+        /* 글로벌/도감 전용 내경 세이프 박스 (695px x 305px) */
         .popup-safe-box {
             width: 695px;
             height: 305px;
@@ -521,16 +528,15 @@ index.html
             border-bottom: none;
         }
 
-        /* NEXT 스테이지 이동용 레이어 보장 */
         #next-btn-container {
             position: absolute;
             bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 99; /* 생명 및 인게임 캐릭터보다 무조건 위로 노출 고정 */
+            z-index: 99; 
         }
 
-        /* 👑 [요청 사항 1, 3번] 보상 팝업창 크기 정확히 절반 축소 (413px x 230px 외경) */
+        /* 보상 팝업창 절반 축소 고정 크기 (413px x 230px 외경) */
         #reward-popup {
             position: absolute;
             top: 50%; left: 50%;
@@ -546,7 +552,7 @@ index.html
             z-index: 150;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        /* [요청 사항 3번] 팝업 내부 텍스트 및 OK 이미지 안전 수납 구역 가이드 박스 내경 (347px x 152px) */
+        /* 보상 팝업 내경 격리 프레임 (347px x 152px) */
         .clear-safe-box {
             width: 347px; 
             height: 152px; 
@@ -559,7 +565,6 @@ index.html
             color: #000;
         }
         
-        /* 👑 [요청 사항 2번] 레트로 아케이드 감성의 영문 스코어 보드 텍스트 규격 */
         .clear-header-text {
             font-size: 20px;
             font-weight: 900;
@@ -583,7 +588,6 @@ index.html
             cursor: pointer;
             margin-top: 5px;
         }
-        /* 👑 [요청 사항 4번] DD_OK_Text.png 확인 이미지 전치 버튼 래퍼 */
         .ok-image-btn {
             margin-top: 8px;
             display: block;
@@ -597,12 +601,12 @@ index.html
         .ok-image-btn:active { transform: scale(0.95); }
         .ok-image-btn img {
             display: block;
-            width: 100px; /* 결과창 축소 크기에 어울리는 스케일 매핑 */
+            width: 100px; 
             height: auto;
         }
     </style>
 
-    <!-- 파이어베이스 및 전체 게임 코드 모듈 통합 로더 (레이스 컨디션 차단) -->
+    <!-- 스크립트 결합 모듈 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -621,7 +625,6 @@ index.html
         const app = initializeApp(firebaseConfig);
         const database = getDatabase(app);
 
-        // 비동기 파이프 바인딩 처리
         window.dbRef = ref;
         window.dbPush = push;
         window.dbSet = set;
@@ -684,7 +687,6 @@ index.html
             updateDoguriImage();
             setupButtonEffects();
             
-            // 보안 정책 우회를 위한 전역 이벤트 리스너 마운트
             document.body.addEventListener('click', () => { initAudioContext(); }, { once: true });
             document.body.addEventListener('keydown', () => { initAudioContext(); }, { once: true });
         });
@@ -827,7 +829,6 @@ index.html
             playNextBgmNote();
         }
 
-        // 👑 [볼륨 연산 증폭]: masterGainNode 가 상시 개방되어 있으므로 효과음 노드를 무조건 마스터 노드에 결합 연결
         function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
             try {
                 initAudioContext();
@@ -841,8 +842,7 @@ index.html
                     osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
                 }
 
-                // [사운드 증폭 2배 추가]: 볼륨 상향 계수(0.88 -> 1.76) 폭발 격상
-                gainNode.gain.setValueAtTime(1.76, audioCtx.currentTime); 
+                gainNode.gain.setValueAtTime(0.88, audioCtx.currentTime); 
                 gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
                 osc.connect(gainNode);
@@ -864,6 +864,11 @@ index.html
 
         function playSelectTickSound() {
             playBeep(440, 0.05, 'triangle');
+        }
+
+        // 게임오버 시의 레트로 하향 낙하 축소 비프음
+        function playGameOverArcadeSound() {
+            playBeep(180, 0.6, 'square', 40);
         }
 
         function playStageClearSound() {
@@ -1027,6 +1032,20 @@ index.html
             initRound();
         }
 
+        // 👑 [신규] 게임오버 화면을 띄우고 라이프 스레드를 통제하는 신형 라우터 함수
+        function triggerGameOverScene() {
+            stopRoundTimer();
+            stopStopwatch();
+            playGameOverArcadeSound();
+            showScreen('screen-gameover'); // DD_GAMEOVER.png 활성화
+        }
+
+        // 👑 [신규] 게임오버 화면 터치/클릭 시 복귀용 콜백 모듈
+        function dismissGameOverAndReturn() {
+            playSelectTickSound();
+            showScreen('screen-start'); // 난이도 선택화면 리다이렉트
+        }
+
         function startStopwatch() {
             if(stopwatchIntervalId) clearInterval(stopwatchIntervalId);
             stopwatchIntervalId = setInterval(() => {
@@ -1149,13 +1168,9 @@ index.html
             updateHeartsUI();
             setCharacterImage('DD_Dance_Fail.png', '도구리 실패 연출');
 
+            // 👑 [요청 변경]: 하트가 완전히 고갈되면 alert창 대신 동적 아케이드 씬 실행 전환
             if (userLives <= 0) {
-                stopRoundTimer();
-                stopStopwatch();
-                setTimeout(() => {
-                    alert("GAME OVER! 모든 하트를 잃었습니다.");
-                    showScreen('screen-start');
-                }, 100);
+                triggerGameOverScene();
                 return;
             }
 
@@ -1171,6 +1186,7 @@ index.html
             let introActive = document.getElementById('screen-intro').classList.contains('active');
             let startActive = document.getElementById('screen-start').classList.contains('active');
             let gameActive = document.getElementById('screen-game').classList.contains('active');
+            let overActive = document.getElementById('screen-gameover').classList.contains('active');
             
             let nextContainer = document.getElementById('next-btn-container');
             let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
@@ -1180,6 +1196,13 @@ index.html
             if(document.getElementById('collection-modal').style.display === 'flex') return;
 
             initAudioContext(); 
+
+            // 👑 게임오버 화면일 땐 스페이스바 등을 눌러도 즉시 난이도창으로 안전 복귀 기능 탑재
+            if (overActive) {
+                e.preventDefault();
+                dismissGameOverAndReturn();
+                return;
+            }
 
             if (e.key === ' ' || e.key === 'Spacebar') {
                 if (introActive) {
@@ -1272,19 +1295,16 @@ index.html
             }
         }
 
-        // 👑 [명칭 버그 완전 수정 완료] 정확한 결과창 타겟팅 및 요구 3개 로우 포맷 출력 스레드
         function giveRandomRewardAndRank() {
             if (isRewardGivenThisGame) return;
             isRewardGivenThisGame = true; 
 
             let finalTimeSec = totalElapsedTime / 1000;
             
-            // 영문 난이도 타이틀 연산 매핑
             let upperTitle = 'EASY CLEAR';
             if (currentDifficulty === 'normal') upperTitle = 'NORMAL CLEAR';
             if (currentDifficulty === 'hard') upperTitle = 'HARD CLEAR';
 
-            // 정교한 HTML 아이디 동적 매핑
             document.getElementById('txt-popup-clear-title').innerText = upperTitle;
             document.getElementById('txt-popup-clear-time').innerText = `TIME : ${finalTimeSec.toFixed(2)}s`;
 
@@ -1354,7 +1374,7 @@ index.html
             document.getElementById('collection-modal').style.display = 'none';
         }
 
-        // 👑 [안전 고정]: Modular 자바스크립트 스코프 가드가 버튼 onclick 바인딩을 깨뜨리지 않도록 전역 Expose 강제 선언
+        // 모듈 범위 내부 상호 연동 핸들러 강제 노출
         window.goToGameStart = goToGameStart;
         window.startGameLoop = startGameLoop;
         window.openLeaderboardModal = openLeaderboardModal;
@@ -1368,6 +1388,7 @@ index.html
         window.resetAllLocalData = resetAllLocalData;
         window.selectDifficulty = selectDifficulty;
         window.handleNextStageClick = handleNextStageClick;
+        window.dismissGameOverAndReturn = dismissGameOverAndReturn;
     </script>
 </head>
 <body>
@@ -1453,7 +1474,7 @@ index.html
             <span id="txt-difficulty">난이도: 쉬움</span> | 
             <span id="txt-stage">스테이지: 1/3</span> | 
             <span id="txt-round">판수: 1/5</span> |
-            <span id="txt-playtime" style="color: #ffeb3b;">시간: 0.00초</span>
+            <span id="txt-playtime">시간: 0.00초</span>
         </div>
 
         <div class="life-container-wrapper">
@@ -1480,22 +1501,22 @@ index.html
         </div>
     </div>
 
-    <!-- 👑 [1, 2, 3, 4번 규격 통합 대개편] 절반 축소형 외경 프레임 및 내경 텍스트 세이프 박스 결과창 -->
+    <!-- 👑 [신규] 게임오버 스크린 패널 배치 - 화면 아무 곳이나 누르면 복귀하는 클릭 리스너 맵핑 -->
+    <div id="screen-gameover" class="screen" onclick="dismissGameOverAndReturn()"></div>
+
+    <!-- 최종 결과창 팝업 -->
     <div id="reward-popup">
         <div class="clear-safe-box">
-            <!-- 자바스크립트에서 EASY CLEAR / NORMAL CLEAR / HARD CLEAR 실시간 조절 연동 -->
             <div id="txt-popup-clear-title" class="clear-header-text">EASY CLEAR</div>
             <div id="txt-popup-clear-time" class="clear-info-row">TIME : 0.00s</div>
             <div id="txt-popup-clear-gift" class="clear-info-row">GIFT : -</div>
-            
-            <!-- 확인 버튼 대신 DD_OK_Text.png 이미지형 버튼 교체 바인딩 완료 -->
             <button class="ok-image-btn" onclick="closeRewardPopup()">
                 <img src="DD_OK_Text.png" alt="OK" id="img-popup-ok-btn" onerror="this.style.display='none'; this.after('OK');">
             </button>
         </div>
     </div>
 
-    <!-- 🏆 글로벌 실시간 TOP 10 랭킹 모달 레이어 -->
+    <!-- 글로벌 실시간 TOP 10 랭킹 모달 레이어 -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content">
             <div class="popup-safe-box">
@@ -1522,4 +1543,3 @@ index.html
 </div>
 </body>
 </html>
-```eof
