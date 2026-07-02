@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V29 (팝업 비율 복구 & 신나는 BGM & 올클리어 스케일업)</title>
+    <title>도구리 하와이 댄스 게임 - V30 (스페이스바 혼합 및 난이도 레벨링 적용)</title>
     <style>
         /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -367,12 +367,10 @@
             height: auto;
             z-index: 1;
         }
-        /* 👑 도구리 중심점 변경 (바닥 기준) 및 크기 전환 부드럽게 설정 */
         #doguri-char {
             position: absolute;
             bottom: 195px; 
             left: 50%;
-            /* translate와 scale을 JS에서 제어할 것이므로 여기엔 기본값 지정 */
             transform: translateX(-50%) scale(1);
             transform-origin: bottom center; 
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -469,14 +467,13 @@
             color: #000;
         }
 
-        /* 👑 세로형 원본 비율 복구 (688x854px) */
+        /* 세로형 팝업 */
         .modal-content-vertical {
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center center;
             width: 688px; 
             height: 854px; 
-            /* 720px 화면에 맞춰 약 80% 크기로 스케일링하여 표시 */
             transform: scale(0.8); 
             display: flex;
             justify-content: center;
@@ -484,7 +481,7 @@
             position: relative;
         }
         .popup-safe-box-vertical {
-            width: 500px; /* 원본 비율에 맞게 넉넉해진 세이프존 */
+            width: 500px; 
             height: 640px; 
             display: flex;
             flex-direction: column;
@@ -986,12 +983,11 @@
         } catch (e) { console.error("파도 생성 실패:", e); }
     }
 
-    // 👑 동적 BGM 엔진 (인게임 시 신나는 모드)
+    // 👑 동적 BGM 엔진
     function startHawaiiBgmEngine() {
         isBgmPlaying = true;
         createOceanWaveSound(); 
 
-        // 대기 화면 잔잔한 화음
         const introChords = [
             [261.63, 329.63, 392.00, 523.25], 
             [220.00, 261.63, 329.63, 440.00], 
@@ -999,7 +995,6 @@
             [196.00, 246.94, 293.66, 392.00]  
         ];
 
-        // 인게임 신나는 화음 (빠르고 통통 튀는)
         const gameChords = [
             [261.63, 392.00, 523.25, 659.25], 
             [261.63, 392.00, 523.25, 659.25], 
@@ -1014,16 +1009,12 @@
             if (!isBgmPlaying) return;
 
             let isGameActive = document.getElementById('screen-game').classList.contains('active');
-            
-            // 인게임일 땐 템포업 & 파형 변경
             let tempoMs = isGameActive ? 120 : 180;
             let type = isGameActive ? 'square' : 'triangle';
-            
             let currentChordsList = isGameActive ? gameChords : introChords;
             let currentChord = currentChordsList[chordIndex % currentChordsList.length];
             let noteFreq = currentChord[noteIndex];
 
-            // 인게임 땐 주기적으로 드럼 비트 추가
             if (isGameActive && (noteIndex === 0 || noteIndex === 2)) {
                 playDrumKick();
             }
@@ -1054,7 +1045,6 @@
             
             bgmMusicTimeoutId = setTimeout(playNextBgmNote, tempoMs);
         }
-
         playNextBgmNote();
     }
 
@@ -1242,6 +1232,7 @@
         document.getElementById('game-container').style.backgroundImage = `url('${randBg}')`;
     }
 
+    // 👑 연습 모드 초기화 (시작 화면 전용, 스페이스바 배제)
     function initPracticeMode() {
         isPracticeProcessing = false;
         practiceIndex = 0;
@@ -1384,6 +1375,7 @@
         }
     }
 
+    // 👑 난이도 및 스페이스바 혼합 레벨링 알고리즘
     function initRound() {
         isRoundFinished = false;
         isStageClearedWait = false;
@@ -1401,29 +1393,62 @@
         document.getElementById('next-btn-container').style.display = 'none'; 
         document.getElementById('rhythm-ui').style.display = 'flex';
         
-        let arrowCount = 2 + currentRound; 
+        // 시퀀스 길이 및 스페이스바 개수 로직
+        let maxArrows = 5;
+        let spaceCount = 0;
+        
+        if (currentDifficulty === 'easy') {
+            maxArrows = 5;
+            if (currentStage === 3) spaceCount = 1;
+        } else if (currentDifficulty === 'normal') {
+            maxArrows = 6;
+            if (currentStage === 2) spaceCount = 1;
+            if (currentStage === 3) spaceCount = 2;
+        } else if (currentDifficulty === 'hard') {
+            maxArrows = 7;
+            if (currentStage === 1) spaceCount = 1;
+            if (currentStage === 2) spaceCount = 2;
+            if (currentStage === 3) spaceCount = 3;
+        }
+        
+        let arrowCount = Math.min(2 + currentRound, maxArrows);
+        spaceCount = Math.min(spaceCount, arrowCount); 
+        
         targetArrowSequence = [];
+        
+        for (let i = 0; i < arrowCount - spaceCount; i++) {
+            targetArrowSequence.push(arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)]);
+        }
+        for (let i = 0; i < spaceCount; i++) {
+            targetArrowSequence.push('Space');
+        }
+        
+        // 배열 셔플 (스페이스바 위치 섞기)
+        for (let i = targetArrowSequence.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [targetArrowSequence[i], targetArrowSequence[j]] = [targetArrowSequence[j], targetArrowSequence[i]];
+        }
         
         let sequenceArea = document.getElementById('arrow-sequence-area');
         sequenceArea.innerHTML = '';
 
-        for(let i=0; i<arrowCount; i++) {
-            let randomKey = arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)];
-            targetArrowSequence.push(randomKey);
+        for(let i=0; i<targetArrowSequence.length; i++) {
+            let key = targetArrowSequence[i];
+            let assetName = key === 'Space' ? 'Space' : arrowNames[key];
 
             let slot = document.createElement('div');
             slot.className = 'arrow-icon-slot';
             slot.id = `arrow-slot-${i}`;
             
             let img = document.createElement('img');
-            img.src = `DD_${arrowNames[randomKey]}_Button_Normal.png`;
+            img.src = `DD_${assetName}_Button_Normal.png`;
             img.id = `arrow-img-${i}`;
-            img.alt = arrowNames[randomKey];
+            img.alt = assetName;
             
             img.onerror = function() {
                 this.style.display = 'none';
-                let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑'};
-                this.parentElement.innerText = sym[randomKey];
+                let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑', 'Space':'[Space]'};
+                this.parentElement.innerText = sym[key] || key;
             };
 
             slot.appendChild(img);
@@ -1487,6 +1512,7 @@
         showScreen('screen-start');
     }
 
+    // 👑 인게임 키보드 판정 (Space 추가)
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1503,7 +1529,8 @@
         
         initAudioContext(); 
 
-        if (e.key === ' ' || e.key === 'Spacebar') {
+        // 팝업, 인트로, 메인 화면에서 UI를 제어할 때 사용되는 스페이스바
+        if ((e.key === ' ' || e.key === 'Spacebar') && (!gameActive || isRoundFinished || isStageClearedWait)) {
             if(leaderboardModalVisible) { e.preventDefault(); document.getElementById('leaderboard-modal').style.display = 'none'; return; }
             if(collectionModalVisible) { e.preventDefault(); document.getElementById('collection-modal').style.display = 'none'; return; }
             if (introActive) { e.preventDefault(); simulateBtnClick('btn-main-start', goToGameStart); return; }
@@ -1527,10 +1554,18 @@
             }
         }
 
+        // 게임 진행 중일 경우
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
-        if (arrowKeyCodes.includes(e.key)) {
+        // 리듬 판정 (방향키 + 스페이스바)
+        let validRhythmKeys = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' ', 'Spacebar'];
+        
+        if (validRhythmKeys.includes(e.key)) {
+            e.preventDefault(); // 게임 중 스페이스바로 스크롤 내려가는 것 방지
+            
+            let pressedKey = (e.key === ' ' || e.key === 'Spacebar') ? 'Space' : e.key;
             let targetKey = targetArrowSequence[currentArrowIndex];
+            
             let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
             let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
 
@@ -1539,8 +1574,10 @@
                 setTimeout(() => slotEl.classList.remove('hit'), 80);
             }
 
-            if (e.key === targetKey) {
-                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
+            if (pressedKey === targetKey) {
+                let assetName = targetKey === 'Space' ? 'Space' : arrowNames[targetKey];
+                if(imgEl) imgEl.src = `DD_${assetName}_Button_Success.png`;
+                
                 playHitSound(currentArrowIndex);
                 currentArrowIndex++;
 
@@ -1552,7 +1589,8 @@
                     handleRoundSuccess();
                 }
             } else {
-                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
+                let targetAssetName = targetKey === 'Space' ? 'Space' : arrowNames[targetKey];
+                if(imgEl) imgEl.src = `DD_${targetAssetName}_Button_Fail.png`;
                 stopRoundTimer();
                 playFailSound(); 
                 handleRoundFailure("FAIL!");
@@ -1674,14 +1712,11 @@
         }
     }
 
-    // 👑 올클리어 시 크기 1.8배 스케일 업! (이미지 변경 제거)
     function updateDoguriImage() {
-        // 무조건 원본 이미지를 할당
         setCharacterImage(DOGURI_BASE, '도구리 기본 상태');
         
         let charImg = document.getElementById('doguri-char');
         if (charImg) {
-            // 올클리어면 스케일을 1.8배로, 아니면 1배로 적용 (transform-origin은 CSS에서 bottom center로 지정됨)
             if (unlockedItems.size === 9) {
                 charImg.style.transform = "translateX(-50%) scale(1.8)";
             } else {
