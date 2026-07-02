@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V17 (소리 설정 컨트롤러 탑재)</title>
+    <title>도구리 하와이 댄스 게임 - V19 (에셋 및 단축키 대규모 업데이트)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -42,7 +42,7 @@
         }
         .screen.active { display: flex; }
 
-        /* 🔊 [신규] 좌측 상단 소리 제어 컨트롤러 패널 */
+        /* 🔊 좌측 상단 소리 제어 컨트롤러 패널 */
         .audio-controller-panel {
             position: absolute;
             top: 30px;
@@ -121,6 +121,22 @@
             font-weight: bold;
         }
 
+        /* 버튼 및 가이드 컴포넌트 묶음 래퍼 */
+        .btn-with-guide-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        /* 버튼 하단 (space) 조그마한 서브 가이드 타이포 */
+        .space-shortcut-guide {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
         /* 중심점이 중앙인 이미지 버튼 공통 */
         .img-btn {
             cursor: pointer;
@@ -134,14 +150,6 @@
         }
         .img-btn:hover { transform: scale(1.05); }
         .img-btn.pressed { transform: scale(0.95); }
-
-        .bottom-center-position {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
 
         .origin-size-btn img {
             display: block;
@@ -189,28 +197,51 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.9); }
 
-        /* 난이도 이미지 버튼 그룹 */
+        /* 👑 [구조 대개편] 난이도 버튼 및 백그라운드 글로우 레이어 묶음 컴포넌트 */
         .difficulty-group {
             display: flex;
-            gap: 25px;
-            margin-bottom: 60px;
+            gap: 40px;
+            margin-bottom: 50px;
             align-items: center;
             justify-content: center;
         }
         
-        .diff-img-btn {
-            border: 3px solid transparent;
-            border-radius: 12px;
-            padding: 4px;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
-        }
-        .diff-img-btn.selected {
-            border-color: #ffeb3b;
-            box-shadow: 0 0 15px #ffeb3b;
-            background: rgba(255, 235, 59, 0.1);
+        /* 개별 버튼 슬롯 (이 내부에서 앞뒤로 이미지가 겹치게 배치) */
+        .diff-btn-slot {
+            position: relative;
+            width: auto;
+            height: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* 상단 상태 판넬 (위치 살짝 우측 이동하여 오디오 바와 격리) */
+        /* 요청 반영: 난이도 버튼 뒤에 깔아줄 글로우 백그라운드 레이어 */
+        .diff-glow-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1; /* 버튼보다 뒤에 배치 */
+            pointer-events: none; /* 클릭 방해 금지 */
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            max-width: none;
+            width: calc(100% + 40px); /* 버튼 원본보다 살짝 넉넉하게 감싸도록 보정 */
+            height: auto;
+        }
+        /* 오직 선택된(selected 클래스를 지닌) 노드의 백글로우만 가시화 */
+        .diff-btn-slot.selected .diff-glow-layer {
+            opacity: 1;
+        }
+
+        /* 실제 앞쪽에 배치되어 클릭을 받는 난이도 이미지 버튼 */
+        .diff-img-btn {
+            position: relative;
+            z-index: 2; /* 글로우보다 위로 상향 조정 */
+        }
+
+        /* 상단 상태 판넬 */
         .game-status {
             position: absolute;
             top: 35px;
@@ -458,7 +489,7 @@
 
 <div id="game-container">
 
-    <!-- 🔊 상시 고정 오디오 제어 판넬 인터페이스 (좌측 상단 배치) -->
+    <!-- 🔊 오디오 제어 판넬 -->
     <div class="audio-controller-panel">
         <button class="audio-toggle-btn" id="btn-audio-mute" onclick="toggleAudioMute()">🔊</button>
         <input type="range" class="volume-slider" id="slider-volume" min="0" max="100" value="50" oninput="changeVolumeValue(this.value)">
@@ -473,10 +504,12 @@
             <input type="text" id="user-name-input" placeholder="닉네임 (최대 8자)" maxlength="8" value="도구리">
         </div>
 
-        <div class="bottom-center-position">
+        <!-- 요청 반영: 버튼 아래 가이드 텍스트 장착 그룹화 -->
+        <div class="bottom-center-position btn-with-guide-container">
             <button id="btn-main-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
                 <img src="DD_Main_Start_Button.png" alt="START" onerror="this.style.display='none'; this.after('[START 버튼]');">
             </button>
+            <span class="space-shortcut-guide">(space)</span>
         </div>
     </div>
 
@@ -486,28 +519,46 @@
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
+        <!-- 👑 [구조 개편] 개별 난이도 버튼 뒤에 발광 이미지를 레이어로 겹쳐서 까는 래퍼 슬롯 설계 -->
         <div class="difficulty-group">
-            <button id="btn-easy" class="img-btn diff-img-btn selected" onclick="selectDifficulty('easy')">
-                <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
-            </button>
-            <button id="btn-normal" class="img-btn diff-img-btn" onclick="selectDifficulty('normal')">
-                <img src="DD_Normal_Button.png" alt="보통" onerror="this.style.display='none'; this.after('보통');">
-            </button>
-            <button id="btn-hard" class="img-btn diff-img-btn" onclick="selectDifficulty('hard')">
-                <img src="DD_Hard_Button.png" alt="어려움" onerror="this.style.display='none'; this.after('어려움');">
-            </button>
+            <!-- 쉬움 슬롯 -->
+            <div id="slot-easy" class="diff-btn-slot selected">
+                <img class="diff-glow-layer" src="DD_Easy_Button_Glow.png" alt="쉬움 글로우" onerror="this.style.display='none';">
+                <button class="img-btn diff-img-btn" onclick="selectDifficulty('easy')">
+                    <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
+                </button>
+            </div>
+            
+            <!-- 보통 슬롯 -->
+            <div id="slot-normal" class="diff-btn-slot">
+                <img class="diff-glow-layer" src="DD_Normal_Button_Glow.png" alt="보통 글로우" onerror="this.style.display='none';">
+                <button class="img-btn diff-img-btn" onclick="selectDifficulty('normal')">
+                    <img src="DD_Normal_Button.png" alt="보통" onerror="this.style.display='none'; this.after('보통');">
+                </button>
+            </div>
+            
+            <!-- 어려움 슬롯 -->
+            <div id="slot-hard" class="diff-btn-slot">
+                <img class="diff-glow-layer" src="DD_Hard_Button_Glow.png" alt="어려움 글로우" onerror="this.style.display='none';">
+                <button class="img-btn diff-img-btn" onclick="selectDifficulty('hard')">
+                    <img src="DD_Hard_Button.png" alt="어려움" onerror="this.style.display='none'; this.after('어려움');">
+                </button>
+            </div>
         </div>
 
-        <div class="bottom-center-position">
+        <!-- 요청 반영: 버튼 아래 가이드 텍스트 장착 그룹화 -->
+        <div class="bottom-center-position btn-with-guide-container">
             <button id="btn-main-dance" class="img-btn origin-size-btn" onclick="startGameLoop()">
                 <img src="DD_Main_Dance_Button.png" alt="DANCE" onerror="this.style.display='none'; this.after('[DANCE 버튼]');">
             </button>
+            <span class="space-shortcut-guide">(space)</span>
         </div>
 
         <!-- 우측 하단 유닛 그룹 -->
         <div class="bottom-right-container">
+            <!-- 요청 반영: RANK 이미지 및 변수명 구조를 전면 DD_Highscore.png 로 변경 치환 완료 -->
             <button id="btn-main-rank" class="img-btn origin-size-btn" onclick="openLeaderboardModal()">
-                <img src="DD_Rank_Button.png" alt="RANK" onerror="this.style.display='none'; this.after('[RANK]');">
+                <img src="DD_Highscore.png" alt="HIGHSCORE" onerror="this.style.display='none'; this.after('[HIGHSCORE]');">
             </button>
 
             <button id="btn-main-gift" class="img-btn origin-size-btn" onclick="openCollection()">
@@ -614,8 +665,14 @@
 
     // --- 🎵 오디오 시스템 변수군 ---
     let audioCtx = null;
-    let globalVolumeValue = 0.5;    // 기본 오디오 소리 볼륨 (50%)
-    let isAudioMuted = false;       // 음소거 토글 상태 플래그
+    let globalVolumeValue = 0.5;    
+    let isAudioMuted = false;       
+    let masterGainNode = null;      
+
+    // 배경음악(BGM) 엔진 전용 노드
+    let bgmMusicTimeoutId = null;
+    let isBgmPlaying = false;
+    let oceanWaveNode = null;       
 
     const collectionItems = [
         "🍍 하와이안 파인애플", "🌸 알로하 레이", "🕶️ 선글라스",
@@ -640,26 +697,37 @@
         setupButtonEffects();
     };
 
-    // --- 🔊 오디오 코어 엔진 제어 스크립트 ---
+    // --- 🔊 오디오 코어 및 BGM 루프 엔진 ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            masterGainNode = audioCtx.createGain();
+            updateMasterVolume();
+            masterGainNode.connect(audioCtx.destination);
         }
         if (audioCtx && audioCtx.state === 'suspended') {
             audioCtx.resume();
         }
-    }
-
-    // 소리 높낮이(볼륨) 바 실시간 슬라이드 콜백
-    function changeVolumeValue(val) {
-        globalVolumeValue = val / 100;
-        initAudioContext();
-        if (globalVolumeValue > 0 && isAudioMuted) {
-            toggleAudioMute(); // 소리를 올리면 자동으로 음소거 풀기
+        if (!isBgmPlaying) {
+            startHawaiiBgmEngine();
         }
     }
 
-    // 소리 온/오프 토글 스위치 콜백
+    function updateMasterVolume() {
+        if (!masterGainNode) return;
+        let targetVol = isAudioMuted ? 0 : globalVolumeValue;
+        masterGainNode.gain.setValueAtTime(targetVol, audioCtx.currentTime);
+    }
+
+    function changeVolumeValue(val) {
+        globalVolumeValue = val / 100;
+        initAudioContext();
+        updateMasterVolume();
+        if (globalVolumeValue > 0 && isAudioMuted) {
+            toggleAudioMute(); 
+        }
+    }
+
     function toggleAudioMute() {
         initAudioContext();
         isAudioMuted = !isAudioMuted;
@@ -671,15 +739,106 @@
             btn.innerText = '🔊';
             btn.style.opacity = '1';
         }
+        updateMasterVolume();
     }
 
-    // 비프음 가동 파이프라인
-    function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
-        if (isAudioMuted || globalVolumeValue <= 0) return; // 음소거나 볼륨 0일 땐 바이패스
+    function createOceanWaveSound() {
+        try {
+            let bufferSize = audioCtx.sampleRate * 5; 
+            let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            let data = buffer.getChannelData(0);
+            
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
 
+            let noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = buffer;
+            noiseSource.loop = true;
+
+            let lowpassFilter = audioCtx.createBiquadFilter();
+            lowpassFilter.type = 'lowpass';
+            lowpassFilter.frequency.setValueAtTime(350, audioCtx.currentTime); 
+
+            let waveGain = audioCtx.createGain();
+            waveGain.gain.setValueAtTime(0.04, audioCtx.currentTime); 
+
+            noiseSource.connect(lowpassFilter);
+            lowpassFilter.connect(waveGain);
+            waveGain.connect(masterGainNode);
+
+            noiseSource.start();
+            oceanWaveNode = { source: noiseSource, gain: waveGain };
+
+            function waveLoop() {
+                if (!isBgmPlaying) return;
+                let now = audioCtx.currentTime;
+                waveGain.gain.linearRampToValueAtTime(0.05, now + 2.0); 
+                waveGain.gain.linearRampToValueAtTime(0.005, now + 4.5); 
+                setTimeout(waveLoop, 4500);
+            }
+            waveLoop();
+        } catch (e) { console.error("파도 소리 생성 실패:", e); }
+    }
+
+    function startHawaiiBgmEngine() {
+        isBgmPlaying = true;
+        createOceanWaveSound(); 
+
+        const chords = [
+            [261.63, 329.63, 392.00, 523.25], 
+            [220.00, 261.63, 329.63, 440.00], 
+            [174.61, 218.27, 261.63, 349.23], 
+            [196.00, 246.94, 293.66, 392.00]  
+        ];
+
+        let chordIndex = 0;
+        let noteIndex = 0;
+        let tempoMs = 180; 
+
+        function playNextBgmNote() {
+            if (!isBgmPlaying) return;
+
+            let currentGameActive = document.getElementById('screen-game').classList.contains('active');
+            let isRhythmUiVisible = document.getElementById('rhythm-ui').style.display !== 'none';
+            let bgmVolumeScale = (currentGameActive && isRhythmUiVisible) ? 0.35 : 0.8;
+
+            let currentChord = chords[chordIndex];
+            let noteFreq = currentChord[noteIndex];
+
+            let osc = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+
+            osc.type = 'triangle'; 
+            osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
+
+            let noteVolume = 0.05 * globalVolumeValue * bgmVolumeScale;
+            gainNode.gain.setValueAtTime(noteVolume, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4); 
+
+            osc.connect(gainNode);
+            gainNode.connect(masterGainNode);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+
+            noteIndex++;
+            if (noteIndex >= 4) {
+                noteIndex = 0;
+                if (Math.random() > 0.7) { 
+                    chordIndex = (chordIndex + 1) % chords.length;
+                }
+            }
+            
+            bgmMusicTimeoutId = setTimeout(playNextBgmNote, tempoMs);
+        }
+
+        playNextBgmNote();
+    }
+
+    function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
         try {
             initAudioContext();
-            
             let osc = audioCtx.createOscillator();
             let gainNode = audioCtx.createGain();
 
@@ -690,13 +849,11 @@
                 osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
             }
 
-            // 마스터 볼륨 계수와 컴포넌트 볼륨 비례 매칭 산출
-            let finalGain = 0.25 * globalVolumeValue; 
-            gainNode.gain.setValueAtTime(finalGain, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.22, audioCtx.currentTime); 
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
             osc.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
+            gainNode.connect(masterGainNode); 
 
             osc.start();
             osc.stop(audioCtx.currentTime + duration);
@@ -710,6 +867,11 @@
 
     function playFailSound() {
         playBeep(220, 0.35, 'square', 80); 
+    }
+
+    // 통통 튀는 글로우 선택 알림 피치 효과음
+    function playSelectTickSound() {
+        playBeep(440, 0.05, 'triangle');
     }
 
     function playStageClearSound() {
@@ -812,7 +974,7 @@
         const btns = document.querySelectorAll('.img-btn');
         btns.forEach(btn => {
             btn.addEventListener('mousedown', () => {
-                initAudioContext(); // 어떤 버튼이든 클릭할 때 강제로 잠금 권한 해제 트리거
+                initAudioContext(); 
                 btn.classList.add('pressed');
             });
             btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
@@ -848,7 +1010,7 @@
     }
 
     function goToGameStart() { 
-        initAudioContext();
+        initAudioContext(); 
         let inputVal = document.getElementById('user-name-input').value.trim();
         globalNickname = inputVal ? inputVal : "도구리";
         showScreen('screen-start'); 
@@ -860,11 +1022,12 @@
         showScreen('screen-intro'); 
     }
 
+    // 요청 반영: 슬롯 구조의 백그라운드 글로우 바인딩 처리
     function selectDifficulty(diff) {
         currentDifficulty = diff;
-        document.querySelectorAll('.diff-img-btn').forEach(b => b.classList.remove('selected'));
-        document.getElementById(`btn-${diff}`).classList.add('selected');
-        playBeep(440, 0.05, 'triangle');
+        document.querySelectorAll('.diff-btn-slot').forEach(b => b.classList.remove('selected'));
+        document.getElementById(`slot-${diff}`).classList.add('selected');
+        playSelectTickSound();
     }
 
     function startGameLoop() {
@@ -899,7 +1062,6 @@
         }
     }
 
-    // 하트 수식 보정
     function updateHeartsUI() {
         let container = document.getElementById('hearts-display');
         container.innerHTML = '';
@@ -1014,6 +1176,7 @@
         initRound();
     }
 
+    // --- 키보드 인터럽트 감지부 ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1022,13 +1185,14 @@
         let nextContainer = document.getElementById('next-btn-container');
         let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
 
+        // 닉네임 입력란 및 모달창 활성화 상태 가드 처리
         if(document.activeElement === document.getElementById('user-name-input')) return;
         if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
         if(document.getElementById('collection-modal').style.display === 'flex') return;
 
-        // 키보드를 누르는 시점에도 오디오 맥락 상시 개방 유도
-        initAudioContext();
+        initAudioContext(); 
 
+        // 1. 공통 화면 Space 단축키 매핑
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (introActive) {
                 e.preventDefault();
@@ -1047,6 +1211,7 @@
             }
         }
 
+        // 2. ESC 단축키 매핑
         if (e.key === 'Escape' || e.key === 'Esc') {
             if (startActive) {
                 simulateBtnClick('btn-main-back', goToIntro);
@@ -1054,6 +1219,23 @@
             }
         }
 
+        // 3. [요청 반영] 숫자 단축키 1, 2, 3 난이도 실시간 선택 및 글로우 레이어 바인딩
+        if (startActive) {
+            if (e.key === '1') {
+                selectDifficulty('easy');
+                return;
+            }
+            if (e.key === '2') {
+                selectDifficulty('normal');
+                return;
+            }
+            if (e.key === '3') {
+                selectDifficulty('hard');
+                return;
+            }
+        }
+
+        // 4. 인게임 방향키 콤보 처리부
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
         if (arrowKeyCodes.includes(e.key)) {
