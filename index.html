@@ -2,11 +2,12 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V28 (코드 충돌 완전 수정본)</title>
+    <title>도구리 하와이 댄스 게임 - V26 (배경 복구 및 NPS 폰트 연동)</title>
     <style>
-        /* 커스텀 NPS 폰트 등록 */
+        /* 👑 [신규] 가지고 계신 NPSfont_bold 커스텀 폰트를 브라우저에 영리하게 등록하는 구문 */
         @font-face {
             font-family: 'NPSfont_bold';
+            /* 같은 폴더 또는 깃허브 리포지토리에 있는 폰트 파일 경로 매핑 */
             src: url('NPSfont_bold.woff2') format('woff2'),
                  url('NPSfont_bold.woff') format('woff'),
                  url('NPSfont_bold.ttf') format('truetype');
@@ -17,6 +18,7 @@
         * { 
             box-sizing: border-box; 
             user-select: none; 
+            /* 게임 전체 서체를 가독성 좋은 국민연금 둥근 서체로 강제 고정 */
             font-family: 'NPSfont_bold', 'LINESeedKR-Bd', 'Malgun Gothic', sans-serif; 
         }
         body {
@@ -30,12 +32,12 @@
             overflow: hidden;
         }
 
-        /* 16:9 고정 해상도 컨테이너 */
+        /* 16:9 고정 해상도 컨테이너 (👑 배경 이미지 출력 유실 버그 완벽 복구) */
         #game-container {
             width: 1280px;
             height: 720px;
             position: relative;
-            background-image: url('DD_Main_Image.png');
+            background-image: url('DD_Main_Image.png'); /* 배경 리소스 재결합 */
             background-size: cover;
             background-position: center;
             overflow: hidden;
@@ -239,7 +241,7 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.8); }
 
-        /* 난이도 이미지 버튼 그룹 */
+        /* 난이도 이미지 버튼 그룹 좌표 100px 하향 고정 */
         .difficulty-group {
             position: absolute;
             bottom: 100px; 
@@ -420,7 +422,16 @@
             z-index: 4;
         }
 
-        /* 글로벌 및 도감 모달의 팝업 크기 가이드라인 지정 (826px x 461px 외경) */
+        .rank-badge {
+            font-size: 54px;
+            font-weight: 900;
+            margin: 5px 0;
+        }
+        .rank-s { color: #ff1744; }
+        .rank-a { color: #ff9100; }
+        .rank-b { color: #00e676; }
+
+        /* 팝업 이미지 픽셀 매칭 및 텍스트 강제 안전 격리 가이드 세팅 */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -430,6 +441,7 @@
             align-items: center;
             z-index: 120;
         }
+        /* 외부 프레임 크기 정밀 락: 826px x 461px */
         .modal-content {
             background: url('DD_Popup.png') no-repeat center center;
             background-size: 100% 100%;
@@ -442,7 +454,7 @@
             border: none;
             position: relative;
         }
-        /* 글로벌/도감 전용 내경 세이프 가이드 박스 (695px x 305px) */
+        /* 내부 세이프 크기 박스 락: 695px x 305px 공간 내부에만 글자, 표, 버튼 강제 배치 */
         .popup-safe-box {
             width: 695px;
             height: 305px;
@@ -490,6 +502,7 @@
             color: #1565c0;
         }
 
+        /* 랭킹 모달 컨텐츠 영역 보정 */
         .leaderboard-modal-list {
             display: flex;
             flex-direction: column;
@@ -525,79 +538,24 @@
             z-index: 50;
         }
 
-        /* 👑 [1, 3번 구조] 요청 반영: 스테이지 클리어 팝업 크기를 절반 비율로 완벽 축소 고정 */
+        /* 스테이지 보상 결과창 826x461 외경 및 695x305 내경 가이드 동일 전치 */
         #reward-popup {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: url('DD_Popup.png') no-repeat center center;
             background-size: 100% 100%;
-            width: 413px; 
-            height: 230px; 
+            width: 826px;
+            height: 461px;
             display: none;
             justify-content: center;
             align-items: center;
             padding: 0;
             z-index: 150;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        /* 요청 반영: 스테이지 클리어 팝업의 텍스트 배치 세이프 박스 내경 크기 (625px x 261px 비율의 절반 수치 분할 세팅) */
-        .clear-safe-box {
-            width: 347px; 
-            height: 152px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-            color: #000;
-        }
-        
-        /* 👑 [2번 구조] 레드로 아케이드 감성의 영문 전용 스코어 보드 텍스트 CSS 규격 */
-        .clear-header-text {
-            font-size: 22px;
-            font-weight: 900;
-            color: #000;
-            margin: 0 0 8px 0;
-            letter-spacing: 1px;
-        }
-        .clear-info-row {
-            font-size: 14px;
-            font-weight: bold;
-            color: #111;
-            margin: 2px 0;
-            letter-spacing: 0.5px;
             text-align: center;
-            width: 100%;
-        }
-
-        .close-btn {
-            padding: 6px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-        /* 👑 [4번 구조] DD_OK_Text.png 이미지 버튼 바인딩 스타일 */
-        .ok-image-btn {
-            margin-top: 10px;
-            display: block;
-            background: none;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-        .ok-image-btn:hover { transform: scale(1.08); }
-        .ok-image-btn:active { transform: scale(0.95); }
-        .ok-image-btn img {
-            display: block;
-            max-width: 100%;
-            height: auto;
         }
     </style>
 
-    <!-- 파이어베이스 SDK 바인딩 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -632,33 +590,31 @@
 
 <div id="game-container">
 
-    <!-- 🔊 오디오 제어 판넬 -->
     <div class="audio-controller-panel">
         <button class="audio-toggle-btn" id="btn-audio-mute" onclick="toggleAudioMute()">🔊</button>
         <input type="range" class="volume-slider" id="slider-volume" min="0" max="100" value="50" oninput="changeVolumeValue(this.value)">
     </div>
     
-    <!-- 1. 인트로 화면 -->
     <div id="screen-intro" class="screen active">
         <img id="main-logo" src="DD_Logo.png" alt="도구리 로고" onerror="this.style.display='none'; this.after('[DD_Logo]');">
         
         <div class="nickname-area-container">
             <img class="nick-title-img" src="DD_Nick_Text.png" alt="플레이어 닉네임 입력" onerror="this.style.display='none'; this.after('플레이어 닉네임 입력');">
+            
             <div class="nick-input-wrapper">
-                <img class="nick-bg-img" src="DD_Nick_Bg.png" alt="닉네임 배경">
+                <img class="nick-bg-img" src="DD_Nick_Bg.png" alt="닉네임 배경" onerror="this.style.display='block';">
                 <input type="text" id="user-name-input" class="nick-input-field" placeholder="닉네임 입력" maxlength="8" value="도구리">
             </div>
         </div>
 
-        <div class="btn-with-guide-container">
-            <button id="btn-intro-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
+        <div class="bottom-center-position btn-with-guide-container">
+            <button id="btn-main-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
                 <img src="DD_Main_Start_Button.png" alt="START" onerror="this.style.display='none'; this.after('[START 버튼]');">
             </button>
             <span class="space-shortcut-guide">(space)</span>
         </div>
     </div>
 
-    <!-- 2. 게임 시작 화면 -->
     <div id="screen-start" class="screen">
         <button id="btn-main-back" class="img-btn top-right-back" onclick="goToIntro()">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
@@ -671,12 +627,14 @@
                     <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
                 </div>
             </div>
+            
             <div id="slot-normal" class="diff-btn-slot" onclick="selectDifficulty('normal')">
                 <img class="diff-glow-layer" src="DD_Normal_Button_Glow.png" alt="보통 글로우" onerror="this.style.display='none';">
                 <div class="diff-img-btn">
                     <img src="DD_Normal_Button.png" alt="보통" onerror="this.style.display='none'; this.after('보통');">
                 </div>
             </div>
+            
             <div id="slot-hard" class="diff-btn-slot" onclick="selectDifficulty('hard')">
                 <img class="diff-glow-layer" src="DD_Hard_Button_Glow.png" alt="어려움 글로우" onerror="this.style.display='none';">
                 <div class="diff-img-btn">
@@ -696,16 +654,17 @@
             <button id="btn-main-rank" class="img-btn origin-size-btn" onclick="openLeaderboardModal()">
                 <img src="DD_Highscore.png" alt="HIGHSCORE" onerror="this.style.display='none'; this.after('[HIGHSCORE]');">
             </button>
+
             <button id="btn-main-gift" class="img-btn origin-size-btn" onclick="openCollection()">
                 <img src="DD_Main_Gift_Button.png" alt="도감" onerror="this.style.display='none'; this.after('[도감]');">
             </button>
+
             <div class="mini-btn-group">
                 <button class="dummy-reset-btn" onclick="resetAllLocalData()">도감 초기화</button>
             </div>
         </div>
     </div>
 
-    <!-- 3. 인게임 화면 -->
     <div id="screen-game" class="screen">
         <div class="game-status">
             <span id="txt-difficulty">난이도: 쉬움</span> | 
@@ -731,29 +690,25 @@
             </div>
         </div>
 
-        <div id="next-btn-container">
+        <div id="next-btn-container" class="bottom-center-position">
             <button id="btn-main-next" class="img-btn origin-size-btn" onclick="handleNextStageClick()">
-                <img src="DD_Main_Next_Button.png" alt="NEXT" onerror="this.style.display='none'; this.after('[NEXT]');">
+                <img src="DD_Main_Next_Button.png" alt="NEXT" onerror="this.style.display='none'; this.after('[NEXT 스테이지]');">
             </button>
         </div>
     </div>
 
-    <!-- 👑 [1, 2, 3, 4번 규격 통합 개편] 절반 축소형 외경 프레임 및 내경 텍스트 세이프 박스 팝업창 -->
     <div id="reward-popup">
-        <div class="clear-safe-box">
-            <!-- 자바스크립트에서 EASY CLEAR / NORMAL CLEAR / HARD CLEAR 실시간 조절 연동 -->
-            <div id="txt-popup-clear-title" class="clear-header-text">EASY CLEAR</div>
-            <div id="txt-popup-clear-time" class="clear-info-row">TIME : 0.00s</div>
-            <div id="txt-popup-clear-gift" class="clear-info-row">GIFT : -</div>
-            
-            <!-- 확인 버튼 대신 DD_OK_Text.png 이미지형 버튼 교체 바인딩 완료 -->
-            <button class="ok-image-btn" onclick="closeRewardPopup()">
-                <img src="DD_OK_Text.png" alt="OK" id="img-popup-ok-btn" onerror="this.style.display='none'; this.after('OK');">
-            </button>
+        <div class="popup-safe-box">
+            <h2>🌴 스테이지 클리어! 🌴</h2>
+            <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
+            <p id="popup-playtime-result" style="font-weight: bold; margin: 0;">기록: 0.00초</p>
+            <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
+            <p style="margin: 3px 0 0 0; font-weight: bold; font-size:13px;">🎁 하와이 기념 도감 보상 🎁</p>
+            <div id="reward-item-name" style="font-size: 20px; font-weight: bold; color: #1565c0; margin-bottom: 8px;">[아이템]</div>
+            <button class="close-btn" onclick="closeRewardPopup()">확인</button>
         </div>
     </div>
 
-    <!-- 글로벌 실시간 TOP 10 랭킹 모달 레이어 -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content">
             <div class="popup-safe-box">
@@ -765,7 +720,6 @@
         </div>
     </div>
 
-    <!-- 도감 모달 -->
     <div id="collection-modal" class="modal">
         <div class="modal-content">
             <div class="popup-safe-box">
@@ -801,12 +755,13 @@
     let totalElapsedTime = 0;       
     let stopwatchIntervalId = null; 
 
-    // --- 🎵 오디오 제어 변수군 ---
+    // --- 🎵 오디오 시스템 변수군 ---
     let audioCtx = null;
     let globalVolumeValue = 0.5;    
     let isAudioMuted = false;       
     let masterGainNode = null;      
 
+    // 배경음악(BGM) 엔진 전용 노드
     let bgmMusicTimeoutId = null;
     let isBgmPlaying = false;
     let oceanWaveNode = null;       
@@ -830,11 +785,9 @@
         initCollectionUI();
         updateDoguriImage();
         setupButtonEffects();
-        
-        document.body.addEventListener('click', () => { initAudioContext(); }, { once: true });
-        document.body.addEventListener('keydown', () => { initAudioContext(); }, { once: true });
     };
 
+    // --- 🔊 오디오 코어 및 BGM 루프 엔진 ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -915,7 +868,7 @@
                 setTimeout(waveLoop, 4500);
             }
             waveLoop();
-        } catch (e) { console.error("파도 생성 실패:", e); }
+        } catch (e) { console.error("파도 소리 생성 실패:", e); }
     }
 
     function startHawaiiBgmEngine() {
@@ -1019,7 +972,7 @@
         try {
             let savedItems = localStorage.getItem(STORAGE_KEY_ITEMS);
             if(savedItems) unlockedItems = new Set(JSON.parse(savedItems));
-        } catch(e) { console.error("로컬 세이브 오류:", e); }
+        } catch(e) { console.error("로컬 세이브 로드 실패:", e); }
     }
 
     function saveGameDataToStorage() {
@@ -1030,6 +983,7 @@
 
     function fetchServerLeaderboard() {
         if (!window.isFirebaseReady) return;
+        
         let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
         document.getElementById('modal-rank-title').innerText = `🏆 글로벌 실시간 TOP 10 (${diffKo})`;
 
@@ -1050,7 +1004,10 @@
                 let data = childSnapshot.val();
                 let row = document.createElement('div');
                 row.className = 'leaderboard-row';
-                if(data.name === globalNickname) row.classList.add('my-row');
+                
+                if(data.name === globalNickname) {
+                    row.classList.add('my-row');
+                }
 
                 let timeSec = (data.playTime / 1000).toFixed(2);
                 row.innerHTML = `<span>${rankIndex}등. ${data.name}</span> <span>${timeSec}초</span>`;
@@ -1062,15 +1019,22 @@
 
     function checkAndUploadScore(nickname, elapsedMs) {
         if (!window.isFirebaseReady) return;
+        
+        let statusText = document.getElementById('popup-firebase-status');
+        statusText.innerText = "순위 연산 판독 중...";
+        statusText.style.color = "#ffeb3b";
 
         const scoreRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
         const rankQuery = window.dbQuery(scoreRef, window.dbOrderBy('playTime'), window.dbLimit(10));
 
         window.dbGet(rankQuery).then((snapshot) => {
             let records = [];
-            snapshot.forEach((child) => { records.push(child.val().playTime); });
+            snapshot.forEach((child) => {
+                records.push(child.val().playTime);
+            });
 
             if (records.length < 10 || elapsedMs < records[records.length - 1]) {
+                statusText.innerText = "⭐ TOP 10 랭크인 진입! 기록 업로드 중...";
                 const scoreListRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
                 const newScoreRef = window.dbPush(scoreListRef);
 
@@ -1078,10 +1042,20 @@
                     name: nickname,
                     playTime: elapsedMs,
                     timestamp: Date.now()
+                }).then(() => {
+                    statusText.innerText = "✓ 글로벌 실시간 10위권 등록 성공!";
+                    statusText.style.color = "#4caf50";
+                }).catch((err) => {
+                    statusText.innerText = "서버 연결 지연";
+                    statusText.style.color = "#f44336";
                 });
+            } else {
+                statusText.innerText = "아쉽게도 아케이드 10위권 순위 내에 진입하지 못했습니다.";
+                statusText.style.color = "#444";
             }
         }).catch((err) => {
-            console.error("서버 통신 락 분치 오류:", err);
+            console.error("판독 스레드 오류:", err);
+            statusText.innerText = "오프라인 모드 플레이 완료";
         });
     }
 
@@ -1206,7 +1180,9 @@
                 this.parentElement.appendChild(txt);
             };
 
-            if (i > userLives) heartImg.classList.add('hidden-life');
+            if (i > userLives) {
+                heartImg.classList.add('hidden-life');
+            }
             container.appendChild(heartImg);
         }
     }
@@ -1328,7 +1304,7 @@
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (introActive) {
                 e.preventDefault();
-                simulateBtnClick('btn-intro-start', goToGameStart);
+                simulateBtnClick('btn-main-start', goToGameStart);
                 return;
             }
             if (startActive) {
@@ -1351,9 +1327,18 @@
         }
 
         if (startActive) {
-            if (e.key === '1') { simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy')); return; }
-            if (e.key === '2') { simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal')); return; }
-            if (e.key === '3') { simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard')); return; }
+            if (e.key === '1') {
+                simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy'));
+                return;
+            }
+            if (e.key === '2') {
+                simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal'));
+                return;
+            }
+            if (e.key === '3') {
+                simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard'));
+                return;
+            }
         }
 
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
@@ -1416,21 +1401,29 @@
         }
     }
 
-    // 👑 [명칭 버그 완전 수정 완료] 정확한 결과창 타겟팅 및 요구 3개 로우 포맷 출력 스레드
     function giveRandomRewardAndRank() {
         if (isRewardGivenThisGame) return;
         isRewardGivenThisGame = true; 
 
         let finalTimeSec = totalElapsedTime / 1000;
-        
-        // 영문 난이도 타이틀 연산 매핑
-        let upperTitle = 'EASY CLEAR';
-        if (currentDifficulty === 'normal') upperTitle = 'NORMAL CLEAR';
-        if (currentDifficulty === 'hard') upperTitle = 'HARD CLEAR';
+        document.getElementById('popup-playtime-result').innerText = `최종 클리어 시간: ${finalTimeSec.toFixed(2)}초`;
 
-        // 정교한 HTML 아이디 동적 매핑
-        document.getElementById('txt-popup-clear-title').innerText = upperTitle;
-        document.getElementById('txt-popup-clear-time').innerText = `TIME : ${finalTimeSec.toFixed(2)}s`;
+        let rankLetter = 'B';
+        let badgeEl = document.getElementById('popup-rank-badge');
+        
+        if (currentDifficulty === 'easy') {
+            if (finalTimeSec <= 22) rankLetter = 'S';
+            else if (finalTimeSec <= 32) rankLetter = 'A';
+        } else if (currentDifficulty === 'normal') {
+            if (finalTimeSec <= 26) rankLetter = 'S';
+            else if (finalTimeSec <= 38) rankLetter = 'A';
+        } else { 
+            if (finalTimeSec <= 30) rankLetter = 'S';
+            else if (finalTimeSec <= 45) rankLetter = 'A';
+        }
+
+        badgeEl.innerText = rankLetter;
+        badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
 
         checkAndUploadScore(globalNickname, totalElapsedTime);
 
@@ -1441,12 +1434,9 @@
         initCollectionUI();
         updateDoguriImage();
 
-        document.getElementById('txt-popup-clear-gift').innerText = `GIFT : ${collectionItems[randomIndex]}`;
+        document.getElementById('reward-item-name').innerText = collectionItems[randomIndex];
         document.getElementById('reward-popup').style.display = 'flex';
     }
-
-    window.handleNextStageClick = handleNextStageClick;
-    window.selectDifficulty = selectDifficulty;
 
     function closeRewardPopup() {
         document.getElementById('reward-popup').style.display = 'none';
@@ -1466,7 +1456,6 @@
 
     function initCollectionUI() {
         let grid = document.getElementById('book-grid-container');
-        if (!grid) return;
         grid.innerHTML = '';
         collectionItems.forEach((item, index) => {
             let box = document.createElement('div');
