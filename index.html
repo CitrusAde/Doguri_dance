@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V30 (스페이스바 혼합 및 난이도 레벨링 적용)</title>
+    <title>도구리 하와이 댄스 게임 - V31 (오토 프로그레스, 스페셜 스테이지 추가)</title>
     <style>
         /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -258,6 +258,25 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
+        /* 👑 스페셜 스테이지 버튼 (25% 확률 등장) */
+        #special-stage-btn {
+            position: absolute;
+            top: 50%;
+            left: calc(50% + 200px);
+            transform: translateY(-50%);
+            cursor: pointer;
+            z-index: 15;
+            display: none;
+            transition: transform 0.1s ease;
+        }
+        #special-stage-btn:hover { transform: translateY(-50%) scale(1.05); }
+        #special-stage-btn:active { transform: translateY(-50%) scale(0.95); }
+        #special-stage-btn img {
+            display: block;
+            width: 150px; /* 적당한 크기 지정 */
+            height: auto;
+        }
+
         /* 난이도 이미지 버튼 그룹 */
         .difficulty-group {
             position: absolute;
@@ -305,11 +324,11 @@
             height: auto;
         }
 
-        /* 상단 상태 판넬 */
+        /* 👑 상단 상태 판넬 (오른쪽으로 20px 이동 -> left: 220px;) */
         .game-status {
             position: absolute;
             top: 35px;
-            left: 200px;
+            left: 220px;
             background: rgba(0,0,0,0.7);
             color: white;
             padding: 10px 20px;
@@ -451,11 +470,12 @@
             z-index: 120;
         }
 
-        /* 가로형 보상 팝업 */
+        /* 👑 0.7배로 축소된 가로형 보상 팝업 */
         .modal-content-horizontal {
             background: url('DD_Popup.png') no-repeat center center;
             background-size: 100% 100%;
             width: 826px; height: 461px;
+            transform: scale(0.7);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -576,19 +596,6 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
         }
 
-        #next-btn-container {
-            position: absolute;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-        }
-
-        .rank-badge { font-size: 54px; font-weight: 900; }
-        .rank-s { color: #ff1744; }
-        .rank-a { color: #ff9100; }
-        .rank-b { color: #00e676; }
-
         /* 게임 오버 팝업 스타일 */
         #game-over-popup {
             position: absolute;
@@ -669,6 +676,11 @@
             <div class="arrow-sequence-box" id="practice-sequence-area"></div>
         </div>
 
+        <!-- 👑 스페셜 스테이지 버튼 -->
+        <div id="special-stage-btn" onclick="startSpecialStage()">
+            <img src="DD_Special_Stage.png" alt="스페셜 스테이지" onerror="this.style.display='none'; this.after('[스페셜 스테이지]');">
+        </div>
+
         <div class="difficulty-group">
             <div id="slot-easy" class="diff-btn-slot selected" onclick="selectDifficulty('easy')">
                 <img class="diff-glow-layer" src="DD_Easy_Button_Glow.png" alt="쉬움 글로우" onerror="this.style.display='none';">
@@ -734,28 +746,29 @@
                 <div id="timer-bar"></div>
             </div>
         </div>
-
-        <div id="next-btn-container">
-            <button id="btn-main-next" class="img-btn origin-size-btn" onclick="handleNextStageClick()">
-                <img src="DD_Main_Next_Button.png" alt="NEXT" onerror="this.style.display='none'; this.after('[NEXT]');">
-            </button>
-        </div>
     </div>
 
-    <!-- 리워드 팝업 -->
+    <!-- 👑 깔끔해진 리워드 팝업 (NEXT 삭제됨) -->
     <div id="reward-popup" class="modal">
         <div class="modal-content-horizontal">
             <div class="popup-safe-box-horizontal">
-                <h2 style="margin: 0 0 5px 0; font-size: 24px;">🌴 스테이지 클리어! 🌴</h2>
-                <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
-                <p id="popup-playtime-result" style="font-weight: bold; margin: 0; font-size: 14px;">기록: 0.00초</p>
+                <h2 style="margin: 0 0 10px 0; font-size: 26px;">🌴 스테이지 클리어! 🌴</h2>
+                <!-- 등급 뱃지 제거됨 -->
+                <p id="popup-playtime-result" style="font-weight: bold; margin: 0; font-size: 18px;">최종 클리어 시간: 0.00초</p>
                 <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
-                <p style="margin: 3px 0 0 0; font-weight: bold; font-size:13px;">🎁 하와이 기념 도감 보상 🎁</p>
-                <div id="reward-item-name" style="font-size: 20px; font-weight: bold; color: #1565c0; margin-bottom: 8px;">[아이템]</div>
                 
-                <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
-                    <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
-                </button>
+                <p style="margin: 15px 0 5px 0; font-weight: bold; font-size:13px; color:#333;">🎁 하와이 기념 도감 보상 🎁</p>
+                <!-- 텍스트 대신 이미지 아이콘 렌더링 -->
+                <div id="reward-item-name" style="margin-bottom: 15px; width: 60px; height: 60px; display:flex; justify-content:center; align-items:center;">
+                    <!-- 스크립트에서 이미지가 들어감 -->
+                </div>
+                
+                <div class="btn-with-guide-container">
+                    <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
+                        <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
+                    </button>
+                    <span class="space-shortcut-guide" style="color:#000;">(space)</span>
+                </div>
             </div>
         </div>
     </div>
@@ -1107,9 +1120,12 @@
         if (!window.isFirebaseReady) return;
         
         document.querySelectorAll('.rank-tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`tab-${diffLevel}`).classList.add('active');
+        // 스페셜일 경우 랭킹은 쉬움 랭킹 등으로 예외처리할 수도 있지만 일단 기존 탭 유지
+        let targetDiff = diffLevel === 'special' ? 'normal' : diffLevel;
+        let tabEl = document.getElementById(`tab-${targetDiff}`);
+        if(tabEl) tabEl.classList.add('active');
 
-        const scoreRef = window.dbRef(window.firebaseDb, `scores/${diffLevel}`);
+        const scoreRef = window.dbRef(window.firebaseDb, `scores/${targetDiff}`);
         const rankQuery = window.dbQuery(scoreRef, window.dbOrderBy('playTime'), window.dbLimit(10));
 
         window.dbOnValue(rankQuery, (snapshot) => {
@@ -1137,7 +1153,7 @@
     }
 
     function checkAndUploadScore(nickname, elapsedMs) {
-        if (!window.isFirebaseReady) return;
+        if (!window.isFirebaseReady || currentDifficulty === 'special') return;
         let statusText = document.getElementById('popup-firebase-status');
         statusText.innerText = "순위 연산 판독 중...";
         statusText.style.color = "#ffeb3b";
@@ -1213,6 +1229,17 @@
         document.getElementById(screenId).classList.add('active');
         if(screenId === 'screen-start') {
             initPracticeMode();
+            checkSpecialStageChance();
+        }
+    }
+    
+    // 👑 시작화면으로 갈 때 25% 확률로 스페셜 스테이지 출현
+    function checkSpecialStageChance() {
+        let btn = document.getElementById('special-stage-btn');
+        if (Math.random() < 0.25) {
+            btn.style.display = 'block';
+        } else {
+            btn.style.display = 'none';
         }
     }
 
@@ -1232,7 +1259,7 @@
         document.getElementById('game-container').style.backgroundImage = `url('${randBg}')`;
     }
 
-    // 👑 연습 모드 초기화 (시작 화면 전용, 스페이스바 배제)
+    // 연습 모드 초기화 (시작 화면 전용, 스페이스바 배제)
     function initPracticeMode() {
         isPracticeProcessing = false;
         practiceIndex = 0;
@@ -1312,8 +1339,19 @@
     function selectDifficulty(diff) {
         currentDifficulty = diff;
         document.querySelectorAll('.diff-btn-slot').forEach(b => b.classList.remove('selected'));
-        document.getElementById(`slot-${diff}`).classList.add('selected');
+        if (diff !== 'special') {
+            document.getElementById(`slot-${diff}`).classList.add('selected');
+        }
         playSelectTickSound();
+    }
+    
+    // 👑 스페셜 스테이지 진입 함수
+    function startSpecialStage() {
+        initAudioContext();
+        currentDifficulty = 'special';
+        document.querySelectorAll('.diff-btn-slot').forEach(b => b.classList.remove('selected'));
+        playSelectTickSound();
+        startGameLoop();
     }
 
     function startGameLoop() {
@@ -1355,6 +1393,7 @@
         let container = document.getElementById('hearts-display-images');
         container.innerHTML = '';
         
+        // 스페셜 스테이지는 무적(실패 없음)이므로 목숨도 특별하게 표기할 수 있지만 일단 하트는 유지
         for(let i=1; i<=5; i++) {
             let heartImg = document.createElement('img');
             heartImg.src = "DD_Heart.png";
@@ -1375,7 +1414,7 @@
         }
     }
 
-    // 👑 난이도 및 스페이스바 혼합 레벨링 알고리즘
+    // 👑 스페셜 모드 및 레벨링 알고리즘 적용
     function initRound() {
         isRoundFinished = false;
         isStageClearedWait = false;
@@ -1384,77 +1423,89 @@
         
         updateDoguriImage();
         
-        let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
+        let diffKo = currentDifficulty === 'special' ? '스페셜' : (currentDifficulty === 'easy' ? '쉬움' : (currentDifficulty === 'normal' ? '보통' : '어려움'));
+        let maxStages = currentDifficulty === 'special' ? 1 : 3;
+        let maxRounds = currentDifficulty === 'special' ? 10 : 5;
+        
         document.getElementById('txt-difficulty').innerText = `난이도: ${diffKo}`;
-        document.getElementById('txt-stage').innerText = `스테이지: ${currentStage}/3`;
-        document.getElementById('txt-round').innerText = `판수: ${currentRound}/5`;
+        document.getElementById('txt-stage').innerText = `스테이지: ${currentStage}/${maxStages}`;
+        document.getElementById('txt-round').innerText = `판수: ${currentRound}/${maxRounds}`;
         
         document.getElementById('judgment-text').innerText = '';
-        document.getElementById('next-btn-container').style.display = 'none'; 
-        document.getElementById('rhythm-ui').style.display = 'flex';
-        
-        // 시퀀스 길이 및 스페이스바 개수 로직
-        let maxArrows = 5;
-        let spaceCount = 0;
-        
-        if (currentDifficulty === 'easy') {
-            maxArrows = 5;
-            if (currentStage === 3) spaceCount = 1;
-        } else if (currentDifficulty === 'normal') {
-            maxArrows = 6;
-            if (currentStage === 2) spaceCount = 1;
-            if (currentStage === 3) spaceCount = 2;
-        } else if (currentDifficulty === 'hard') {
-            maxArrows = 7;
-            if (currentStage === 1) spaceCount = 1;
-            if (currentStage === 2) spaceCount = 2;
-            if (currentStage === 3) spaceCount = 3;
-        }
-        
-        let arrowCount = Math.min(2 + currentRound, maxArrows);
-        spaceCount = Math.min(spaceCount, arrowCount); 
-        
-        targetArrowSequence = [];
-        
-        for (let i = 0; i < arrowCount - spaceCount; i++) {
-            targetArrowSequence.push(arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)]);
-        }
-        for (let i = 0; i < spaceCount; i++) {
-            targetArrowSequence.push('Space');
-        }
-        
-        // 배열 셔플 (스페이스바 위치 섞기)
-        for (let i = targetArrowSequence.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [targetArrowSequence[i], targetArrowSequence[j]] = [targetArrowSequence[j], targetArrowSequence[i]];
-        }
         
         let sequenceArea = document.getElementById('arrow-sequence-area');
         sequenceArea.innerHTML = '';
+        
+        targetArrowSequence = [];
+        
+        if (currentDifficulty === 'special') {
+            // 스페셜: 5~7개 임의 생성 (별표로 랜더링)
+            let arrowCount = Math.floor(Math.random() * 3) + 5;
+            for (let i = 0; i < arrowCount; i++) {
+                targetArrowSequence.push('Space'); // 실제 키 확인 시에는 validKey 무조건 허용
+            }
+        } else {
+            // 일반 난이도: 시퀀스 길이 및 스페이스바 개수 로직
+            let maxArrows = 5;
+            let spaceCount = 0;
+            
+            if (currentDifficulty === 'easy') {
+                maxArrows = 5;
+                if (currentStage === 3) spaceCount = 1;
+            } else if (currentDifficulty === 'normal') {
+                maxArrows = 6;
+                if (currentStage === 2) spaceCount = 1;
+                if (currentStage === 3) spaceCount = 2;
+            } else if (currentDifficulty === 'hard') {
+                maxArrows = 7;
+                if (currentStage === 1) spaceCount = 1;
+                if (currentStage === 2) spaceCount = 2;
+                if (currentStage === 3) spaceCount = 3;
+            }
+            
+            let arrowCount = Math.min(2 + currentRound, maxArrows);
+            spaceCount = Math.min(spaceCount, arrowCount); 
+            
+            for (let i = 0; i < arrowCount - spaceCount; i++) {
+                targetArrowSequence.push(arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)]);
+            }
+            for (let i = 0; i < spaceCount; i++) {
+                targetArrowSequence.push('Space');
+            }
+            
+            // 배열 셔플
+            for (let i = targetArrowSequence.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [targetArrowSequence[i], targetArrowSequence[j]] = [targetArrowSequence[j], targetArrowSequence[i]];
+            }
+        }
 
+        // 아이콘 렌더링
         for(let i=0; i<targetArrowSequence.length; i++) {
             let key = targetArrowSequence[i];
-            let assetName = key === 'Space' ? 'Space' : arrowNames[key];
+            let assetName = currentDifficulty === 'special' ? 'Star' : (key === 'Space' ? 'Space' : arrowNames[key]);
+            let normalImg = currentDifficulty === 'special' ? 'DD_Star_Button.png' : `DD_${assetName}_Button_Normal.png`;
 
             let slot = document.createElement('div');
             slot.className = 'arrow-icon-slot';
             slot.id = `arrow-slot-${i}`;
             
             let img = document.createElement('img');
-            img.src = `DD_${assetName}_Button_Normal.png`;
+            img.src = normalImg;
             img.id = `arrow-img-${i}`;
             img.alt = assetName;
             
             img.onerror = function() {
                 this.style.display = 'none';
                 let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑', 'Space':'[Space]'};
-                this.parentElement.innerText = sym[key] || key;
+                this.parentElement.innerText = (currentDifficulty === 'special') ? '★' : (sym[key] || key);
             };
 
             slot.appendChild(img);
             sequenceArea.appendChild(slot);
         }
-
+        
+        document.getElementById('rhythm-ui').style.display = 'flex';
         startRoundTimer();
     }
 
@@ -1487,6 +1538,15 @@
     }
 
     function handleRoundFailure(reasonText) {
+        if (currentDifficulty === 'special') {
+            // 스페셜 스테이지는 시간초과 등 실패 시에도 감점 없이 그냥 재시작 (무적 피버)
+            let jTxt = document.getElementById('judgment-text');
+            jTxt.innerText = "KEEP GOING!";
+            jTxt.style.color = "#ffeb3b";
+            initRound();
+            return;
+        }
+
         userLives--;
         updateHeartsUI();
         setCharacterImage('DD_Dance_Fail.png', '도구리 실패 연출');
@@ -1512,7 +1572,7 @@
         showScreen('screen-start');
     }
 
-    // 👑 인게임 키보드 판정 (Space 추가)
+    // 👑 인게임 키보드 판정 (스페셜 모드 예외 처리 포함)
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1522,20 +1582,17 @@
         let gameOverPopupVisible = document.getElementById('game-over-popup').style.display === 'flex';
         let leaderboardModalVisible = document.getElementById('leaderboard-modal').style.display === 'flex';
         let collectionModalVisible = document.getElementById('collection-modal').style.display === 'flex';
-        let nextContainer = document.getElementById('next-btn-container');
-        let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
 
         if(document.activeElement === document.getElementById('user-name-input')) return;
         
         initAudioContext(); 
 
-        // 팝업, 인트로, 메인 화면에서 UI를 제어할 때 사용되는 스페이스바
+        // 팝업, 인트로 등에서 사용하는 스페이스바 제어
         if ((e.key === ' ' || e.key === 'Spacebar') && (!gameActive || isRoundFinished || isStageClearedWait)) {
             if(leaderboardModalVisible) { e.preventDefault(); document.getElementById('leaderboard-modal').style.display = 'none'; return; }
             if(collectionModalVisible) { e.preventDefault(); document.getElementById('collection-modal').style.display = 'none'; return; }
             if (introActive) { e.preventDefault(); simulateBtnClick('btn-main-start', goToGameStart); return; }
             if (startActive) { e.preventDefault(); simulateBtnClick('btn-main-dance', startGameLoop); return; }
-            if (gameActive && nextBtnVisible && isStageClearedWait) { e.preventDefault(); simulateBtnClick('btn-main-next', handleNextStageClick); return; }
             if (rewardPopupVisible) { e.preventDefault(); simulateBtnClick('btn-reward-ok', closeRewardPopup); return; }
             if (gameOverPopupVisible) { e.preventDefault(); simulateBtnClick('btn-game-over', closeGameOver); return; }
         }
@@ -1557,14 +1614,11 @@
         // 게임 진행 중일 경우
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
-        // 리듬 판정 (방향키 + 스페이스바)
         let validRhythmKeys = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' ', 'Spacebar'];
         
         if (validRhythmKeys.includes(e.key)) {
-            e.preventDefault(); // 게임 중 스페이스바로 스크롤 내려가는 것 방지
-            
+            e.preventDefault(); 
             let pressedKey = (e.key === ' ' || e.key === 'Spacebar') ? 'Space' : e.key;
-            let targetKey = targetArrowSequence[currentArrowIndex];
             
             let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
             let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
@@ -1573,7 +1627,26 @@
                 slotEl.classList.add('hit');
                 setTimeout(() => slotEl.classList.remove('hit'), 80);
             }
+            
+            // 👑 스페셜 모드: 아무 버튼(방향키, 스페이스)이나 누르면 성공
+            if (currentDifficulty === 'special') {
+                if(imgEl) imgEl.src = `DD_Star_Success.png`;
+                playHitSound(currentArrowIndex);
+                currentArrowIndex++;
 
+                let randomDanceNum = Math.floor(Math.random() * 4) + 1;
+                setCharacterImage(`DD_Dance_${randomDanceNum}.png`, `도구리 댄스 ${randomDanceNum}`);
+
+                if (currentArrowIndex >= targetArrowSequence.length) {
+                    stopRoundTimer();
+                    handleRoundSuccess();
+                }
+                return;
+            }
+
+            // 일반 모드 판정
+            let targetKey = targetArrowSequence[currentArrowIndex];
+            
             if (pressedKey === targetKey) {
                 let assetName = targetKey === 'Space' ? 'Space' : arrowNames[targetKey];
                 if(imgEl) imgEl.src = `DD_${assetName}_Button_Success.png`;
@@ -1598,32 +1671,37 @@
         }
     });
 
+    // 👑 넥스트 버튼 없애고 자동 진행 로직 (오토 프로그레스)
     function handleRoundSuccess() {
-        if (currentRound >= 5) {
+        let maxRounds = currentDifficulty === 'special' ? 10 : 5;
+        let maxStages = currentDifficulty === 'special' ? 1 : 3;
+        
+        if (currentRound >= maxRounds) {
             isStageClearedWait = true;
             document.getElementById('rhythm-ui').style.display = 'none';
-            document.getElementById('next-btn-container').style.display = 'block';
             
             let jTxt = document.getElementById('judgment-text');
             jTxt.innerText = "STAGE CLEAR!";
             jTxt.style.color = "#4caf50";
             
             playStageClearSound(); 
+            
+            // 1.5초 대기 후 자동으로 다음 스테이지로 넘어가거나 종료(보상)
+            setTimeout(() => {
+                if (currentStage < maxStages) {
+                    currentStage++;
+                    currentRound = 1;
+                    changeRandomBackground(); 
+                    initRound();
+                } else {
+                    stopStopwatch();
+                    giveRandomRewardAndRank();
+                }
+            }, 1500);
+
         } else {
             currentRound++;
             initRound();
-        }
-    }
-
-    function handleNextStageClick() {
-        if (currentStage < 3) {
-            currentStage++;
-            currentRound = 1;
-            changeRandomBackground(); 
-            initRound();
-        } else {
-            stopStopwatch();
-            giveRandomRewardAndRank();
         }
     }
 
@@ -1634,24 +1712,14 @@
         let finalTimeSec = totalElapsedTime / 1000;
         document.getElementById('popup-playtime-result').innerText = `최종 클리어 시간: ${finalTimeSec.toFixed(2)}초`;
 
-        let rankLetter = 'B';
-        let badgeEl = document.getElementById('popup-rank-badge');
-        
-        if (currentDifficulty === 'easy') {
-            if (finalTimeSec <= 22) rankLetter = 'S';
-            else if (finalTimeSec <= 32) rankLetter = 'A';
-        } else if (currentDifficulty === 'normal') {
-            if (finalTimeSec <= 26) rankLetter = 'S';
-            else if (finalTimeSec <= 38) rankLetter = 'A';
-        } else { 
-            if (finalTimeSec <= 30) rankLetter = 'S';
-            else if (finalTimeSec <= 45) rankLetter = 'A';
+        // 랭크 및 서버 업로드(스페셜 스테이지는 업로드 제외)
+        if (currentDifficulty !== 'special') {
+            checkAndUploadScore(globalNickname, totalElapsedTime);
+        } else {
+            let statusText = document.getElementById('popup-firebase-status');
+            statusText.innerText = "⭐ 스페셜 피버 타임 종료! ⭐";
+            statusText.style.color = "#ffeb3b";
         }
-
-        badgeEl.innerText = rankLetter;
-        badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
-
-        checkAndUploadScore(globalNickname, totalElapsedTime);
 
         let randomIndex = Math.floor(Math.random() * collectionItems.length);
         unlockedItems.add(randomIndex);
@@ -1660,7 +1728,17 @@
         initCollectionUI();
         updateDoguriImage();
 
-        document.getElementById('reward-item-name').innerText = collectionItems[randomIndex];
+        // 👑 텍스트 대신 보상 아이템 이미지를 표시하도록 구성
+        let rewardBox = document.getElementById('reward-item-name');
+        rewardBox.innerHTML = '';
+        let rewardImg = document.createElement('img');
+        rewardImg.src = `DD_Item_${randomIndex}.png`;
+        rewardImg.style.width = '100%';
+        rewardImg.style.height = '100%';
+        rewardImg.style.objectFit = 'contain';
+        rewardImg.alt = collectionItems[randomIndex];
+        rewardBox.appendChild(rewardImg);
+        
         document.getElementById('reward-popup').style.display = 'flex';
     }
 
