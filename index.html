@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V15 (TOP 10 데이터 최적화)</title>
+    <title>도구리 하와이 댄스 게임 - V17 (소리 설정 컨트롤러 탑재)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -41,6 +41,54 @@
             justify-content: center;
         }
         .screen.active { display: flex; }
+
+        /* 🔊 [신규] 좌측 상단 소리 제어 컨트롤러 패널 */
+        .audio-controller-panel {
+            position: absolute;
+            top: 30px;
+            left: 40px;
+            background: rgba(0, 0, 0, 0.75);
+            border: 2px solid #fff;
+            border-radius: 12px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 100;
+        }
+        .audio-toggle-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            transition: transform 0.1s ease;
+        }
+        .audio-toggle-btn:active { transform: scale(0.9); }
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 80px;
+            height: 6px;
+            background: #555;
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffeb3b;
+            cursor: pointer;
+        }
 
         #main-logo {
             display: block;
@@ -162,11 +210,11 @@
             background: rgba(255, 235, 59, 0.1);
         }
 
-        /* 상단 상태 판넬 */
+        /* 상단 상태 판넬 (위치 살짝 우측 이동하여 오디오 바와 격리) */
         .game-status {
             position: absolute;
             top: 35px;
-            left: 40px;
+            left: 200px;
             background: rgba(0,0,0,0.7);
             color: white;
             padding: 10px 20px;
@@ -409,6 +457,12 @@
 <body>
 
 <div id="game-container">
+
+    <!-- 🔊 상시 고정 오디오 제어 판넬 인터페이스 (좌측 상단 배치) -->
+    <div class="audio-controller-panel">
+        <button class="audio-toggle-btn" id="btn-audio-mute" onclick="toggleAudioMute()">🔊</button>
+        <input type="range" class="volume-slider" id="slider-volume" min="0" max="100" value="50" oninput="changeVolumeValue(this.value)">
+    </div>
     
     <!-- 1. 인트로 화면 -->
     <div id="screen-intro" class="screen active">
@@ -558,6 +612,11 @@
     let totalElapsedTime = 0;       
     let stopwatchIntervalId = null; 
 
+    // --- 🎵 오디오 시스템 변수군 ---
+    let audioCtx = null;
+    let globalVolumeValue = 0.5;    // 기본 오디오 소리 볼륨 (50%)
+    let isAudioMuted = false;       // 음소거 토글 상태 플래그
+
     const collectionItems = [
         "🍍 하와이안 파인애플", "🌸 알로하 레이", "🕶️ 선글라스",
         "🏄 미니 서프보드", "🥥 코코넛 주스", "🎸 우쿨렐레",
@@ -581,6 +640,83 @@
         setupButtonEffects();
     };
 
+    // --- 🔊 오디오 코어 엔진 제어 스크립트 ---
+    function initAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    // 소리 높낮이(볼륨) 바 실시간 슬라이드 콜백
+    function changeVolumeValue(val) {
+        globalVolumeValue = val / 100;
+        initAudioContext();
+        if (globalVolumeValue > 0 && isAudioMuted) {
+            toggleAudioMute(); // 소리를 올리면 자동으로 음소거 풀기
+        }
+    }
+
+    // 소리 온/오프 토글 스위치 콜백
+    function toggleAudioMute() {
+        initAudioContext();
+        isAudioMuted = !isAudioMuted;
+        let btn = document.getElementById('btn-audio-mute');
+        if (isAudioMuted) {
+            btn.innerText = '🔇';
+            btn.style.opacity = '0.5';
+        } else {
+            btn.innerText = '🔊';
+            btn.style.opacity = '1';
+        }
+    }
+
+    // 비프음 가동 파이프라인
+    function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
+        if (isAudioMuted || globalVolumeValue <= 0) return; // 음소거나 볼륨 0일 땐 바이패스
+
+        try {
+            initAudioContext();
+            
+            let osc = audioCtx.createOscillator();
+            let gainNode = audioCtx.createGain();
+
+            osc.type = type; 
+            osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+            
+            if (customEndFreq !== null) {
+                osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
+            }
+
+            // 마스터 볼륨 계수와 컴포넌트 볼륨 비례 매칭 산출
+            let finalGain = 0.25 * globalVolumeValue; 
+            gainNode.gain.setValueAtTime(finalGain, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        } catch (e) { console.error("사운드 재생 에러:", e); }
+    }
+
+    function playHitSound(comboIndex) {
+        let targetFreq = 320 + (comboIndex * 60);
+        playBeep(targetFreq, 0.08, 'triangle'); 
+    }
+
+    function playFailSound() {
+        playBeep(220, 0.35, 'square', 80); 
+    }
+
+    function playStageClearSound() {
+        playBeep(523.25, 0.1, 'square'); 
+        setTimeout(() => { playBeep(659.25, 0.25, 'square'); }, 80);
+    }
+
     function loadLocalStorageData() {
         try {
             let savedItems = localStorage.getItem(STORAGE_KEY_ITEMS);
@@ -594,7 +730,6 @@
         } catch(e) { console.error("로컬 세이브 저장 실패:", e); }
     }
 
-    // --- 🏆 파이어베이스 10명 서버 랭킹 뷰 바인딩 ---
     function fetchServerLeaderboard() {
         if (!window.isFirebaseReady) return;
         
@@ -631,7 +766,6 @@
         });
     }
 
-    // [규칙 변경 개편]: 무조건 쌓이지 않도록 10위 안에 들 때만 기록하는 서버 필터 커스텀 모듈
     function checkAndUploadScore(nickname, elapsedMs) {
         if (!window.isFirebaseReady) return;
         
@@ -642,17 +776,14 @@
         const scoreRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
         const rankQuery = window.dbQuery(scoreRef, window.dbOrderBy('playTime'), window.dbLimit(10));
 
-        // 1단계: 현재 서버의 top 10 리스트를 단발성(get)으로 긁어옵니다.
         window.dbGet(rankQuery).then((snapshot) => {
             let records = [];
             snapshot.forEach((child) => {
                 records.push(child.val().playTime);
             });
 
-            // 2단계: 서버에 등록된 개수가 10개 미만이거나, 현재 내 기록이 기존 10등의 기록보다 빠른 수치인지 판별합니다.
             if (records.length < 10 || elapsedMs < records[records.length - 1]) {
                 statusText.innerText = "⭐ TOP 10 랭크인 진입! 기록 업로드 중...";
-                
                 const scoreListRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
                 const newScoreRef = window.dbPush(scoreListRef);
 
@@ -668,7 +799,6 @@
                     statusText.style.color = "#f44336";
                 });
             } else {
-                // 10위권 커트라인 밖일 때의 안전 연출 플래그
                 statusText.innerText = "아쉽게도 아케이드 10위권 순위 내에 진입하지 못했습니다.";
                 statusText.style.color = "#999";
             }
@@ -681,7 +811,10 @@
     function setupButtonEffects() {
         const btns = document.querySelectorAll('.img-btn');
         btns.forEach(btn => {
-            btn.addEventListener('mousedown', () => btn.classList.add('pressed'));
+            btn.addEventListener('mousedown', () => {
+                initAudioContext(); // 어떤 버튼이든 클릭할 때 강제로 잠금 권한 해제 트리거
+                btn.classList.add('pressed');
+            });
             btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
             btn.addEventListener('mouseleave', () => btn.classList.remove('pressed'));
         });
@@ -715,6 +848,7 @@
     }
 
     function goToGameStart() { 
+        initAudioContext();
         let inputVal = document.getElementById('user-name-input').value.trim();
         globalNickname = inputVal ? inputVal : "도구리";
         showScreen('screen-start'); 
@@ -730,9 +864,11 @@
         currentDifficulty = diff;
         document.querySelectorAll('.diff-img-btn').forEach(b => b.classList.remove('selected'));
         document.getElementById(`btn-${diff}`).classList.add('selected');
+        playBeep(440, 0.05, 'triangle');
     }
 
     function startGameLoop() {
+        initAudioContext();
         showScreen('screen-game');
         currentStage = 1;
         currentRound = 1;
@@ -763,6 +899,7 @@
         }
     }
 
+    // 하트 수식 보정
     function updateHeartsUI() {
         let container = document.getElementById('hearts-display');
         container.innerHTML = '';
@@ -842,6 +979,7 @@
 
             if (timeRemaining <= 0) {
                 stopRoundTimer();
+                playFailSound(); 
                 handleRoundFailure("TIME OVER!");
             }
         }, 50);
@@ -888,6 +1026,9 @@
         if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
         if(document.getElementById('collection-modal').style.display === 'flex') return;
 
+        // 키보드를 누르는 시점에도 오디오 맥락 상시 개방 유도
+        initAudioContext();
+
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (introActive) {
                 e.preventDefault();
@@ -927,10 +1068,9 @@
 
             if (e.key === targetKey) {
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
+                
+                playHitSound(currentArrowIndex);
                 currentArrowIndex++;
-
-                let randomDanceNum = Math.floor(Math.random() * 4) + 1;
-                setCharacterImage(`DD_Dance_${randomDanceNum}.png`, `도구리 댄스 ${randomDanceNum}`);
 
                 if (currentArrowIndex >= targetArrowSequence.length) {
                     stopRoundTimer();
@@ -939,6 +1079,7 @@
             } else {
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
                 stopRoundTimer();
+                playFailSound(); 
                 handleRoundFailure("FAIL!");
             }
         }
@@ -953,6 +1094,8 @@
             let jTxt = document.getElementById('judgment-text');
             jTxt.innerText = "STAGE CLEAR!";
             jTxt.style.color = "#4caf50";
+            
+            playStageClearSound(); 
         } else {
             currentRound++;
             initRound();
@@ -994,7 +1137,6 @@
         badgeEl.innerText = rankLetter;
         badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
 
-        // 🚀 [업데이트 적용] 무조건 쌓이지 않게 10위 필터를 검증한 뒤 점수를 쏩니다.
         checkAndUploadScore(globalNickname, totalElapsedTime);
 
         let randomIndex = Math.floor(Math.random() * collectionItems.length);
@@ -1052,7 +1194,6 @@
         document.getElementById('leaderboard-modal').style.display = 'none';
     }
 
-    // 도감 열기/닫기
     function openCollection() {
         initCollectionUI();
         document.getElementById('collection-modal').style.display = 'flex';
