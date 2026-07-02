@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V22 (배경 랜덤 및 하트 UI 전면 개편)</title>
+    <title>도구리 하와이 댄스 게임 - V21 (UI 미세 조정 및 사운드 폭발 증폭)</title>
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -26,8 +26,21 @@
             background-position: center;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            transition: background-image 0.3s ease; /* 배경 전환 시 부드러운 디졸브 */
         }
+
+        /* 공통 화면 스타일 */
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .screen.active { display: flex; }
 
         /* 🔊 좌측 상단 소리 제어 컨트롤러 패널 */
         .audio-controller-panel {
@@ -81,50 +94,48 @@
             display: block;
             max-width: 90%;
             height: auto;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
-        /* 닉네임 입력 구역 컴포넌트 */
+        /* 📝 [구조 개편] 에셋 기반 인트로 닉네임 입력 구역 정의 */
         .nickname-area-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 15px;
             margin-bottom: 25px;
         }
-        /* 요청 반영: 타이틀 텍스트 소폭 하향 조정 마진 */
+        /* 요청 반영: 플레이어 닉네임 입력 텍스트를 이미지로 치환 */
         .nick-title-img {
             display: block;
             max-width: 100%;
             height: auto;
-            margin-top: 15px; 
         }
-        /* 요청 반영: DD_Nick_Bg.png 스케일 0.7배 압축 적용 */
+        /* 요청 반영: 닉네임 인풋창의 배경을 DD_Nick_Bg.png 이미지로 바인딩 */
         .nick-input-wrapper {
             position: relative;
             width: auto;
             height: auto;
             display: inline-block;
-            transform: scale(0.7);
-            transform-origin: center center;
         }
         .nick-bg-img {
             display: block;
             max-width: 100%;
             height: auto;
         }
+        /* 배경 이미지 정중앙에 맞춰 텍스트를 깔끔하게 적도록 보정 배치한 인풋창 */
         .nick-input-field {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 85%;
-            height: 65%;
-            background: none;
+            width: 80%; /* 배경 이미지 안쪽에 여유있게 들어오도록 조절 */
+            height: 60%;
+            background: none; /* 배경을 투명하게 뚫어 이미지 노출 */
             border: none;
             outline: none;
-            color: #000;
-            font-size: 26px; /* 축소를 고려하여 타이포 폰트 키 조정 */
+            color: #000; /* 어두운 텍스트색 피드백 유도 */
+            font-size: 22px;
             font-weight: bold;
             text-align: center;
             font-family: 'Malgun Gothic', sans-serif;
@@ -165,6 +176,7 @@
             height: auto;
         }
 
+        /* 요청 반영: DANCE 버튼을 조금 더 아래로 하향 조정 (bottom 수치 감소) */
         .bottom-dance-position {
             position: absolute;
             bottom: 45px;
@@ -185,7 +197,7 @@
             width: auto;
         }
 
-        /* 우측 하단 레이아웃 제어 그룹 (요청사항: 0.5배 축소 삭제, 원본 크기 복원 완료) */
+        /* 우측 하단 레이아웃 제어 그룹 */
         .bottom-right-container {
             position: absolute;
             bottom: 40px;
@@ -213,11 +225,19 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.8); }
 
-        /* 난이도 이미지 버튼 그룹 */
+        /* 요청 반영: HIGHSCORE 및 GIFT(도감) 이미지 버튼 0.5배 축소 적용 */
+        .scale-down-btn img {
+            width: auto;
+            height: auto;
+            transform: scale(0.5);
+            transform-origin: right bottom; /* 우하단 고정 축소 간격 수호 */
+        }
+
+        /* 요청 반영: 난이도 이미지 버튼 그룹 간격을 조금 더 좁게 압축 (gap 감소) */
         .difficulty-group {
             display: flex;
             gap: 15px; 
-            margin-bottom: 120px; 
+            margin-bottom: 120px; /* DANCE 버튼 하향에 비례하여 마진 상향 조정 */
             align-items: center;
             justify-content: center;
         }
@@ -272,43 +292,22 @@
             gap: 15px;
         }
 
-        /* 👑 [구조 대개편] 요청반영: 하트 라이프 패널 그래픽 전치화 */
-        .life-container-wrapper {
+        /* 왼쪽 아래 하트 표시 영역 */
+        .life-container {
             position: absolute;
             bottom: 40px;
             left: 40px;
-            z-index: 10;
-            transform: scale(0.7); /* 요청사항: 원본보다 0.7배 축소 유지 */
-            transform-origin: left bottom;
-        }
-        /* 라이프 배경 이미지를 DD_Nick_Bg.png로 전환 */
-        .life-bg-asset {
-            display: block;
-            max-width: none;
-            height: auto;
-        }
-        /* 배경 에셋 위에 하트 이미지들을 나란히 등간격 배치 */
-        .life-hearts-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.6);
+            padding: 12px 20px;
+            border-radius: 30px;
             display: flex;
-            gap: 12px;
-            justify-content: center;
-            align-items: center;
-            width: 85%;
-            height: 100%;
+            gap: 8px;
+            font-size: 28px;
+            z-index: 10;
+            border: 2px solid rgba(255,255,255,0.3);
         }
-        .heart-img-slot {
-            width: 45px; /* 노출 하트 규격 제어 수치 */
-            height: 45px;
-            object-fit: contain;
-            transition: opacity 0.1s ease;
-        }
-        .heart-img-slot.hidden-life {
-            opacity: 0; /* 라이프 소실 시 투명 노출 처리 */
-        }
+        .heart { color: #ff1744; text-shadow: 0 0 10px #ff1744; }
+        .heart.empty { color: #444; text-shadow: none; }
 
         /* 무대 요소 */
         #game-table {
@@ -490,6 +489,7 @@
         }
     </style>
 
+    <!-- 파이어베이스 SDK 바인딩 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -524,14 +524,17 @@
 
 <div id="game-container">
 
+    <!-- 🔊 오디오 제어 판넬 -->
     <div class="audio-controller-panel">
         <button class="audio-toggle-btn" id="btn-audio-mute" onclick="toggleAudioMute()">🔊</button>
         <input type="range" class="volume-slider" id="slider-volume" min="0" max="100" value="50" oninput="changeVolumeValue(this.value)">
     </div>
     
+    <!-- 1. 인트로 화면 -->
     <div id="screen-intro" class="screen active">
         <img id="main-logo" src="DD_Logo.png" alt="도구리 로고" onerror="this.style.display='none'; this.after('[DD_Logo]');">
         
+        <!-- 📝 요청반영: 닉네임 구역 텍스트 및 레이아웃 이미지화 교체 완료 -->
         <div class="nickname-area-container">
             <img class="nick-title-img" src="DD_Nick_Text.png" alt="플레이어 닉네임 입력" onerror="this.style.display='none'; this.after('플레이어 닉네임 입력');">
             
@@ -549,11 +552,13 @@
         </div>
     </div>
 
+    <!-- 2. 게임 시작 화면 -->
     <div id="screen-start" class="screen">
         <button id="btn-main-back" class="img-btn top-right-back" onclick="goToIntro()">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
+        <!-- 요청반영: 난이도 버튼들의 좌우 간격을 촘촘하게 압축(gap: 15px) 완료 -->
         <div class="difficulty-group">
             <div id="slot-easy" class="diff-btn-slot selected" onclick="selectDifficulty('easy')">
                 <img class="diff-glow-layer" src="DD_Easy_Button_Glow.png" alt="쉬움 글로우" onerror="this.style.display='none';">
@@ -577,6 +582,7 @@
             </div>
         </div>
 
+        <!-- 요청반영: DANCE 버튼을 하단 45px 위치로 조금 더 내려 레이아웃 가독성 확보 완료 -->
         <div class="bottom-dance-position btn-with-guide-container">
             <button id="btn-main-dance" class="img-btn origin-size-btn" onclick="startGameLoop()">
                 <img src="DD_Main_Dance_Button.png" alt="DANCE" onerror="this.style.display='none'; this.after('[DANCE 버튼]');">
@@ -584,12 +590,15 @@
             <span class="space-shortcut-guide">(space)</span>
         </div>
 
+        <!-- 우측 하단 레이아웃 제어 컨테이너 -->
         <div class="bottom-right-container">
-            <button id="btn-main-rank" class="img-btn origin-size-btn" onclick="openLeaderboardModal()">
+            <!-- 요청반영: HIGHSCORE 버튼 크기 0.5배 축소(scale-down-btn 클래스 적용) 완료 -->
+            <button id="btn-main-rank" class="img-btn scale-down-btn" onclick="openLeaderboardModal()">
                 <img src="DD_Highscore.png" alt="HIGHSCORE" onerror="this.style.display='none'; this.after('[HIGHSCORE]');">
             </button>
 
-            <button id="btn-main-gift" class="img-btn origin-size-btn" onclick="openCollection()">
+            <!-- 요청반영: GIFT 버튼 크기 0.5배 축소(scale-down-btn 클래스 적용) 완료 -->
+            <button id="btn-main-gift" class="img-btn scale-down-btn" onclick="openCollection()">
                 <img src="DD_Main_Gift_Button.png" alt="도감" onerror="this.style.display='none'; this.after('[도감]');">
             </button>
 
@@ -599,6 +608,7 @@
         </div>
     </div>
 
+    <!-- 3. 인게임 화면 -->
     <div id="screen-game" class="screen">
         <div class="game-status">
             <span id="txt-difficulty">난이도: 쉬움</span> | 
@@ -607,11 +617,7 @@
             <span id="txt-playtime" style="color: #ffeb3b;">시간: 0.00초</span>
         </div>
 
-        <div class="life-container-wrapper">
-            <img class="life-bg-asset" src="DD_Nick_Bg.png" alt="라이프 배경">
-            <div class="life-hearts-overlay" id="hearts-display-images">
-                </div>
-        </div>
+        <div class="life-container" id="hearts-display"></div>
 
         <img id="game-table" src="DD_Game_Table.png" alt="단상" onerror="this.style.display='none';">
         <img id="doguri-char" src="doguri_image_base.png" alt="도구리" onerror="this.style.display='none'; this.after('[도구리]');">
@@ -632,6 +638,7 @@
         </div>
     </div>
 
+    <!-- 결산 팝업 보드 -->
     <div id="reward-popup">
         <h2 style="color: #333; margin-top:0; margin-bottom:5px;">🌴 스테이지 클리어! 🌴</h2>
         
@@ -646,6 +653,7 @@
         <button class="close-btn" onclick="closeRewardPopup()">확인</button>
     </div>
 
+    <!-- 글로벌 실시간 TOP 10 랭킹 모달 레이어 -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content">
             <h2 id="modal-rank-title" style="color: #333; margin-top: 0; margin-bottom: 5px;">🏆 글로벌 실시간 랭킹</h2>
@@ -659,6 +667,7 @@
         </div>
     </div>
 
+    <!-- 도감 모달 -->
     <div id="collection-modal" class="modal">
         <div class="modal-content">
             <h2>🎒 도구리의 하와이 도감 (총 9종)</h2>
@@ -702,14 +711,6 @@
     let isBgmPlaying = false;
     let oceanWaveNode = null;       
 
-    // 🌴 [신규요청] 4가지 배경화면 리소스 묶음 배열 정의
-    const backgroundAssets = [
-        "DD_Main_Image.png",
-        "DD_Main_Image_PM4.png",
-        "DD_Main_Image_PM5.png",
-        "DD_Main_Image_PM6.png"
-    ];
-
     const collectionItems = [
         "🍍 하와이안 파인애플", "🌸 알로하 레이", "🕶️ 선글라스",
         "🏄 미니 서프보드", "🥥 코코넛 주스", "🎸 우쿨렐레",
@@ -718,6 +719,7 @@
     let unlockedItems = new Set();
     const STORAGE_KEY_ITEMS = "doguri_unlocked_items_firebase_v1";
 
+    const BG_MAIN = "DD_Main_Image.png";
     const DOGURI_BASE = "doguri_image_base.png";
     const DOGURI_UPGRADE = "doguri_image_upgrade.png";
 
@@ -725,22 +727,14 @@
     const arrowNames = { 'ArrowLeft': 'Left', 'ArrowRight': 'Right', 'ArrowDown': 'Down', 'ArrowUp': 'Up' };
 
     window.onload = function() {
-        // 첫 진입 시 임의의 배경 출력
-        rollRandomBackgroundImage();
+        document.getElementById('game-container').style.backgroundImage = `url('${BG_MAIN}')`;
         loadLocalStorageData();
         initCollectionUI();
         updateDoguriImage();
         setupButtonEffects();
     };
 
-    // 🌴 [신규기능] 배경 이미지를 무작위로 추첨해 컨테이너 스타일링에 밀어넣는 가동 함수
-    function rollRandomBackgroundImage() {
-        let randomIndex = Math.floor(Math.random() * backgroundAssets.length);
-        let selectedBg = backgroundAssets[randomIndex];
-        document.getElementById('game-container').style.backgroundImage = `url('${selectedBg}')`;
-    }
-
-    // --- 🔊 오디오 코어 및 BGM 루프 엔진 ---
+    // --- 🔊 오디오 코어 및 BGM 루프 엔진 (사운드 파워 스케일 2배 추가 상향 연산 완료) ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -804,7 +798,7 @@
             lowpassFilter.frequency.setValueAtTime(350, audioCtx.currentTime); 
 
             let waveGain = audioCtx.createGain();
-            waveGain.gain.setValueAtTime(0.08, audioCtx.currentTime); 
+            waveGain.gain.setValueAtTime(0.08, audioCtx.currentTime); // 파도소리 게인 확보
 
             noiseSource.connect(lowpassFilter);
             lowpassFilter.connect(waveGain);
@@ -855,7 +849,7 @@
             osc.type = 'triangle'; 
             osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
 
-            let noteVolume = 0.12 * globalVolumeValue * bgmVolumeScale; 
+            let noteVolume = 0.12 * globalVolumeValue * bgmVolumeScale; // 배경 루프 체감 증폭
             gainNode.gain.setValueAtTime(noteVolume, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4); 
 
@@ -879,6 +873,7 @@
         playNextBgmNote();
     }
 
+    // [사운드 대증폭 패치]: 마스터 상향에 응해 효과음 고유 피크 파워를 0.44에서 0.88로 격상 (0~10 기준에서 0~20 크기 2배 확보 완료)
     function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
         try {
             initAudioContext();
@@ -892,7 +887,7 @@
                 osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
             }
 
-            gainNode.gain.setValueAtTime(0.88, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(0.88, audioCtx.currentTime); // 타격 폭발 음량 증폭 완료
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
             osc.connect(gainNode);
@@ -1114,32 +1109,19 @@
         }
     }
 
-    // 👑 [구조 대개편] 요청반영: DD_Heart.png 노드들을 동적 제어해 노출하는 신형 라이프 코어 함수
     function updateHeartsUI() {
-        let container = document.getElementById('hearts-display-images');
+        let container = document.getElementById('hearts-display');
         container.innerHTML = '';
-        
         for(let i=1; i<=5; i++) {
-            let heartImg = document.createElement('img');
-            heartImg.src = "DD_Heart.png";
-            heartImg.className = "heart-img-slot";
-            heartImg.alt = "라이프 하트";
-            
-            // 이미지 부재 시 대체 텍스트 가드
-            heartImg.onerror = function() {
-                this.style.display = 'none';
-                let txt = document.createElement('span');
-                txt.innerText = '❤️';
-                txt.style.fontSize = '24px';
-                if(i > userLives) txt.style.opacity = '0.2';
-                this.parentElement.appendChild(txt);
-            };
-
-            // 차감된 라이프 개수 인덱스를 벗어나면 안 보이게 처리
-            if (i > userLives) {
-                heartImg.classList.add('hidden-life');
+            let heartSpan = document.createElement('span');
+            if (i <= userLives) {
+                heartSpan.className = 'heart';
+                heartSpan.innerText = '❤️';
+            } else {
+                heartSpan.className = 'heart empty';
+                heartSpan.innerText = '🖤';
             }
-            container.appendChild(heartImg);
+            container.appendChild(heartSpan);
         }
     }
 
@@ -1219,6 +1201,7 @@
         }
     }
 
+    // 실패 처리
     function handleRoundFailure(reasonText) {
         userLives--;
         updateHeartsUI();
@@ -1229,8 +1212,6 @@
             stopStopwatch();
             setTimeout(() => {
                 alert("GAME OVER! 모든 하트를 잃었습니다.");
-                // 🌴 요청사항 반영: 시작화면 복귀 시 배경 이미지 무작위 변경
-                rollRandomBackgroundImage();
                 showScreen('screen-start');
             }, 100);
             return;
@@ -1243,6 +1224,7 @@
         initRound();
     }
 
+    // --- 키보드 이벤트 핸들러 ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1395,8 +1377,6 @@
 
     function closeRewardPopup() {
         document.getElementById('reward-popup').style.display = 'none';
-        // 🌴 요청사항 반영: 플레이가 끝나고 대기화면으로 돌아올 때 배경 이미지 랜덤 리프레시
-        rollRandomBackgroundImage();
         goToGameStart();
     }
 
