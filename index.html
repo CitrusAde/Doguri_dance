@@ -1195,4 +1195,301 @@
         
         updateDoguriImage();
         
-        let diffKo = currentDifficulty === 'easy' ? '
+        let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
+        document.getElementById('txt-difficulty').innerText = `난이도: ${diffKo}`;
+        document.getElementById('txt-stage').innerText = `스테이지: ${currentStage}/3`;
+        document.getElementById('txt-round').innerText = `판수: ${currentRound}/5`;
+        
+        document.getElementById('judgment-text').innerText = '';
+        document.getElementById('next-btn-container').style.display = 'none'; 
+        document.getElementById('rhythm-ui').style.display = 'flex';
+        
+        let arrowCount = 2 + currentRound; 
+        targetArrowSequence = [];
+        
+        let sequenceArea = document.getElementById('arrow-sequence-area');
+        sequenceArea.innerHTML = '';
+
+        for(let i=0; i<arrowCount; i++) {
+            let randomKey = arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)];
+            targetArrowSequence.push(randomKey);
+
+            let slot = document.createElement('div');
+            slot.className = 'arrow-icon-slot';
+            slot.id = `arrow-slot-${i}`;
+            
+            let img = document.createElement('img');
+            img.src = `DD_${arrowNames[randomKey]}_Button_Normal.png`;
+            img.id = `arrow-img-${i}`;
+            img.alt = arrowNames[randomKey];
+            
+            img.onerror = function() {
+                this.style.display = 'none';
+                let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑'};
+                this.parentElement.innerText = sym[randomKey];
+            };
+
+            slot.appendChild(img);
+            sequenceArea.appendChild(slot);
+        }
+
+        startRoundTimer();
+    }
+
+    function startRoundTimer() {
+        timeRemaining = timeLimit;
+        document.getElementById('timer-bar').style.width = '100%';
+
+        roundTimerId = setInterval(() => {
+            if (isRoundFinished || isStageClearedWait) {
+                stopRoundTimer();
+                return;
+            }
+            timeRemaining -= 50;
+            let percent = (timeRemaining / timeLimit) * 100;
+            document.getElementById('timer-bar').style.width = percent + '%';
+
+            if (timeRemaining <= 0) {
+                stopRoundTimer();
+                playFailSound(); 
+                handleRoundFailure("TIME OVER!");
+            }
+        }, 50);
+    }
+
+    function stopRoundTimer() {
+        if (roundTimerId) {
+            clearInterval(roundTimerId);
+            roundTimerId = null;
+        }
+    }
+
+    function handleRoundFailure(reasonText) {
+        userLives--;
+        updateHeartsUI();
+        setCharacterImage('DD_Dance_Fail.png', '도구리 실패 연출');
+
+        if (userLives <= 0) {
+            stopRoundTimer();
+            stopStopwatch();
+            setTimeout(() => {
+                alert("GAME OVER! 모든 하트를 잃었습니다.");
+                showScreen('screen-start');
+            }, 100);
+            return;
+        }
+
+        let jTxt = document.getElementById('judgment-text');
+        jTxt.innerText = reasonText;
+        jTxt.style.color = "#f44336";
+
+        initRound();
+    }
+
+    // --- 키보드 이벤트 핸들러 ---
+    window.addEventListener('keydown', function(e) {
+        let introActive = document.getElementById('screen-intro').classList.contains('active');
+        let startActive = document.getElementById('screen-start').classList.contains('active');
+        let gameActive = document.getElementById('screen-game').classList.contains('active');
+        
+        let nextContainer = document.getElementById('next-btn-container');
+        let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
+
+        if(document.activeElement === document.getElementById('user-name-input')) return;
+        if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
+        if(document.getElementById('collection-modal').style.display === 'flex') return;
+
+        initAudioContext(); 
+
+        if (e.key === ' ' || e.key === 'Spacebar') {
+            if (introActive) {
+                e.preventDefault();
+                simulateBtnClick('btn-main-start', goToGameStart);
+                return;
+            }
+            if (startActive) {
+                e.preventDefault();
+                simulateBtnClick('btn-main-dance', startGameLoop);
+                return;
+            }
+            if (gameActive && nextBtnVisible && isStageClearedWait) {
+                e.preventDefault();
+                simulateBtnClick('btn-main-next', handleNextStageClick);
+                return;
+            }
+        }
+
+        if (e.key === 'Escape' || e.key === 'Esc') {
+            if (startActive) {
+                simulateBtnClick('btn-main-back', goToIntro);
+                return;
+            }
+        }
+
+        if (startActive) {
+            if (e.key === '1') {
+                simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy'));
+                return;
+            }
+            if (e.key === '2') {
+                simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal'));
+                return;
+            }
+            if (e.key === '3') {
+                simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard'));
+                return;
+            }
+        }
+
+        if (!gameActive || isRoundFinished || isStageClearedWait) return;
+
+        if (arrowKeyCodes.includes(e.key)) {
+            let targetKey = targetArrowSequence[currentArrowIndex];
+            let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
+            let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
+
+            if(slotEl) {
+                slotEl.classList.add('hit');
+                setTimeout(() => slotEl.classList.remove('hit'), 80);
+            }
+
+            if (e.key === targetKey) {
+                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
+                currentArrowIndex++;
+
+                let randomDanceNum = Math.floor(Math.random() * 4) + 1;
+                setCharacterImage(`DD_Dance_${randomDanceNum}.png`, `도구리 댄스 ${randomDanceNum}`);
+
+                if (currentArrowIndex >= targetArrowSequence.length) {
+                    stopRoundTimer();
+                    handleRoundSuccess();
+                }
+            } else {
+                if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
+                stopRoundTimer();
+                playFailSound(); 
+                handleRoundFailure("FAIL!");
+            }
+        }
+    });
+
+    function handleRoundSuccess() {
+        if (currentRound >= 5) {
+            isStageClearedWait = true;
+            document.getElementById('rhythm-ui').style.display = 'none';
+            document.getElementById('next-btn-container').style.display = 'block';
+            
+            let jTxt = document.getElementById('judgment-text');
+            jTxt.innerText = "STAGE CLEAR!";
+            jTxt.style.color = "#4caf50";
+            
+            playStageClearSound(); 
+        } else {
+            currentRound++;
+            initRound();
+        }
+    }
+
+    function handleNextStageClick() {
+        if (currentStage < 3) {
+            currentStage++;
+            currentRound = 1;
+            initRound();
+        } else {
+            stopStopwatch();
+            giveRandomRewardAndRank();
+        }
+    }
+
+    function giveRandomRewardAndRank() {
+        if (isRewardGivenThisGame) return;
+        isRewardGivenThisGame = true; 
+
+        let finalTimeSec = totalElapsedTime / 1000;
+        document.getElementById('popup-playtime-result').innerText = `최종 클리어 시간: ${finalTimeSec.toFixed(2)}초`;
+
+        let rankLetter = 'B';
+        let badgeEl = document.getElementById('popup-rank-badge');
+        
+        if (currentDifficulty === 'easy') {
+            if (finalTimeSec <= 22) rankLetter = 'S';
+            else if (finalTimeSec <= 32) rankLetter = 'A';
+        } else if (currentDifficulty === 'normal') {
+            if (finalTimeSec <= 26) rankLetter = 'S';
+            else if (finalTimeSec <= 38) rankLetter = 'A';
+        } else { 
+            if (finalTimeSec <= 30) rankLetter = 'S';
+            else if (finalTimeSec <= 45) rankLetter = 'A';
+        }
+
+        badgeEl.innerText = rankLetter;
+        badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
+
+        checkAndUploadScore(globalNickname, totalElapsedTime);
+
+        let randomIndex = Math.floor(Math.random() * collectionItems.length);
+        unlockedItems.add(randomIndex);
+        
+        saveGameDataToStorage();
+        initCollectionUI();
+        updateDoguriImage();
+
+        document.getElementById('reward-item-name').innerText = collectionItems[randomIndex];
+        document.getElementById('reward-popup').style.display = 'flex';
+    }
+
+    function closeRewardPopup() {
+        document.getElementById('reward-popup').style.display = 'none';
+        goToGameStart();
+    }
+
+    function resetAllLocalData() {
+        if (confirm("도감 데이터가 전면 초기화됩니다. 진행하시겠습니까?")) {
+            unlockedItems.clear();
+            isRewardGivenThisGame = false;
+            saveGameDataToStorage();
+            initCollectionUI();
+            updateDoguriImage();
+            alert('도감이 완전히 초기화되었습니다.');
+        }
+    }
+
+    function initCollectionUI() {
+        let grid = document.getElementById('book-grid-container');
+        grid.innerHTML = '';
+        collectionItems.forEach((item, index) => {
+            let box = document.createElement('div');
+            box.id = `book-item-${index}`;
+            box.className = `book-item ${unlockedItems.has(index) ? 'unlocked' : ''}`;
+            box.innerText = unlockedItems.has(index) ? item : `🔒 미획득 (${index + 1})`;
+            grid.appendChild(box);
+        });
+    }
+
+    function updateDoguriImage() {
+        if (unlockedItems.size === 9) {
+            setCharacterImage(DOGURI_UPGRADE, '👑 하와이안 도구리 업그레이드 완료');
+        } else {
+            setCharacterImage(DOGURI_BASE, '도구리 기본 상태');
+        }
+    }
+
+    function openLeaderboardModal() {
+        fetchServerLeaderboard();
+        document.getElementById('leaderboard-modal').style.display = 'flex';
+    }
+    function closeLeaderboardModal() {
+        document.getElementById('leaderboard-modal').style.display = 'none';
+    }
+
+    function openCollection() {
+        initCollectionUI();
+        document.getElementById('collection-modal').style.display = 'flex';
+    }
+    function closeCollection() {
+        document.getElementById('collection-modal').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
