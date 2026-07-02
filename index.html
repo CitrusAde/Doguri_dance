@@ -41,6 +41,7 @@
             background-position: center;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            transition: background-image 0.5s ease; /* 배경 전환 시 부드러운 효과 */
         }
 
         /* 공통 화면 스타일 */
@@ -538,6 +539,17 @@
             cursor: pointer;
             margin-top: 5px;
         }
+
+        /* 👑 게임 오버 팝업 스타일 */
+        #game-over-popup {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
     </style>
 
     <script type="module">
@@ -713,6 +725,16 @@
         </div>
     </div>
 
+    <!-- 👑 게임 오버 팝업 추가 -->
+    <div id="game-over-popup">
+        <div class="btn-with-guide-container">
+            <button id="btn-game-over" class="img-btn origin-size-btn" onclick="closeGameOver()">
+                <img src="DD_GAMEOVER.png" alt="GAME OVER" onerror="this.style.display='none'; this.after('[GAME OVER - 클릭하여 돌아가기]');">
+            </button>
+            <span class="space-shortcut-guide">(space)</span>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -746,6 +768,14 @@
     let bgmMusicTimeoutId = null;
     let isBgmPlaying = false;
     let oceanWaveNode = null;       
+
+    // 👑 랜덤 배경 이미지 목록
+    const bgImages = [
+        'DD_Main_Image.png', 
+        'DD_Main_Image_PM4.png', 
+        'DD_Main_Image_PM5.png', 
+        'DD_Main_Image_PM6.png'
+    ];
 
     const collectionItems = [
         "🍍 하와이안 파인애플", "🌸 알로하 레이", "🕶️ 선글라스",
@@ -1085,6 +1115,12 @@
         }
     }
 
+    // 👑 배경을 무작위로 변경해주는 함수 추가
+    function changeRandomBackground() {
+        let randBg = bgImages[Math.floor(Math.random() * bgImages.length)];
+        document.getElementById('game-container').style.backgroundImage = `url('${randBg}')`;
+    }
+
     function goToGameStart() { 
         initAudioContext(); 
         let inputVal = document.getElementById('user-name-input').value.trim();
@@ -1108,6 +1144,9 @@
     function startGameLoop() {
         initAudioContext();
         showScreen('screen-game');
+        
+        changeRandomBackground(); // 👑 게임 시작 시 랜덤 배경 적용
+
         currentStage = 1;
         currentRound = 1;
         userLives = 5; 
@@ -1247,8 +1286,8 @@
             stopRoundTimer();
             stopStopwatch();
             setTimeout(() => {
-                alert("GAME OVER! 모든 하트를 잃었습니다.");
-                showScreen('screen-start');
+                // 👑 alert 대신 게임오버 버튼 팝업창 활성화
+                document.getElementById('game-over-popup').style.display = 'flex';
             }, 100);
             return;
         }
@@ -1260,6 +1299,12 @@
         initRound();
     }
 
+    // 👑 게임 오버 팝업 닫고 스타트 화면으로 보내는 함수
+    function closeGameOver() {
+        document.getElementById('game-over-popup').style.display = 'none';
+        showScreen('screen-start');
+    }
+
     // --- 키보드 이벤트 핸들러 ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
@@ -1267,6 +1312,7 @@
         let gameActive = document.getElementById('screen-game').classList.contains('active');
         
         let rewardPopupVisible = document.getElementById('reward-popup').style.display === 'flex';
+        let gameOverPopupVisible = document.getElementById('game-over-popup').style.display === 'flex';
         let nextContainer = document.getElementById('next-btn-container');
         let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
 
@@ -1292,10 +1338,16 @@
                 simulateBtnClick('btn-main-next', handleNextStageClick);
                 return;
             }
-            // [수정된 부분] 보상 팝업에서 Space 키 대응
+            // 👑 보상 팝업 스페이스 키 대응
             if (rewardPopupVisible) {
                 e.preventDefault();
                 simulateBtnClick('btn-reward-ok', closeRewardPopup);
+                return;
+            }
+            // 👑 게임 오버 팝업 스페이스 키 대응
+            if (gameOverPopupVisible) {
+                e.preventDefault();
+                simulateBtnClick('btn-game-over', closeGameOver);
                 return;
             }
         }
@@ -1369,6 +1421,9 @@
         if (currentStage < 3) {
             currentStage++;
             currentRound = 1;
+            
+            changeRandomBackground(); // 👑 스테이지 클리어하여 다음으로 넘어갈 때 배경 랜덤 전환
+
             initRound();
         } else {
             stopStopwatch();
