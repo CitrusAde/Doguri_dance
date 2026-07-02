@@ -2,9 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V27 (엔진 안정화 및 NPS 폰트 완전 호환)</title>
+    <title>도구리 하와이 댄스 게임 - V28 (클리어 팝업 전면 개편)</title>
     <style>
-        /* 👑 커스텀 NPS 폰트 등록 (에러 방지를 위해 경로 및 포맷 구조 최적화) */
+        /* 커스텀 NPS 폰트 등록 */
         @font-face {
             font-family: 'NPSfont_bold';
             src: url('NPSfont_bold.woff2') format('woff2'),
@@ -17,7 +17,6 @@
         * { 
             box-sizing: border-box; 
             user-select: none; 
-            /* 가독성 서체 순위 적용 */
             font-family: 'NPSfont_bold', 'LINESeedKR-Bd', 'Malgun Gothic', sans-serif; 
         }
         body {
@@ -31,7 +30,7 @@
             overflow: hidden;
         }
 
-        /* 16:9 고정 해상도 컨테이너 및 배경 화면 복구 */
+        /* 16:9 고정 해상도 컨테이너 */
         #game-container {
             width: 1280px;
             height: 720px;
@@ -172,7 +171,7 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
         }
 
-        /* 이미지 버튼 지침 */
+        /* 이미지 버튼 기본 지침 */
         .img-btn {
             cursor: pointer;
             border: none;
@@ -303,7 +302,7 @@
             gap: 15px;
         }
 
-        /* 라이프 패널 */
+        /* 하트 라이프 패널 그래픽 전치화 (0.7배 축소형) */
         .life-container-wrapper {
             position: absolute;
             bottom: 40px;
@@ -339,7 +338,7 @@
             opacity: 0;
         }
 
-        /* 인게임 무대 배치 */
+        /* 무대 요소 */
         #game-table {
             position: absolute;
             bottom: 120px;
@@ -359,7 +358,7 @@
             z-index: 2;
         }
 
-        /* 리듬 시퀀스 박스 */
+        /* 하단 리듬 제어 영역 */
         .rhythm-container {
             position: absolute;
             bottom: 80px;
@@ -371,6 +370,7 @@
             width: 900px;
             z-index: 4;
         }
+
         .arrow-sequence-box {
             display: flex;
             gap: 15px;
@@ -420,7 +420,7 @@
             z-index: 4;
         }
 
-        /* 팝업 UI 스타일 */
+        /* [구조 개편] 글로벌 및 도감 모달의 팝업 크기 가이드라인 지정 (826px x 461px 외경) */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -438,8 +438,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 0;
+            border: none;
             position: relative;
         }
+        /* 글로벌/도감 전용 내경 세이프 가이드 박스 (695px x 305px) */
         .popup-safe-box {
             width: 695px;
             height: 305px;
@@ -453,7 +456,9 @@
         }
         .popup-safe-box h2 {
             margin: 0 0 5px 0;
+            color: #000;
             font-size: 24px;
+            font-weight: bold;
         }
         .popup-safe-box p {
             font-size: 14px;
@@ -477,6 +482,7 @@
             background: rgba(255, 255, 255, 0.9);
             font-weight: bold;
             font-size: 13px;
+            color: #000;
         }
         .book-item.unlocked {
             background: #e3f2fd;
@@ -501,12 +507,14 @@
             justify-content: space-between;
             font-size: 14px;
             font-weight: bold;
+            color: #111;
             padding: 3px 8px;
             border-bottom: 1px dashed #aaa;
         }
         .leaderboard-row.my-row {
             background: #ffeb3b;
             border-radius: 4px;
+            border-bottom: none;
         }
 
         #next-btn-container {
@@ -516,69 +524,92 @@
             transform: translateX(-50%);
             z-index: 50;
         }
+
+        /* 👑 [1, 3번 구조 전면 개편] 요청 반영: 스테이지 클리어 팝업 크기를 절반 비율로 완벽 축소 고정 */
         #reward-popup {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: url('DD_Popup.png') no-repeat center center;
             background-size: 100% 100%;
-            width: 826px; height: 461px;
+            /* 기존 826x461의 가로세로 절반 스케일 축소 유도 */
+            width: 413px; 
+            height: 230px; 
             display: none;
             justify-content: center;
             align-items: center;
+            padding: 0;
             z-index: 150;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        .rank-badge { font-size: 54px; font-weight: 900; }
-        .rank-s { color: #ff1744; }
-        .rank-a { color: #ff9100; }
-        .rank-b { color: #00e676; }
+        /* 요청 반영: 스테이지 클리어 팝업의 텍스트들이 완벽 격리 가두어질 내경 프레임 크기 (625px x 261px 비율 연산 보정) */
+        .clear-safe-box {
+            width: 347px; /* 625px의 딱 절반 크기 */
+            height: 152px; /* 261px의 딱 절반 크기 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            color: #000;
+        }
+        
+        /* 👑 [2번 구조 전면 개편] 레트로 아케이드 감성의 영문 출력 텍스트 스타일 정의 */
+        .clear-header-text {
+            font-size: 22px;
+            font-weight: 900;
+            color: #000;
+            margin: 0 0 8px 0;
+            letter-spacing: 1px;
+        }
+        .clear-info-row {
+            font-size: 14px;
+            font-weight: bold;
+            color: #111;
+            margin: 2px 0;
+            letter-spacing: 0.5px;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* 공용 텍스트/이미지형 버튼 하단 마진 보정 */
         .close-btn {
             padding: 6px 20px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 5px;
         }
-    </style>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDL0ytMkp9lhXKNETfo_phU2mYybWSMLrc",
-            authDomain: "doguridance.firebaseapp.com",
-            databaseURL: "https://doguridance-default-rtdb.firebaseio.com",
-            projectId: "doguridance",
-            storageBucket: "doguridance.firebasestorage.app",
-            messagingSenderId: "692785013428",
-            appId: "1:692785013428:web:8d686d5ab3e669ed3d2de1",
-            measurementId: "G-1STG643F4L"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        window.dbRef = ref;
-        window.dbPush = push;
-        window.dbSet = set;
-        window.dbGet = get;
-        window.dbOnValue = onValue;
-        window.dbQuery = query;
-        window.dbOrderBy = orderByChild;
-        window.dbLimit = limitToFirst;
-        window.firebaseDb = database;
-        window.isFirebaseReady = true;
+        /* 👑 [4번 구조 전면 개편] DD_OK_Text.png 이미지 버튼을 위한 전용 스타일 정의 */
+        .ok-image-btn {
+            margin-top: 10px;
+            display: block;
+            background: none;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        .ok-image-btn:hover { transform: scale(1.08); }
+        .ok-image-btn:active { transform: scale(0.95); }
+        .ok-image-btn img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
     </script>
 </head>
 <body>
 
 <div id="game-container">
 
+    <!-- 🔊 오디오 제어 판넬 -->
     <div class="audio-controller-panel">
         <button class="audio-toggle-btn" id="btn-audio-mute" onclick="toggleAudioMute()">🔊</button>
         <input type="range" class="volume-slider" id="slider-volume" min="0" max="100" value="50" oninput="changeVolumeValue(this.value)">
     </div>
     
+    <!-- 1. 인트로 화면 -->
     <div id="screen-intro" class="screen active">
         <img id="main-logo" src="DD_Logo.png" alt="도구리 로고" onerror="this.style.display='none'; this.after('[DD_Logo]');">
         
@@ -598,6 +629,7 @@
         </div>
     </div>
 
+    <!-- 2. 게임 시작 화면 -->
     <div id="screen-start" class="screen">
         <button id="btn-main-back" class="img-btn top-right-back" onclick="goToIntro()">
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
@@ -644,6 +676,7 @@
         </div>
     </div>
 
+    <!-- 3. 인게임 화면 -->
     <div id="screen-game" class="screen">
         <div class="game-status">
             <span id="txt-difficulty">난이도: 쉬움</span> | 
@@ -676,18 +709,22 @@
         </div>
     </div>
 
+    <!-- 👑 [1, 2, 3, 4번 통합 대개편] 절반 크기(413x230 외경) 및 625x261비율 축소 내경으로 가둔 신형 아케이드 영문 클리어 결과창 -->
     <div id="reward-popup">
-        <div class="popup-safe-box">
-            <h2>🌴 스테이지 클리어! 🌴</h2>
-            <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
-            <p id="popup-playtime-result" style="font-weight: bold; margin: 0;">기록: 0.00초</p>
-            <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
-            <p style="margin: 3px 0 0 0; font-weight: bold; font-size:13px;">🎁 하와이 기념 도감 보상 🎁</p>
-            <div id="reward-item-name" style="font-size: 20px; font-weight: bold; color: #1565c0; margin-bottom: 8px;">[아이템]</div>
-            <button class="close-btn" onclick="closeRewardPopup()">확인</button>
+        <div class="clear-safe-box">
+            <!-- 자바스크립트에서 EASY CLEAR / NORMAL CLEAR / HARD CLEAR 실시간 조절 연동 -->
+            <div id="txt-popup-clear-title" class="clear-header-text">EASY CLEAR</div>
+            <div id="txt-popup-clear-time" class="clear-info-row">TIME : 0.00s</div>
+            <div id="txt-popup-clear-gift" class="clear-info-row">GIFT : -</div>
+            
+            <!-- 확인 텍스트 버튼 대신 DD_OK_Text.png 이미지 형태의 터치형 버튼 인터페이스 배치 완료 -->
+            <button class="ok-image-btn" onclick="closeRewardPopup()">
+                <img src="DD_OK_Text.png" alt="OK" id="img-popup-ok-btn" onerror="this.style.display='none'; this.after('OK');">
+            </button>
         </div>
     </div>
 
+    <!-- 글로벌 실시간 TOP 10 랭킹 모달 레이어 -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content">
             <div class="popup-safe-box">
@@ -699,6 +736,7 @@
         </div>
     </div>
 
+    <!-- 도감 모달 -->
     <div id="collection-modal" class="modal">
         <div class="modal-content">
             <div class="popup-safe-box">
@@ -764,7 +802,6 @@
         updateDoguriImage();
         setupButtonEffects();
         
-        // 💡 브라우저 정책상 상호작용 후 사운드가 시작되므로 최초 클릭/키 핸들러 연동
         document.body.addEventListener('click', () => { initAudioContext(); }, { once: true });
         document.body.addEventListener('keydown', () => { initAudioContext(); }, { once: true });
     };
@@ -920,7 +957,7 @@
                 osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
             }
 
-            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime); 
+            gainNode.gain.setValueAtTime(0.88, audioCtx.currentTime); 
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
 
             osc.connect(gainNode);
@@ -928,7 +965,7 @@
 
             osc.start();
             osc.stop(audioCtx.currentTime + duration);
-        } catch (e) { console.error("사운드 에러:", e); }
+        } catch (e) { console.error("사운드 재생 에러:", e); }
     }
 
     function playHitSound(comboIndex) {
@@ -996,8 +1033,8 @@
 
     function checkAndUploadScore(nickname, elapsedMs) {
         if (!window.isFirebaseReady) return;
-        let statusText = document.getElementById('popup-firebase-status');
-        statusText.innerText = "순위 연산 판독 중...";
+        let statusText = document.getElementById('txt-popup-firebase-status') || { innerText: "", style: {} };
+        statusText.innerText = "RANKING UPLOADING...";
         statusText.style.color = "#ffeb3b";
 
         const scoreRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
@@ -1008,7 +1045,8 @@
             snapshot.forEach((child) => { records.push(child.val().playTime); });
 
             if (records.length < 10 || elapsedMs < records[records.length - 1]) {
-                statusText.innerText = "⭐ TOP 10 랭크인 진입! 기록 업로드 중...";
+                statusText.innerText = "⭐ NEW TOP 10 RECORD!";
+                statusText.style.color = "#4caf50";
                 const scoreListRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
                 const newScoreRef = window.dbPush(scoreListRef);
 
@@ -1016,19 +1054,16 @@
                     name: nickname,
                     playTime: elapsedMs,
                     timestamp: Date.now()
-                }).then(() => {
-                    statusText.innerText = "✓ 글로벌 실시간 10위권 등록 성공!";
-                    statusText.style.color = "#4caf50";
                 }).catch(() => {
-                    statusText.innerText = "서버 연결 지연";
+                    statusText.innerText = "SERVER ERROR";
                     statusText.style.color = "#f44336";
                 });
             } else {
-                statusText.innerText = "아쉽게도 아케이드 10위권 순위 내에 진입하지 못했습니다.";
+                statusText.innerText = "FINISH!";
                 statusText.style.color = "#444";
             }
         }).catch(() => {
-            statusText.innerText = "오프라인 모드 플레이 완료";
+            statusText.innerText = "OFFLINE MODE";
         });
     }
 
@@ -1071,6 +1106,7 @@
         document.getElementById(screenId).classList.add('active');
     }
 
+    // 캐릭터 스프라이트 교체 
     function setCharacterImage(srcPath, fallbackText) {
         let charImg = document.getElementById('doguri-char');
         if (charImg) {
@@ -1127,6 +1163,7 @@
         }, 30);
     }
 
+    // 스톱워치 중지
     function stopStopwatch() {
         if(stopwatchIntervalId) {
             clearInterval(stopwatchIntervalId);
@@ -1317,9 +1354,6 @@
 
             if (e.key === targetKey) {
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
-                
-                // 🔊 타격음 정상 바인딩 및 화살표 인덱스 증가
-                playHitSound(currentArrowIndex);
                 currentArrowIndex++;
 
                 let randomDanceNum = Math.floor(Math.random() * 4) + 1;
@@ -1366,29 +1400,17 @@
         }
     }
 
+    // 👑 [수정반영]: 축소 프레임 가이드 연산 및 아케이드 영문 텍스트 연동 트리거 함수
     function giveRandomRewardAndRank() {
         if (isRewardGivenThisGame) return;
         isRewardGivenThisGame = true; 
 
         let finalTimeSec = totalElapsedTime / 1000;
-        document.getElementById('popup-playtime-result').innerText = `최종 클리어 시간: ${finalTimeSec.toFixed(2)}초`;
+        let diffUpper = currentDifficulty.toUpperCase();
 
-        let rankLetter = 'B';
-        let badgeEl = document.getElementById('popup-rank-badge');
-        
-        if (currentDifficulty === 'easy') {
-            if (finalTimeSec <= 22) rankLetter = 'S';
-            else if (finalTimeSec <= 32) rankLetter = 'A';
-        } else if (currentDifficulty === 'normal') {
-            if (finalTimeSec <= 26) rankLetter = 'S';
-            else if (finalTimeSec <= 38) rankLetter = 'A';
-        } else { 
-            if (finalTimeSec <= 30) rankLetter = 'S';
-            else if (finalTimeSec <= 45) rankLetter = 'A';
-        }
-
-        badgeEl.innerText = rankLetter;
-        badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
+        // 1. 요청양식 맵핑 구조: 난이도 + CLEAR 타이틀화
+        document.getElementById('popup-clear-title').innerText = `${diffIneTag(diffUpper(currentDifficulty))} CLEAR`;
+        document.getElementById('popup-time-text').innerText = `TIME : ${finalTimeSec.toFixed(2)}s`;
 
         checkAndUploadScore(globalNickname, totalElapsedTime);
 
@@ -1399,9 +1421,19 @@
         initCollectionUI();
         updateDoguriImage();
 
-        document.getElementById('reward-item-name').innerText = collectionItems[randomIndex];
+        document.getElementById('popup-gift-text').innerText = `GIFT : ${collectionItems[randomIndex]}`;
         document.getElementById('reward-popup').style.display = 'flex';
     }
+
+    function diffUpper(diff) {
+        if(diff === 'easy') return 'EASY';
+        if(diff === 'normal') return 'NORMAL';
+        return 'HARD';
+    }
+
+    // 가독성 헬퍼 바인딩
+    window.handleNextStageClick = handleNextStageClick;
+    window.selectDifficulty = selectDifficulty;
 
     function closeRewardPopup() {
         document.getElementById('reward-popup').style.display = 'none';
