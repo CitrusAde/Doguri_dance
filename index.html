@@ -2,7 +2,10 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V24 (공용 팝업 에셋 매핑)</title>
+    <title>도구리 하와이 댄스 게임 - V24 (사운드 복구 및 팝업 규격 수정)</title>
+    <!-- 👑 게임 전체의 감성을 살려줄 귀엽고 동글동글한 구글 웹폰트 'Gamja Flower' 임포트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Gamja+Flower&display=swap" rel="stylesheet">
+    
     <style>
         * { box-sizing: border-box; user-select: none; }
         body {
@@ -13,7 +16,8 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            font-family: 'Malgun Gothic', sans-serif;
+            /* 👑 글로벌 폰트 변경 사항 전치 반영 */
+            font-family: 'Gamja Flower', 'Malgun Gothic', sans-serif;
             overflow: hidden;
         }
 
@@ -42,25 +46,28 @@
         }
         .screen.active { display: flex; }
 
-        /* 🔊 좌측 상단 소리 제어 패널 */
+        /* 🔊 [구조 변경] 좌측 상단 소리 제어 패널 - DD_Nick_Bg.png를 미니 축소 배경으로 교체 */
         .audio-controller-panel {
             position: absolute;
             top: 30px;
             left: 40px;
-            background: rgba(0, 0, 0, 0.75);
-            border: 2px solid #fff;
+            background: url('DD_Nick_Bg.png') no-repeat center center;
+            background-size: cover;
             border-radius: 12px;
-            padding: 10px 15px;
+            padding: 8px 15px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             z-index: 100;
+            width: 160px;
+            height: 48px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
         .audio-toggle-btn {
             background: none;
             border: none;
-            color: #fff;
-            font-size: 20px;
+            color: #000; /* 어두운 배경 아이콘 감도 유지 */
+            font-size: 22px;
             cursor: pointer;
             padding: 0;
             display: flex;
@@ -73,9 +80,9 @@
         .volume-slider {
             -webkit-appearance: none;
             appearance: none;
-            width: 80px;
+            width: 75px;
             height: 6px;
-            background: #555;
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 3px;
             outline: none;
             cursor: pointer;
@@ -86,7 +93,7 @@
             width: 14px;
             height: 14px;
             border-radius: 50%;
-            background: #ffeb3b;
+            background: #ff1744;
             cursor: pointer;
         }
 
@@ -135,10 +142,10 @@
             border: none;
             outline: none;
             color: #000;
-            font-size: 26px; 
+            font-size: 28px; 
             font-weight: bold;
             text-align: center;
-            font-family: 'Malgun Gothic', sans-serif;
+            font-family: 'Gamja Flower', sans-serif;
         }
 
         /* 버튼 가이드 래퍼 세트 */
@@ -149,8 +156,8 @@
             gap: 8px;
         }
         .space-shortcut-guide {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
             font-weight: bold;
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -178,7 +185,7 @@
 
         .bottom-dance-position {
             position: absolute;
-            bottom: 45px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -220,14 +227,15 @@
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
+            font-family: 'Gamja Flower', sans-serif;
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.8); }
 
-        /* 난이도 이미지 버튼 그룹 */
+        /* [요청 반영] 난이도 이미지 버튼 그룹 위치 대폭 하향 수리 (기존 200px -> 100px 하향 조정) */
         .difficulty-group {
             position: absolute;
-            bottom: 200px; 
+            bottom: 100px; 
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -280,7 +288,7 @@
             color: white;
             padding: 10px 20px;
             border-radius: 10px;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             z-index: 5;
             display: flex;
@@ -400,7 +408,7 @@
             bottom: 210px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 34px;
+            font-size: 36px;
             font-weight: bold;
             text-shadow: 0 3px 6px rgba(0,0,0,0.9);
             z-index: 4;
@@ -415,7 +423,7 @@
         .rank-a { color: #ff9100; }
         .rank-b { color: #00e676; }
 
-        /* 👑 [구조 개편] 공용 팝업 모달 마크업 - DD_Popup.png 이미지 배경 통합 장착 */
+        /* 👑 [구조 대수정] 요청반영: 826px x 461px 외곽 해상도 팝업 모달 하우징 구축 */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -425,46 +433,60 @@
             align-items: center;
             z-index: 120;
         }
-        /* 요청반영: 모달 내부 흰색 박스를 걷어내고 DD_Popup.png 배경 이미지 고정 적용 */
         .modal-content {
             background: url('DD_Popup.png') no-repeat center center;
             background-size: contain;
-            width: 650px; /* 에셋 디자인 비율을 고려한 너비 조절 */
-            height: 550px; /* 에셋 디자인 비율을 고려한 높이 조절 */
+            width: 826px;  /* 팝업 전체 가로 고정 크기 */
+            height: 461px; /* 팝업 전체 세로 고정 크기 */
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0;
+        }
+        /* 👑 [핵심] 요청반영: 695px x 305px 안전 격리 구역 전용 콘텐츠 배치 래퍼 박스 */
+        .popup-safe-content-zone {
+            width: 695px;  /* 안전 구역 가로 고정 */
+            height: 305px; /* 안전 구역 세로 고정 */
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 40px;
-            color: #000; /* 어두운 계열의 텍스트가 돋보이도록 유도 */
+            justify-content: space-between; /* 텍스트와 하단 닫기 버튼 배치의 균형 유지 */
+            overflow: hidden;
             text-align: center;
+            color: #000;
+            padding: 10px;
         }
-        .modal-content h2 {
-            margin-top: 0;
-            margin-bottom: 10px;
+        
+        .popup-safe-content-zone h2 {
+            margin: 0 0 5px 0;
             color: #111;
-            font-size: 26px;
+            font-size: 32px;
+            font-weight: bold;
         }
-        .modal-content p {
-            font-size: 14px;
-            color: #444;
-            margin-top: 0;
+        .popup-safe-content-zone p {
+            font-size: 18px;
+            color: #333;
+            margin: 0;
         }
+        
         .book-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 15px 0;
-            width: 90%;
+            gap: 10px;
+            margin: 5px 0;
+            width: 100%;
+            max-height: 190px;
+            overflow-y: auto;
         }
         .book-item {
-            border: 2px solid #aaa;
-            padding: 12px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #888;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
             font-weight: bold;
-            font-size: 14px;
-            color: #333;
+            font-size: 16px;
+            color: #222;
         }
         .book-item.unlocked {
             background: #e3f2fd;
@@ -472,26 +494,26 @@
             color: #1565c0;
         }
 
-        /* 랭킹 모달 리스트 컨텐츠 영역 보정 */
         .leaderboard-modal-list {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #bbb;
-            min-height: 220px;
-            width: 90%;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #999;
+            height: 190px;
+            width: 100%;
+            overflow-y: auto;
         }
         .leaderboard-row {
             display: flex;
             justify-content: space-between;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
-            color: #333;
-            padding: 4px 10px;
-            border-bottom: 1px dashed #ccc;
+            color: #222;
+            padding: 2px 10px;
+            border-bottom: 1px dashed #bbb;
         }
         .leaderboard-row.my-row {
             background: #ffeb3b;
@@ -507,24 +529,34 @@
             z-index: 50;
         }
 
-        /* 👑 요청반영: 스테이지 클리어 팝업 창의 배경도 DD_Popup.png 이미지 배경으로 완전 변환 */
+        /* 👑 요청반영: 스테이지 결과창 리워드 팝업 역시 동일한 안전지대 규격 분할 적용 */
         #reward-popup {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: url('DD_Popup.png') no-repeat center center;
             background-size: contain;
-            width: 650px;
-            height: 550px;
+            width: 826px;
+            height: 461px;
             display: none;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: 40px;
+            align-items: center;
             z-index: 150;
-            color: #000;
-            text-align: center;
+            padding: 0;
         }
+        .close-btn {
+            padding: 6px 20px;
+            background: #333;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 18px;
+            font-family: 'Gamja Flower', sans-serif;
+            margin-top: 5px;
+        }
+        .close-btn:hover { background: #000; }
     </style>
 
     <!-- 파이어베이스 SDK 바인딩 -->
@@ -595,6 +627,7 @@
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
+        <!-- 난이도 이미지 버튼 그룹 (100px 완벽 하향 정렬 가시성 확보) -->
         <div class="difficulty-group">
             <div id="slot-easy" class="diff-btn-slot selected" onclick="selectDifficulty('easy')">
                 <img class="diff-glow-layer" src="DD_Easy_Button_Glow.png" alt="쉬움 글로우" onerror="this.style.display='none';">
@@ -625,7 +658,7 @@
             <span class="space-shortcut-guide">(space)</span>
         </div>
 
-        <!-- 우측 하단 레이아웃 제어 컨테이너 (원본 크기 노출 복구) -->
+        <!-- 우측 하단 레이아웃 제어 컨테이너 -->
         <div class="bottom-right-container">
             <button id="btn-main-rank" class="img-btn origin-size-btn" onclick="openLeaderboardModal()">
                 <img src="DD_Highscore.png" alt="HIGHSCORE" onerror="this.style.display='none'; this.after('[HIGHSCORE]');">
@@ -675,42 +708,39 @@
         </div>
     </div>
 
-    <!-- 👑 요청반영: 스테이지 결과창의 배경을 DD_Popup.png 이미지 레이어로 교체 가독성 교정 -->
+    <!-- 👑 요청반영: 695px x 305px 격리 안착형 스테이지 결과창 리워드 팝업 -->
     <div id="reward-popup">
-        <h2 style="color: #222; font-weight: bold; margin-bottom: 0;">🌴 스테이지 클리어! 🌴</h2>
-        
-        <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
-        <p id="popup-playtime-result" style="font-size: 16px; margin: 0; color: #333; font-weight: bold;">기록: 0.00초</p>
-        <p id="popup-firebase-status" style="font-size: 14px; margin: 2px 0 10px 0; color: #ff1744; font-weight: bold;">순위 판단 중...</p>
-
-        <hr style="border: 0; height: 1px; background: #bbb; margin: 10px 0; width: 80%;">
-        <p style="font-size: 15px; color: #444; margin-bottom: 3px; font-weight: bold;">🎁 하와이 기념 도감 보상 🎁</p>
-        <div id="reward-item-name" style="font-size: 24px; font-weight: bold; color: #1565c0; margin-bottom: 15px;">[아이템]</div>
-        
-        <button class="close-btn" onclick="closeRewardPopup()">확인</button>
-    </div>
-
-    <!-- 🏆 글로벌 실시간 TOP 10 랭킹 모달 레이어 (요청반영: DD_Popup 배경 적용) -->
-    <div id="leaderboard-modal" class="modal">
-        <div class="modal-content">
-            <h2 id="modal-rank-title">🏆 글로벌 실시간 랭킹</h2>
-            <p>현재 선택된 난이도의 TOP 10 기록입니다.</p>
-            
-            <div class="leaderboard-modal-list" id="modal-rank-rows">
-                <div style="text-align:center; color:#999; padding-top:80px;">서버 데이터 수신 중...</div>
-            </div>
-            
-            <button class="close-btn" onclick="closeLeaderboardModal()">닫기</button>
+        <div class="popup-safe-content-zone">
+            <h2>🌴 스테이지 클리어! 🌴</h2>
+            <p style="font-size: 20px; font-weight: bold;">최종 순위 산출 등급: <span id="popup-rank-badge" style="color:#ff1744; font-size:24px;">S</span></p>
+            <p id="popup-playtime-result" style="font-weight: bold;">기록: 0.00초</p>
+            <p id="popup-firebase-status" style="color: #1565c0; font-weight: bold; font-size:16px;">순위 판단 중...</p>
+            <div style="font-size: 16px; font-weight: bold; color: #555;">🎁 하와이 기념 도감 보상: <span id="reward-item-name" style="color: #4caf50; font-size:18px;">[아이템]</span></div>
+            <button class="close-btn" onclick="closeRewardPopup()">확인</button>
         </div>
     </div>
 
-    <!-- 🎒 도구리 도감 모달 (요청반영: DD_Popup 배경 적용) -->
+    <!-- 🏆 글로벌 실시간 TOP 10 랭킹 모달 레이어 (요청반영: 695px x 305px 안전지대 격리식 적용 완료) -->
+    <div id="leaderboard-modal" class="modal">
+        <div class="modal-content">
+            <div class="popup-safe-content-zone">
+                <h2 id="modal-rank-title" style="font-size:24px;">🏆 글로벌 실시간 랭킹</h2>
+                <div class="leaderboard-modal-list" id="modal-rank-rows">
+                    <div style="text-align:center; color:#999; padding-top:60px;">서버 데이터 수신 중...</div>
+                </div>
+                <button class="close-btn" onclick="closeLeaderboardModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎒 도구리 도감 모달 (요청반영: 695px x 305px 안전지대 격리식 적용 완료) -->
     <div id="collection-modal" class="modal">
         <div class="modal-content">
-            <h2>🎒 도구리의 하와이 도감</h2>
-            <p>총 9가지 기념품을 모두 모아보세요!</p>
-            <div class="book-grid" id="book-grid-container"></div>
-            <button class="close-btn" onclick="closeCollection()">닫기</button>
+            <div class="popup-safe-content-zone">
+                <h2 style="font-size:24px;">🎒 도구리의 하와이 도감</h2>
+                <div class="book-grid" id="book-grid-container"></div>
+                <button class="close-btn" onclick="closeCollection()">닫기</button>
+            </div>
         </div>
     </div>
 
@@ -757,7 +787,6 @@
     let unlockedItems = new Set();
     const STORAGE_KEY_ITEMS = "doguri_unlocked_items_firebase_v1";
 
-    const BG_MAIN = "DD_Main_Image.png";
     const DOGURI_BASE = "doguri_image_base.png";
     const DOGURI_UPGRADE = "doguri_image_upgrade.png";
 
@@ -765,14 +794,13 @@
     const arrowNames = { 'ArrowLeft': 'Left', 'ArrowRight': 'Right', 'ArrowDown': 'Down', 'ArrowUp': 'Up' };
 
     window.onload = function() {
-        document.getElementById('game-container').style.backgroundImage = `url('${BG_MAIN}')`;
         loadLocalStorageData();
         initCollectionUI();
         updateDoguriImage();
         setupButtonEffects();
     };
 
-    // --- 🔊 오디오 코어 및 BGM 루프 엔진 ---
+    // --- 🔊 오디오 코어 및 BGM 루프 엔진 (비트음 강제 구동 보강) ---
     function initAudioContext() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -911,6 +939,7 @@
         playNextBgmNote();
     }
 
+    // 👑 효과음 고유 피크 파워 가이드 안정화 (비트음 연동)
     function playBeep(frequency, duration, type = 'square', customEndFreq = null) {
         try {
             initAudioContext();
@@ -948,6 +977,8 @@
         playBeep(440, 0.05, 'triangle');
     }
 
+    document.addEventListener('click', () => { initAudioContext(); }); // 전역 안전 잠금 장치 해제 트리거
+
     function playStageClearSound() {
         playBeep(523.25, 0.1, 'square'); 
         setTimeout(() => { playBeep(659.25, 0.25, 'square'); }, 80);
@@ -980,7 +1011,7 @@
             rowsContainer.innerHTML = '';
 
             if (!snapshot.exists()) {
-                rowsContainer.innerHTML = '<div style="text-align:center; color:#999; padding-top:80px;">등록된 기록이 없습니다. 최초의 명예를 얻으세요!</div>';
+                rowsContainer.innerHTML = '<div style="text-align:center; color:#999; padding-top:40px; font-size:22px;">등록된 기록이 없습니다.</div>';
                 return;
             }
 
@@ -1035,8 +1066,8 @@
                     statusText.style.color = "#f44336";
                 });
             } else {
-                statusText.innerText = "아쉽게도 아케이드 10위권 순위 내에 진입하지 못했습니다.";
-                statusText.style.color = "#999";
+                statusText.innerText = "아쉽게도 아케이드 10위권 진입 실패";
+                statusText.style.color = "#555";
             }
         }).catch((err) => {
             console.error("판독 스레드 오류:", err);
@@ -1078,7 +1109,6 @@
         }
     }
 
-    // 화면 페이드 제어
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
@@ -1102,6 +1132,7 @@
         showScreen('screen-start'); 
     }
 
+    // 뒤로가기
     function goToIntro() { 
         stopRoundTimer();
         stopStopwatch();
@@ -1272,7 +1303,7 @@
         initRound();
     }
 
-    // --- 키보드 이벤트 핸들러 ---
+    // --- 키보드 인터럽트 처리기 ---
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1285,6 +1316,7 @@
         if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
         if(document.getElementById('collection-modal').style.display === 'flex') return;
 
+        // 👑 키보드 다운 스트로크 시점에 사운드 재생 상태 한 번 더 체크해서 안전 복구
         initAudioContext(); 
 
         if (e.key === ' ' || e.key === 'Spacebar') {
@@ -1341,6 +1373,9 @@
 
             if (e.key === targetKey) {
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
+                
+                // 👑 오디오 서브시스템으로 정타 비트음 주파수 발사!
+                playHitSound(currentArrowIndex);
                 currentArrowIndex++;
 
                 let randomDanceNum = Math.floor(Math.random() * 4) + 1;
@@ -1409,7 +1444,6 @@
         }
 
         badgeEl.innerText = rankLetter;
-        badgeEl.className = `rank-badge rank-${rankLetter.toLowerCase()}`;
 
         checkAndUploadScore(globalNickname, totalElapsedTime);
 
