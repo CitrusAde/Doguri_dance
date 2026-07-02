@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V28 (클리어 팝업 전면 개편)</title>
+    <title>도구리 하와이 댄스 게임 - V28 (코드 충돌 완전 수정본)</title>
     <style>
         /* 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -420,7 +420,7 @@
             z-index: 4;
         }
 
-        /* [구조 개편] 글로벌 및 도감 모달의 팝업 크기 가이드라인 지정 (826px x 461px 외경) */
+        /* 글로벌 및 도감 모달의 팝업 크기 가이드라인 지정 (826px x 461px 외경) */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -525,14 +525,13 @@
             z-index: 50;
         }
 
-        /* 👑 [1, 3번 구조 전면 개편] 요청 반영: 스테이지 클리어 팝업 크기를 절반 비율로 완벽 축소 고정 */
+        /* 👑 [1, 3번 구조] 요청 반영: 스테이지 클리어 팝업 크기를 절반 비율로 완벽 축소 고정 */
         #reward-popup {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
             background: url('DD_Popup.png') no-repeat center center;
             background-size: 100% 100%;
-            /* 기존 826x461의 가로세로 절반 스케일 축소 유도 */
             width: 413px; 
             height: 230px; 
             display: none;
@@ -542,10 +541,10 @@
             z-index: 150;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        /* 요청 반영: 스테이지 클리어 팝업의 텍스트들이 완벽 격리 가두어질 내경 프레임 크기 (625px x 261px 비율 연산 보정) */
+        /* 요청 반영: 스테이지 클리어 팝업의 텍스트 배치 세이프 박스 내경 크기 (625px x 261px 비율의 절반 수치 분할 세팅) */
         .clear-safe-box {
-            width: 347px; /* 625px의 딱 절반 크기 */
-            height: 152px; /* 261px의 딱 절반 크기 */
+            width: 347px; 
+            height: 152px; 
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -555,7 +554,7 @@
             color: #000;
         }
         
-        /* 👑 [2번 구조 전면 개편] 레트로 아케이드 감성의 영문 출력 텍스트 스타일 정의 */
+        /* 👑 [2번 구조] 레드로 아케이드 감성의 영문 전용 스코어 보드 텍스트 CSS 규격 */
         .clear-header-text {
             font-size: 22px;
             font-weight: 900;
@@ -573,14 +572,13 @@
             width: 100%;
         }
 
-        /* 공용 텍스트/이미지형 버튼 하단 마진 보정 */
         .close-btn {
             padding: 6px 20px;
             font-weight: bold;
             cursor: pointer;
             margin-top: 5px;
         }
-        /* 👑 [4번 구조 전면 개편] DD_OK_Text.png 이미지 버튼을 위한 전용 스타일 정의 */
+        /* 👑 [4번 구조] DD_OK_Text.png 이미지 버튼 바인딩 스타일 */
         .ok-image-btn {
             margin-top: 10px;
             display: block;
@@ -597,6 +595,37 @@
             max-width: 100%;
             height: auto;
         }
+    </style>
+
+    <!-- 파이어베이스 SDK 바인딩 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, set, get, onValue, query, orderByChild, limitToFirst } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDL0ytMkp9lhXKNETfo_phU2mYybWSMLrc",
+            authDomain: "doguridance.firebaseapp.com",
+            databaseURL: "https://doguridance-default-rtdb.firebaseio.com",
+            projectId: "doguridance",
+            storageBucket: "doguridance.firebasestorage.app",
+            messagingSenderId: "692785013428",
+            appId: "1:692785013428:web:8d686d5ab3e669ed3d2de1",
+            measurementId: "G-1STG643F4L"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        window.dbRef = ref;
+        window.dbPush = push;
+        window.dbSet = set;
+        window.dbGet = get;
+        window.dbOnValue = onValue;
+        window.dbQuery = query;
+        window.dbOrderBy = orderByChild;
+        window.dbLimit = limitToFirst;
+        window.firebaseDb = database;
+        window.isFirebaseReady = true;
     </script>
 </head>
 <body>
@@ -622,7 +651,7 @@
         </div>
 
         <div class="btn-with-guide-container">
-            <button id="btn-main-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
+            <button id="btn-intro-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
                 <img src="DD_Main_Start_Button.png" alt="START" onerror="this.style.display='none'; this.after('[START 버튼]');">
             </button>
             <span class="space-shortcut-guide">(space)</span>
@@ -709,7 +738,7 @@
         </div>
     </div>
 
-    <!-- 👑 [1, 2, 3, 4번 통합 대개편] 절반 크기(413x230 외경) 및 625x261비율 축소 내경으로 가둔 신형 아케이드 영문 클리어 결과창 -->
+    <!-- 👑 [1, 2, 3, 4번 규격 통합 개편] 절반 축소형 외경 프레임 및 내경 텍스트 세이프 박스 팝업창 -->
     <div id="reward-popup">
         <div class="clear-safe-box">
             <!-- 자바스크립트에서 EASY CLEAR / NORMAL CLEAR / HARD CLEAR 실시간 조절 연동 -->
@@ -717,7 +746,7 @@
             <div id="txt-popup-clear-time" class="clear-info-row">TIME : 0.00s</div>
             <div id="txt-popup-clear-gift" class="clear-info-row">GIFT : -</div>
             
-            <!-- 확인 텍스트 버튼 대신 DD_OK_Text.png 이미지 형태의 터치형 버튼 인터페이스 배치 완료 -->
+            <!-- 확인 버튼 대신 DD_OK_Text.png 이미지형 버튼 교체 바인딩 완료 -->
             <button class="ok-image-btn" onclick="closeRewardPopup()">
                 <img src="DD_OK_Text.png" alt="OK" id="img-popup-ok-btn" onerror="this.style.display='none'; this.after('OK');">
             </button>
@@ -1033,9 +1062,6 @@
 
     function checkAndUploadScore(nickname, elapsedMs) {
         if (!window.isFirebaseReady) return;
-        let statusText = document.getElementById('txt-popup-firebase-status') || { innerText: "", style: {} };
-        statusText.innerText = "RANKING UPLOADING...";
-        statusText.style.color = "#ffeb3b";
 
         const scoreRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
         const rankQuery = window.dbQuery(scoreRef, window.dbOrderBy('playTime'), window.dbLimit(10));
@@ -1045,8 +1071,6 @@
             snapshot.forEach((child) => { records.push(child.val().playTime); });
 
             if (records.length < 10 || elapsedMs < records[records.length - 1]) {
-                statusText.innerText = "⭐ NEW TOP 10 RECORD!";
-                statusText.style.color = "#4caf50";
                 const scoreListRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
                 const newScoreRef = window.dbPush(scoreListRef);
 
@@ -1054,16 +1078,10 @@
                     name: nickname,
                     playTime: elapsedMs,
                     timestamp: Date.now()
-                }).catch(() => {
-                    statusText.innerText = "SERVER ERROR";
-                    statusText.style.color = "#f44336";
                 });
-            } else {
-                statusText.innerText = "FINISH!";
-                statusText.style.color = "#444";
             }
-        }).catch(() => {
-            statusText.innerText = "OFFLINE MODE";
+        }).catch((err) => {
+            console.error("서버 통신 락 분치 오류:", err);
         });
     }
 
@@ -1106,7 +1124,6 @@
         document.getElementById(screenId).classList.add('active');
     }
 
-    // 캐릭터 스프라이트 교체 
     function setCharacterImage(srcPath, fallbackText) {
         let charImg = document.getElementById('doguri-char');
         if (charImg) {
@@ -1163,7 +1180,6 @@
         }, 30);
     }
 
-    // 스톱워치 중지
     function stopStopwatch() {
         if(stopwatchIntervalId) {
             clearInterval(stopwatchIntervalId);
@@ -1312,7 +1328,7 @@
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (introActive) {
                 e.preventDefault();
-                simulateBtnClick('btn-main-start', goToGameStart);
+                simulateBtnClick('btn-intro-start', goToGameStart);
                 return;
             }
             if (startActive) {
@@ -1400,17 +1416,21 @@
         }
     }
 
-    // 👑 [수정반영]: 축소 프레임 가이드 연산 및 아케이드 영문 텍스트 연동 트리거 함수
+    // 👑 [명칭 버그 완전 수정 완료] 정확한 결과창 타겟팅 및 요구 3개 로우 포맷 출력 스레드
     function giveRandomRewardAndRank() {
         if (isRewardGivenThisGame) return;
         isRewardGivenThisGame = true; 
 
         let finalTimeSec = totalElapsedTime / 1000;
-        let diffUpper = currentDifficulty.toUpperCase();
+        
+        // 영문 난이도 타이틀 연산 매핑
+        let upperTitle = 'EASY CLEAR';
+        if (currentDifficulty === 'normal') upperTitle = 'NORMAL CLEAR';
+        if (currentDifficulty === 'hard') upperTitle = 'HARD CLEAR';
 
-        // 1. 요청양식 맵핑 구조: 난이도 + CLEAR 타이틀화
-        document.getElementById('popup-clear-title').innerText = `${diffIneTag(diffUpper(currentDifficulty))} CLEAR`;
-        document.getElementById('popup-time-text').innerText = `TIME : ${finalTimeSec.toFixed(2)}s`;
+        // 정교한 HTML 아이디 동적 매핑
+        document.getElementById('txt-popup-clear-title').innerText = upperTitle;
+        document.getElementById('txt-popup-clear-time').innerText = `TIME : ${finalTimeSec.toFixed(2)}s`;
 
         checkAndUploadScore(globalNickname, totalElapsedTime);
 
@@ -1421,17 +1441,10 @@
         initCollectionUI();
         updateDoguriImage();
 
-        document.getElementById('popup-gift-text').innerText = `GIFT : ${collectionItems[randomIndex]}`;
+        document.getElementById('txt-popup-clear-gift').innerText = `GIFT : ${collectionItems[randomIndex]}`;
         document.getElementById('reward-popup').style.display = 'flex';
     }
 
-    function diffUpper(diff) {
-        if(diff === 'easy') return 'EASY';
-        if(diff === 'normal') return 'NORMAL';
-        return 'HARD';
-    }
-
-    // 가독성 헬퍼 바인딩
     window.handleNextStageClick = handleNextStageClick;
     window.selectDifficulty = selectDifficulty;
 
