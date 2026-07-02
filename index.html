@@ -2,9 +2,9 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V27 (엔진 안정화 및 NPS 폰트 완전 호환)</title>
+    <title>도구리 하와이 댄스 게임 - V28 (세로형 팝업 및 연습모드 추가)</title>
     <style>
-        /* 👑 커스텀 NPS 폰트 등록 (에러 방지를 위해 경로 및 포맷 구조 최적화) */
+        /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
             font-family: 'NPSfont_bold';
             src: url('NPSfont_bold.woff2') format('woff2'),
@@ -17,7 +17,6 @@
         * { 
             box-sizing: border-box; 
             user-select: none; 
-            /* 가독성 서체 순위 적용 */
             font-family: 'NPSfont_bold', 'LINESeedKR-Bd', 'Malgun Gothic', sans-serif; 
         }
         body {
@@ -31,7 +30,7 @@
             overflow: hidden;
         }
 
-        /* 16:9 고정 해상도 컨테이너 및 배경 화면 복구 */
+        /* 16:9 고정 해상도 컨테이너 */
         #game-container {
             width: 1280px;
             height: 720px;
@@ -41,7 +40,7 @@
             background-position: center;
             overflow: hidden;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            transition: background-image 0.5s ease; /* 배경 전환 시 부드러운 효과 */
+            transition: background-image 0.5s ease;
         }
 
         /* 공통 화면 스타일 */
@@ -241,6 +240,24 @@
         }
         .dummy-reset-btn:hover { background: rgba(244, 67, 54, 0.8); }
 
+        /* 연습 모드 영역 (난이도 선택창 상단) */
+        #practice-ui {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 5;
+        }
+        .practice-title {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
         /* 난이도 이미지 버튼 그룹 */
         .difficulty-group {
             position: absolute;
@@ -421,93 +438,136 @@
             z-index: 4;
         }
 
-        /* 팝업 UI 스타일 */
+        /* 팝업 공통 배경 모달 */
         .modal {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 120;
         }
-        .modal-content {
+
+        /* 가로형 보상 팝업 */
+        .modal-content-horizontal {
             background: url('DD_Popup.png') no-repeat center center;
             background-size: 100% 100%;
-            width: 826px; 
-            height: 461px; 
+            width: 826px; height: 461px;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
         }
-        .popup-safe-box {
-            width: 695px;
-            height: 305px;
+        .popup-safe-box-horizontal {
+            width: 695px; height: 305px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #000;
+        }
+
+        /* 👑 세로형 9:16 팝업 (하이스코어, 도감) */
+        .modal-content-vertical {
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center center;
+            width: 384px; 
+            height: 688px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .popup-safe-box-vertical {
+            width: 279px; 
+            height: 520px; 
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
             position: relative;
-            color: #000;
-        }
-        .popup-safe-box h2 {
-            margin: 0 0 5px 0;
-            font-size: 24px;
-        }
-        .popup-safe-box p {
-            font-size: 14px;
-            color: #333;
-            margin: 0 0 5px 0;
+            color: #fff;
         }
 
-        .book-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 10px 0;
+        /* 랭킹 탭 버튼 */
+        .rank-tabs {
+            display: flex;
+            gap: 5px;
             width: 100%;
-            max-height: 180px;
-            overflow-y: auto;
+            margin-bottom: 15px;
+            justify-content: center;
         }
-        .book-item {
-            border: 2px solid #666;
-            padding: 8px;
+        .rank-tab-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 5px 12px;
             border-radius: 8px;
-            background: rgba(255, 255, 255, 0.9);
             font-weight: bold;
-            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.1s;
         }
-        .book-item.unlocked {
-            background: #e3f2fd;
-            border-color: #2196f3;
-            color: #1565c0;
+        .rank-tab-btn.active {
+            background: #ffeb3b;
+            color: #000;
+            border-color: #ffeb3b;
         }
 
+        /* 랭킹 리스트 (배경 투명화) */
         .leaderboard-modal-list {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 10px;
-            border: 2px solid #555;
-            height: 180px;
-            overflow-y: auto;
+            gap: 8px;
             width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 5px;
         }
         .leaderboard-row {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
-            padding: 3px 8px;
-            border-bottom: 1px dashed #aaa;
+            padding: 5px 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
         }
         .leaderboard-row.my-row {
-            background: #ffeb3b;
-            border-radius: 4px;
+            color: #ffeb3b;
+        }
+
+        /* 도감 3x3 정사각형 그리드 */
+        .square-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .square-item {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .square-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .modal-space-hint {
+            position: absolute;
+            bottom: -30px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         #next-btn-container {
@@ -517,30 +577,13 @@
             transform: translateX(-50%);
             z-index: 50;
         }
-        #reward-popup {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: url('DD_Popup.png') no-repeat center center;
-            background-size: 100% 100%;
-            width: 826px; height: 461px;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 150;
-        }
+
         .rank-badge { font-size: 54px; font-weight: 900; }
         .rank-s { color: #ff1744; }
         .rank-a { color: #ff9100; }
         .rank-b { color: #00e676; }
-        .close-btn {
-            padding: 6px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 5px;
-        }
 
-        /* 👑 게임 오버 팝업 스타일 */
+        /* 게임 오버 팝업 스타일 */
         #game-over-popup {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -615,6 +658,12 @@
             <img src="DD_Main_Back_Button.png" alt="뒤로가기" onerror="this.style.display='none'; this.after('← 뒤로가기');">
         </button>
 
+        <!-- 👑 연습(Practice) 모드 UI 추가 -->
+        <div id="practice-ui">
+            <div class="practice-title">🎮 연습 모드 (화살표를 눌러보세요)</div>
+            <div class="arrow-sequence-box" id="practice-sequence-area"></div>
+        </div>
+
         <div class="difficulty-group">
             <div id="slot-easy" class="diff-btn-slot selected" onclick="selectDifficulty('easy')">
                 <img class="diff-glow-layer" src="DD_Easy_Button_Glow.png" alt="쉬움 글로우" onerror="this.style.display='none';">
@@ -688,45 +737,51 @@
         </div>
     </div>
 
-    <div id="reward-popup">
-        <div class="popup-safe-box">
-            <h2>🌴 스테이지 클리어! 🌴</h2>
-            <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
-            <p id="popup-playtime-result" style="font-weight: bold; margin: 0;">기록: 0.00초</p>
-            <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
-            <p style="margin: 3px 0 0 0; font-weight: bold; font-size:13px;">🎁 하와이 기념 도감 보상 🎁</p>
-            <div id="reward-item-name" style="font-size: 20px; font-weight: bold; color: #1565c0; margin-bottom: 8px;">[아이템]</div>
-            
-            <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
-                <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
-            </button>
+    <!-- 리워드 팝업 (가로형 유지) -->
+    <div id="reward-popup" class="modal">
+        <div class="modal-content-horizontal">
+            <div class="popup-safe-box-horizontal">
+                <h2 style="margin: 0 0 5px 0; font-size: 24px;">🌴 스테이지 클리어! 🌴</h2>
+                <div id="popup-rank-badge" class="rank-badge rank-s">S</div>
+                <p id="popup-playtime-result" style="font-weight: bold; margin: 0; font-size: 14px;">기록: 0.00초</p>
+                <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
+                <p style="margin: 3px 0 0 0; font-weight: bold; font-size:13px;">🎁 하와이 기념 도감 보상 🎁</p>
+                <div id="reward-item-name" style="font-size: 20px; font-weight: bold; color: #1565c0; margin-bottom: 8px;">[아이템]</div>
+                
+                <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
+                    <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- 👑 세로형 리더보드 팝업 -->
     <div id="leaderboard-modal" class="modal">
-        <div class="modal-content">
-            <div class="popup-safe-box">
-                <h2 id="modal-rank-title" style="font-size:22px;">🏆 글로벌 실시간 랭킹</h2>
-                <p style="margin-bottom:6px;">현재 선택된 난이도의 TOP 10 기록입니다.</p>
+        <div class="modal-content-vertical" style="background-image: url('DD_Highscore_popup.png');">
+            <div class="popup-safe-box-vertical">
+                <div class="rank-tabs">
+                    <button id="tab-easy" class="rank-tab-btn" onclick="fetchServerLeaderboard('easy')">쉬움</button>
+                    <button id="tab-normal" class="rank-tab-btn" onclick="fetchServerLeaderboard('normal')">보통</button>
+                    <button id="tab-hard" class="rank-tab-btn" onclick="fetchServerLeaderboard('hard')">어려움</button>
+                </div>
                 <div class="leaderboard-modal-list" id="modal-rank-rows"></div>
-                <button class="close-btn" onclick="closeLeaderboardModal()">닫기</button>
+                <div class="modal-space-hint">(space)</div>
             </div>
         </div>
     </div>
 
+    <!-- 👑 세로형 도감 팝업 -->
     <div id="collection-modal" class="modal">
-        <div class="modal-content">
-            <div class="popup-safe-box">
-                <h2 style="font-size:22px;">🎒 도구리의 하와이 도감</h2>
-                <p style="margin-bottom:6px;">총 9가지 기념품을 모두 모아보세요!</p>
-                <div class="book-grid" id="book-grid-container"></div>
-                <button class="close-btn" onclick="closeCollection()">닫기</button>
+        <div class="modal-content-vertical" style="background-image: url('DD_Gift_popup.png');">
+            <div class="popup-safe-box-vertical">
+                <div class="square-grid" id="book-grid-container"></div>
+                <div class="modal-space-hint">(space)</div>
             </div>
         </div>
     </div>
 
-    <!-- 👑 게임 오버 팝업 추가 -->
-    <div id="game-over-popup">
+    <!-- 게임 오버 팝업 -->
+    <div id="game-over-popup" class="modal">
         <div class="btn-with-guide-container">
             <button id="btn-game-over" class="img-btn origin-size-btn" onclick="closeGameOver()">
                 <img src="DD_GAMEOVER.png" alt="GAME OVER" onerror="this.style.display='none'; this.after('[GAME OVER - 클릭하여 돌아가기]');">
@@ -751,6 +806,11 @@
     let isStageClearedWait = false; 
     let isRewardGivenThisGame = false; 
 
+    // 연습모드 변수
+    let practiceSequence = [];
+    let practiceIndex = 0;
+    let isPracticeProcessing = false;
+
     let roundTimerId = null;
     let timeLimit = 5000;            
     let timeRemaining = 5000;
@@ -769,7 +829,7 @@
     let isBgmPlaying = false;
     let oceanWaveNode = null;       
 
-    // 👑 랜덤 배경 이미지 목록
+    // 랜덤 배경 이미지 목록
     const bgImages = [
         'DD_Main_Image.png', 
         'DD_Main_Image_PM4.png', 
@@ -796,11 +856,24 @@
         initCollectionUI();
         updateDoguriImage();
         setupButtonEffects();
+        setupModalOutsideClick();
         
-        // 💡 브라우저 정책상 상호작용 후 사운드가 시작되므로 최초 클릭/키 핸들러 연동
         document.body.addEventListener('click', () => { initAudioContext(); }, { once: true });
         document.body.addEventListener('keydown', () => { initAudioContext(); }, { once: true });
     };
+
+    // 팝업 외부(배경 어두운 부분) 클릭 시 닫기
+    function setupModalOutsideClick() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                    if(this.id === 'reward-popup') goToGameStart();
+                    if(this.id === 'game-over-popup') showScreen('screen-start');
+                }
+            });
+        });
+    }
 
     function initAudioContext() {
         if (!audioCtx) {
@@ -995,12 +1068,15 @@
         } catch(e) { console.error("로컬 세이브 저장 실패:", e); }
     }
 
-    function fetchServerLeaderboard() {
+    // 👑 탭을 통해 난이도별로 리더보드 호출
+    window.fetchServerLeaderboard = function(diffLevel) {
         if (!window.isFirebaseReady) return;
-        let diffKo = currentDifficulty === 'easy' ? '쉬움' : currentDifficulty === 'normal' ? '보통' : '어려움';
-        document.getElementById('modal-rank-title').innerText = `🏆 글로벌 실시간 TOP 10 (${diffKo})`;
+        
+        // 탭 스타일 활성화 갱신
+        document.querySelectorAll('.rank-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${diffLevel}`).classList.add('active');
 
-        const scoreRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
+        const scoreRef = window.dbRef(window.firebaseDb, `scores/${diffLevel}`);
         const rankQuery = window.dbQuery(scoreRef, window.dbOrderBy('playTime'), window.dbLimit(10));
 
         window.dbOnValue(rankQuery, (snapshot) => {
@@ -1008,7 +1084,7 @@
             rowsContainer.innerHTML = '';
 
             if (!snapshot.exists()) {
-                rowsContainer.innerHTML = '<div style="text-align:center; color:#999; padding-top:40px;">등록된 기록이 없습니다. 최초의 명예를 얻으세요!</div>';
+                rowsContainer.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.7); padding-top:40px;">등록된 기록이 없습니다.</div>';
                 return;
             }
 
@@ -1020,7 +1096,7 @@
                 if(data.name === globalNickname) row.classList.add('my-row');
 
                 let timeSec = (data.playTime / 1000).toFixed(2);
-                row.innerHTML = `<span>${rankIndex}등. ${data.name}</span> <span>${timeSec}초</span>`;
+                row.innerHTML = `<span>${rankIndex}. ${data.name}</span> <span>${timeSec}s</span>`;
                 rowsContainer.appendChild(row);
                 rankIndex++;
             });
@@ -1066,7 +1142,7 @@
     }
 
     function setupButtonEffects() {
-        const btns = document.querySelectorAll('.img-btn');
+        const btns = document.querySelectorAll('.img-btn, .rank-tab-btn');
         btns.forEach(btn => {
             btn.addEventListener('mousedown', () => {
                 initAudioContext(); 
@@ -1102,6 +1178,9 @@
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
         document.getElementById(screenId).classList.add('active');
+        if(screenId === 'screen-start') {
+            initPracticeMode();
+        }
     }
 
     function setCharacterImage(srcPath, fallbackText) {
@@ -1115,10 +1194,74 @@
         }
     }
 
-    // 👑 배경을 무작위로 변경해주는 함수 추가
     function changeRandomBackground() {
         let randBg = bgImages[Math.floor(Math.random() * bgImages.length)];
         document.getElementById('game-container').style.backgroundImage = `url('${randBg}')`;
+    }
+
+    // 👑 연습 모드 초기화
+    function initPracticeMode() {
+        isPracticeProcessing = false;
+        practiceIndex = 0;
+        let count = Math.floor(Math.random() * 3) + 3; // 3~5개
+        practiceSequence = [];
+        
+        let area = document.getElementById('practice-sequence-area');
+        if(!area) return;
+        area.innerHTML = '';
+        
+        for(let i=0; i<count; i++) {
+            let key = arrowKeyCodes[Math.floor(Math.random() * 4)];
+            practiceSequence.push(key);
+            
+            let slot = document.createElement('div');
+            slot.className = 'arrow-icon-slot';
+            slot.id = `prac-slot-${i}`;
+            
+            let img = document.createElement('img');
+            img.src = `DD_${arrowNames[key]}_Button_Normal.png`;
+            img.id = `prac-img-${i}`;
+            img.alt = arrowNames[key];
+            
+            img.onerror = function() {
+                this.style.display = 'none';
+                let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑'};
+                this.parentElement.innerText = sym[key];
+            };
+            
+            slot.appendChild(img);
+            area.appendChild(slot);
+        }
+    }
+
+    // 👑 연습 모드 키보드 판정
+    function handlePracticeInput(key) {
+        if(isPracticeProcessing) return;
+        
+        let targetKey = practiceSequence[practiceIndex];
+        let slotEl = document.getElementById(`prac-slot-${practiceIndex}`);
+        let imgEl = document.getElementById(`prac-img-${practiceIndex}`);
+        
+        if(slotEl) {
+            slotEl.classList.add('hit');
+            setTimeout(() => slotEl.classList.remove('hit'), 80);
+        }
+
+        if(key === targetKey) {
+            if(imgEl) imgEl.src = `DD_${arrowNames[key]}_Button_Success.png`;
+            playHitSound(practiceIndex);
+            practiceIndex++;
+            
+            if(practiceIndex >= practiceSequence.length) {
+                isPracticeProcessing = true;
+                setTimeout(initPracticeMode, 500); // 0.5초 뒤 새 연습 생성
+            }
+        } else {
+            if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Fail.png`;
+            playFailSound();
+            isPracticeProcessing = true;
+            setTimeout(initPracticeMode, 500); // 실패 시에도 새 연습 생성
+        }
     }
 
     function goToGameStart() { 
@@ -1145,7 +1288,7 @@
         initAudioContext();
         showScreen('screen-game');
         
-        changeRandomBackground(); // 👑 게임 시작 시 랜덤 배경 적용
+        changeRandomBackground(); 
 
         currentStage = 1;
         currentRound = 1;
@@ -1286,7 +1429,6 @@
             stopRoundTimer();
             stopStopwatch();
             setTimeout(() => {
-                // 👑 alert 대신 게임오버 버튼 팝업창 활성화
                 document.getElementById('game-over-popup').style.display = 'flex';
             }, 100);
             return;
@@ -1299,7 +1441,6 @@
         initRound();
     }
 
-    // 👑 게임 오버 팝업 닫고 스타트 화면으로 보내는 함수
     function closeGameOver() {
         document.getElementById('game-over-popup').style.display = 'none';
         showScreen('screen-start');
@@ -1313,60 +1454,43 @@
         
         let rewardPopupVisible = document.getElementById('reward-popup').style.display === 'flex';
         let gameOverPopupVisible = document.getElementById('game-over-popup').style.display === 'flex';
+        let leaderboardModalVisible = document.getElementById('leaderboard-modal').style.display === 'flex';
+        let collectionModalVisible = document.getElementById('collection-modal').style.display === 'flex';
         let nextContainer = document.getElementById('next-btn-container');
         let nextBtnVisible = nextContainer && nextContainer.style.display === 'block';
 
         if(document.activeElement === document.getElementById('user-name-input')) return;
-        if(document.getElementById('leaderboard-modal').style.display === 'flex') return;
-        if(document.getElementById('collection-modal').style.display === 'flex') return;
-
+        
         initAudioContext(); 
 
         if (e.key === ' ' || e.key === 'Spacebar') {
-            if (introActive) {
-                e.preventDefault();
-                simulateBtnClick('btn-main-start', goToGameStart);
-                return;
-            }
-            if (startActive) {
-                e.preventDefault();
-                simulateBtnClick('btn-main-dance', startGameLoop);
-                return;
-            }
-            if (gameActive && nextBtnVisible && isStageClearedWait) {
-                e.preventDefault();
-                simulateBtnClick('btn-main-next', handleNextStageClick);
-                return;
-            }
-            // 👑 보상 팝업 스페이스 키 대응
-            if (rewardPopupVisible) {
-                e.preventDefault();
-                simulateBtnClick('btn-reward-ok', closeRewardPopup);
-                return;
-            }
-            // 👑 게임 오버 팝업 스페이스 키 대응
-            if (gameOverPopupVisible) {
-                e.preventDefault();
-                simulateBtnClick('btn-game-over', closeGameOver);
-                return;
-            }
+            if(leaderboardModalVisible) { e.preventDefault(); document.getElementById('leaderboard-modal').style.display = 'none'; return; }
+            if(collectionModalVisible) { e.preventDefault(); document.getElementById('collection-modal').style.display = 'none'; return; }
+            if (introActive) { e.preventDefault(); simulateBtnClick('btn-main-start', goToGameStart); return; }
+            if (startActive) { e.preventDefault(); simulateBtnClick('btn-main-dance', startGameLoop); return; }
+            if (gameActive && nextBtnVisible && isStageClearedWait) { e.preventDefault(); simulateBtnClick('btn-main-next', handleNextStageClick); return; }
+            if (rewardPopupVisible) { e.preventDefault(); simulateBtnClick('btn-reward-ok', closeRewardPopup); return; }
+            if (gameOverPopupVisible) { e.preventDefault(); simulateBtnClick('btn-game-over', closeGameOver); return; }
         }
 
         if (e.key === 'Escape' || e.key === 'Esc') {
-            if (startActive) {
-                simulateBtnClick('btn-main-back', goToIntro);
-                return;
-            }
+            if (startActive) { simulateBtnClick('btn-main-back', goToIntro); return; }
         }
 
+        // 화면 2: 난이도 단축키 및 연습모드
         if (startActive) {
             if (e.key === '1') { simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy')); return; }
             if (e.key === '2') { simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal')); return; }
             if (e.key === '3') { simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard')); return; }
+            if (arrowKeyCodes.includes(e.key)) {
+                handlePracticeInput(e.key);
+                return;
+            }
         }
 
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
+        // 인게임 판정
         if (arrowKeyCodes.includes(e.key)) {
             let targetKey = targetArrowSequence[currentArrowIndex];
             let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
@@ -1379,8 +1503,6 @@
 
             if (e.key === targetKey) {
                 if(imgEl) imgEl.src = `DD_${arrowNames[targetKey]}_Button_Success.png`;
-                
-                // 🔊 타격음 정상 바인딩 및 화살표 인덱스 증가
                 playHitSound(currentArrowIndex);
                 currentArrowIndex++;
 
@@ -1421,9 +1543,7 @@
         if (currentStage < 3) {
             currentStage++;
             currentRound = 1;
-            
-            changeRandomBackground(); // 👑 스테이지 클리어하여 다음으로 넘어갈 때 배경 랜덤 전환
-
+            changeRandomBackground(); 
             initRound();
         } else {
             stopStopwatch();
@@ -1484,17 +1604,39 @@
         }
     }
 
+    // 👑 3x3 정사각형 도감 이미지 렌더링
     function initCollectionUI() {
         let grid = document.getElementById('book-grid-container');
         if (!grid) return;
         grid.innerHTML = '';
-        collectionItems.forEach((item, index) => {
+        
+        // 9개 강제 배치
+        for (let i = 0; i < 9; i++) {
             let box = document.createElement('div');
-            box.id = `book-item-${index}`;
-            box.className = `book-item ${unlockedItems.has(index) ? 'unlocked' : ''}`;
-            box.innerText = unlockedItems.has(index) ? item : `🔒 미획득 (${index + 1})`;
+            box.className = 'square-item';
+            
+            let img = document.createElement('img');
+            if (unlockedItems.has(i)) {
+                img.src = `DD_Item_${i}.png`; // 획득한 아이템 이미지
+                img.alt = collectionItems[i];
+            } else {
+                img.src = 'DD_Item_Locked.png'; // 미획득 자물쇠 또는 실루엣
+                img.alt = '미획득 아이템';
+            }
+            // fallback (이미지 없을 시 텍스트 렌더링)
+            img.onerror = function() {
+                this.style.display = 'none';
+                let fallback = document.createElement('span');
+                fallback.style.fontSize = '12px';
+                fallback.style.fontWeight = 'bold';
+                fallback.style.textAlign = 'center';
+                fallback.innerText = unlockedItems.has(i) ? collectionItems[i] : '🔒';
+                this.parentElement.appendChild(fallback);
+            }
+            
+            box.appendChild(img);
             grid.appendChild(box);
-        });
+        }
     }
 
     function updateDoguriImage() {
@@ -1506,19 +1648,13 @@
     }
 
     function openLeaderboardModal() {
-        fetchServerLeaderboard();
+        fetchServerLeaderboard(currentDifficulty); // 선택된 난이도를 디폴트로 호출
         document.getElementById('leaderboard-modal').style.display = 'flex';
     }
-    function closeLeaderboardModal() {
-        document.getElementById('leaderboard-modal').style.display = 'none';
-    }
-
+    
     function openCollection() {
         initCollectionUI();
         document.getElementById('collection-modal').style.display = 'flex';
-    }
-    function closeCollection() {
-        document.getElementById('collection-modal').style.display = 'none';
     }
 </script>
 
