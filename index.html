@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V35</title>
+    <title>도구리 하와이 댄스 게임 - V36</title>
     <style>
         /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -164,7 +164,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px; /* 👑 (space) 텍스트를 버튼에 5px로 붙임 */
+            gap: 5px;
         }
         .space-shortcut-guide {
             color: rgba(255, 255, 255, 0.8);
@@ -283,10 +283,10 @@
             transition: transform 0.1s ease;
         }
 
-        /* 👑 난이도 이미지 버튼 그룹 (10px 올림) */
+        /* 난이도 이미지 버튼 그룹 */
         .difficulty-group {
             position: absolute;
-            bottom: 110px; /* 기존 100px -> 110px */
+            bottom: 110px; 
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -301,19 +301,21 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px; /* 👑 (1) (2) (3) 텍스트를 버튼 바로 밑 5px에 위치 */
+            gap: 5px; 
             transition: transform 0.1s ease;
             transform-origin: center center;
         }
         .diff-btn-slot:hover { transform: scale(1.05); }
         .diff-btn-slot:active { transform: scale(0.95); }
 
+        /* 👑 글로우 비율 조정: 중앙 정렬 후 버튼 밖으로 퍼지도록 130% 세팅 */
         .diff-glow-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130%;
+            height: 130%;
             object-fit: contain;
             z-index: 1;
             pointer-events: none;
@@ -488,13 +490,13 @@
             flex-direction: column;
         }
 
-        /* 👑 가로형 보상 팝업 (검은 배경 제거 및 원본 비율 복구) */
+        /* 가로형 보상 팝업 */
         .modal-content-horizontal {
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center center;
             width: 826px; height: 461px;
-            transform: scale(0.85); /* 화면에 적절히 핏되게 약간만 축소 */
+            transform: scale(0.85); 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -506,7 +508,7 @@
             color: #000;
         }
 
-        /* 👑 세로형 팝업 도감, 랭킹 (검은 배경 제거 및 원본 비율 유지) */
+        /* 세로형 팝업 (도감, 랭킹) */
         .modal-content-vertical {
             background-size: contain;
             background-repeat: no-repeat;
@@ -633,7 +635,7 @@
             z-index: 50;
         }
 
-        /* 👑 게임 오버 화면 (게이지 위치에 배치) */
+        /* 게임 오버 화면 */
         #game-over-popup {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -643,7 +645,6 @@
             align-items: center;
             z-index: 200;
         }
-        /* 게임 오버 버튼 컨테이너를 타이머 게이지 위치(bottom: 80px)에 절대 배치 */
         #game-over-popup .btn-with-guide-container {
             position: absolute;
             bottom: 80px; 
@@ -798,7 +799,7 @@
             </div>
         </div>
         
-        <!-- 🌴 인게임 스테이지 클리어 UI (원본 크기) -->
+        <!-- 🌴 인게임 스테이지 클리어 UI (원본 크기 복원) -->
         <div id="in-game-clear-ui">
             <img src="DD_Stage_Clear.png" alt="STAGE CLEAR!" onerror="this.style.display='none'; this.after('STAGE CLEAR!');">
             
@@ -815,14 +816,12 @@
     <div id="reward-popup" class="modal">
         <div class="modal-content-horizontal" style="background-image: url('DD_Clear_Popup.png');">
             <div class="popup-safe-box-horizontal">
-                <!-- 👑 불필요한 "스테이지 클리어!" 텍스트 제거 및 간격 조절 -->
                 <p id="popup-playtime-result" style="font-weight: bold; margin: 10px 0 0 0; font-size: 22px;">최종 클리어 시간: 0.00초</p>
                 <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:14px; margin:5px 0;">순위 판단 중...</p>
                 
                 <p style="margin: 20px 0 10px 0; font-weight: bold; font-size:16px; color:#333;">🎁 하와이 기념 도감 보상 🎁</p>
                 
-                <!-- 👑 도감 보상 이미지 + 정사각형 뒷배경 적용 -->
-                <div id="reward-item-name" class="square-item" style="width: 140px; height: 140px;">
+                <div id="reward-item-name" class="square-item" style="width: 140px; height: 140px; margin-bottom: 0;">
                     <!-- 스크립트에서 이미지가 들어감 -->
                 </div>
             </div>
@@ -865,7 +864,6 @@
     <div id="game-over-popup" class="modal">
         <div class="btn-with-guide-container">
             <button id="btn-game-over" class="img-btn origin-size-btn" onclick="closeGameOver()">
-                <!-- 이미지 자체 너비를 제어해서 작게 만듦 -->
                 <img src="DD_GAMEOVER.png" style="width: 300px; height: auto;" alt="GAME OVER" onerror="this.style.display='none'; this.after('[GAME OVER - 클릭하여 돌아가기]');">
             </button>
             <span class="space-shortcut-guide">(space)</span>
@@ -1055,7 +1053,6 @@
         } catch (e) { console.error("파도 생성 실패:", e); }
     }
 
-    // 👑 난이도별 BGM 엔진 차별화
     function startHawaiiBgmEngine() {
         isBgmPlaying = true;
         createOceanWaveSound(); 
@@ -1084,7 +1081,6 @@
             let type = 'triangle';
             let currentChordsList = introChords;
 
-            // 난이도별 사운드 세팅
             if (isGameActive) {
                 currentChordsList = gameChords;
                 if (currentDifficulty === 'easy') { tempoMs = 140; type = 'square'; }
@@ -1152,10 +1148,8 @@
         } catch (e) { console.error("사운드 에러:", e); }
     }
 
-    // 👑 난이도별 히트 사운드 적용
     function playHitSound(comboIndex) {
         if (currentDifficulty === 'special') {
-            // 스페셜: 영롱한 실로폰(Sine) 느낌의 다른 사운드
             let targetFreq = 500 + (comboIndex * 40);
             playBeep(targetFreq, 0.1, 'sine');
         } else {
@@ -1306,7 +1300,6 @@
         }
     }
     
-    // 시작화면으로 갈 때 확률(15%)로 스페셜 스테이지 출현
     function checkSpecialStageChance() {
         let btn = document.getElementById('special-stage-btn');
         if (Math.random() < 0.15) {
@@ -1400,10 +1393,8 @@
         let inputVal = document.getElementById('user-name-input').value.trim();
         globalNickname = inputVal ? inputVal : "도구리";
         
-        // 👑 스페셜 스테이지 종료/초기화 시 무조건 '쉬움'으로 리셋되도록 보완
-        if (currentDifficulty === 'special') {
-            selectDifficulty('easy');
-        }
+        // 👑 시작 화면 진입 시 무조건 쉬움 난이도로 자동 초기화 (스페셜 연속 방지)
+        selectDifficulty('easy');
         showScreen('screen-start'); 
     }
 
@@ -1667,7 +1658,7 @@
 
     function closeGameOver() {
         document.getElementById('game-over-popup').style.display = 'none';
-        goToGameStart(); // 👑 수정됨: Game over시에도 스페셜 난이도 리셋 체크를 위해 연결
+        goToGameStart(); 
     }
 
     window.addEventListener('keydown', function(e) {
