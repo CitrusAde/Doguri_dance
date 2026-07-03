@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V33</title>
+    <title>도구리 하와이 댄스 게임 - V34</title>
     <style>
         /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -107,11 +107,13 @@
             cursor: pointer;
         }
 
+        /* 메인 로고 30px 내림 */
         #main-logo {
             display: block;
             max-width: 90%;
             height: auto;
             margin-bottom: 30px;
+            transform: translateY(30px);
         }
 
         /* 닉네임 입력 구역 레이아웃 */
@@ -122,11 +124,14 @@
             gap: 15px;
             margin-bottom: 25px;
         }
+        
+        /* 닉네임 타이틀 20px 내림 (레이아웃 변동 방지) */
         .nick-title-img {
             display: block;
             max-width: 100%;
             height: auto;
-            margin-top: 30px; /* 기존 15px에서 15px 아래로 내림 */
+            margin-top: 15px;
+            transform: translateY(20px);
         }
         .nick-input-wrapper {
             position: relative;
@@ -258,15 +263,15 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* 👑 스페셜 스테이지 버튼 위치 수정 및 애니메이션 */
+        /* 👑 스페셜 스테이지 버튼 오른쪽 10px 이동 */
         @keyframes floatSpecial {
             0%, 100% { margin-top: 0px; }
-            50% { margin-top: -10px; } /* 위아래로 5px씩 움직임 */
+            50% { margin-top: -10px; }
         }
         #special-stage-btn {
             position: absolute;
             top: 50%;
-            left: calc(50% + 270px); /* 오른쪽으로 70px 추가 이동 */
+            left: calc(50% + 280px); /* 270px -> 280px */
             transform: translateY(-50%);
             cursor: pointer;
             z-index: 15;
@@ -290,7 +295,7 @@
             transform: translateX(-50%);
             display: flex;
             gap: 15px; 
-            align-items: flex-start; /* 텍스트 가이드를 위해 top 정렬 */
+            align-items: flex-start;
             justify-content: center;
             z-index: 10;
         }
@@ -440,13 +445,13 @@
             object-fit: contain;
         }
 
-        /* 점멸(깜빡임) 효과 애니메이션 */
+        /* 👑 점멸 2배 느리게 (0.4s) */
         @keyframes blinkArrow {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
         .blinking-arrow {
-            animation: blinkArrow 0.2s infinite;
+            animation: blinkArrow 0.4s infinite;
         }
 
         .timer-wrapper {
@@ -460,7 +465,6 @@
         #timer-bar {
             width: 100%;
             height: 100%;
-            /* 빨강 -> 초록 그라데이션 고정 처리 */
             background-image: linear-gradient(to right, #f44336, #ffeb3b, #4caf50);
             background-size: 400px 10px;
             background-position: left center;
@@ -489,12 +493,11 @@
             justify-content: center;
             align-items: center;
             z-index: 120;
+            flex-direction: column; /* 팝업 밖 버튼 분리를 위한 속성 */
         }
 
         /* 👑 가로형 보상 팝업 */
         .modal-content-horizontal {
-            background: url('DD_Popup.png') no-repeat center center;
-            background-color: rgba(0,0,0,0.8); /* fallback */
             background-size: 100% 100%;
             width: 826px; height: 461px;
             transform: scale(0.7);
@@ -502,7 +505,6 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            border-radius: 20px;
         }
         .popup-safe-box-horizontal {
             width: 695px; height: 305px;
@@ -512,7 +514,6 @@
 
         /* 세로형 팝업 (도감, 랭킹) */
         .modal-content-vertical {
-            background-color: rgba(0,0,0,0.85); /* fallback */
             background-size: 100% 100%;
             background-repeat: no-repeat;
             background-position: center center;
@@ -523,7 +524,6 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            border-radius: 20px;
         }
         .popup-safe-box-vertical {
             width: 500px; 
@@ -599,14 +599,16 @@
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 10px;
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* 텍스트와 이미지 세로정렬 */
+            justify-content: flex-start;
             align-items: center;
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            padding-top: 15px; /* 상단에서 약간 띄움 */
         }
         .square-item img {
-            width: 90%;
-            height: 90%;
+            width: 70%;
+            height: 70%;
             object-fit: contain;
         }
 
@@ -633,18 +635,27 @@
             align-items: center;
             z-index: 50;
         }
+        /* 👑 DD_Stage_Clear.png 2배 확대 */
+        #in-game-clear-ui img.clear-title-img {
+            transform: scale(2);
+        }
 
-        /* 게임 오버 화면 스타일 수정 */
+        /* 👑 게임 오버 화면 하단 내림 & 버튼 크기 축소 */
         #game-over-popup {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); /* 조금 덜 어둡게 */
+            background: rgba(0,0,0,0.4); 
             display: none;
             flex-direction: column;
-            justify-content: flex-end; /* 하단으로 정렬 */
+            justify-content: center;
             align-items: center;
-            padding-bottom: 120px; /* 맨 아래에서 적당히 띄움 */
             z-index: 200;
+        }
+        #btn-game-over img {
+            transform: scale(0.5); /* 버튼 크기 절반 축소 */
+        }
+        #game-over-popup .btn-with-guide-container {
+            transform: translateY(50px); /* 버튼 위치 50px 내림 */
         }
     </style>
 
@@ -688,15 +699,15 @@
     </div>
     
     <div id="screen-intro" class="screen active">
+        <!-- 👑 로고 이미지 30px 이동됨 -->
         <img id="main-logo" src="DD_Logo.png" alt="도구리 로고" onerror="this.style.display='none'; this.after('[DD_Logo]');">
         
         <div class="nickname-area-container">
+            <!-- 👑 닉네임 텍스트 20px 이동됨 -->
             <img class="nick-title-img" src="DD_Nick_Text.png" alt="플레이어 닉네임 입력" onerror="this.style.display='none'; this.after('플레이어 닉네임 입력');">
             <div class="nick-input-wrapper">
                 <img class="nick-bg-img" src="DD_Nick_Bg.png" alt="닉네임 배경">
                 <input type="text" id="user-name-input" class="nick-input-field" placeholder="닉네임 입력" maxlength="8" value="도구리">
-                <!-- ✏️ 연필 아이콘 추가 -->
-                <img src="DD_Pencil.png" alt="수정가능" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; pointer-events: none;" onerror="this.style.display='none'; this.after('✏️');">
             </div>
         </div>
 
@@ -718,7 +729,7 @@
             <div class="arrow-sequence-box" id="practice-sequence-area"></div>
         </div>
 
-        <!-- 👑 스페셜 스테이지 버튼 (15% 확률 등장) -->
+        <!-- 👑 스페셜 스테이지 버튼 (15% 확률) -->
         <div id="special-stage-btn" onclick="startSpecialStage()">
             <img src="DD_Special_Stage.png" alt="스페셜 스테이지" onerror="this.style.display='none'; this.after('[스페셜 스테이지]');">
         </div>
@@ -731,7 +742,8 @@
                         <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
                     </div>
                 </div>
-                <div class="space-shortcut-guide" style="margin-top: 5px;">(1)</div>
+                <!-- 👑 (1), (2), (3) 텍스트 15px 위로 이동됨 -->
+                <div class="space-shortcut-guide" style="margin-top: -10px;">(1)</div>
             </div>
             <div id="slot-normal" class="diff-btn-slot" onclick="selectDifficulty('normal')">
                 <div style="position:relative;">
@@ -740,7 +752,7 @@
                         <img src="DD_Normal_Button.png" alt="보통" onerror="this.style.display='none'; this.after('보통');">
                     </div>
                 </div>
-                <div class="space-shortcut-guide" style="margin-top: 5px;">(2)</div>
+                <div class="space-shortcut-guide" style="margin-top: -10px;">(2)</div>
             </div>
             <div id="slot-hard" class="diff-btn-slot" onclick="selectDifficulty('hard')">
                 <div style="position:relative;">
@@ -749,7 +761,7 @@
                         <img src="DD_Hard_Button.png" alt="어려움" onerror="this.style.display='none'; this.after('어려움');">
                     </div>
                 </div>
-                <div class="space-shortcut-guide" style="margin-top: 5px;">(3)</div>
+                <div class="space-shortcut-guide" style="margin-top: -10px;">(3)</div>
             </div>
         </div>
 
@@ -798,10 +810,13 @@
             </div>
         </div>
         
-        <!-- 🌴 인게임 스테이지 클리어 UI (팝업 대체) -->
+        <!-- 🌴 인게임 스테이지 클리어 UI -->
         <div id="in-game-clear-ui">
-            <img src="DD_Stage_Clear.png" alt="STAGE CLEAR!" style="height: 120px; margin-bottom: 50px;" onerror="this.style.display='none'; this.after('STAGE CLEAR!');">
-            <div class="btn-with-guide-container">
+            <!-- 👑 2배 커진 클리어 이미지 -->
+            <img class="clear-title-img" src="DD_Stage_Clear.png" alt="STAGE CLEAR!" onerror="this.style.display='none'; this.after('STAGE CLEAR!');">
+            
+            <!-- 👑 NEXT 버튼 위치 100px 밑으로 내림 -->
+            <div class="btn-with-guide-container" style="margin-top: 100px;">
                 <button id="btn-next-stage" class="img-btn origin-size-btn" onclick="goToNextStage()">
                     <img src="DD_Main_Next_Button.png" alt="NEXT" onerror="this.style.display='none'; this.after('[NEXT 버튼]');">
                 </button>
@@ -810,28 +825,29 @@
         </div>
     </div>
 
-    <!-- 👑 최종 클리어 리워드 팝업 (마지막 스테이지 클리어 시) -->
+    <!-- 👑 최종 클리어 리워드 팝업 (팝업 이미지 DD_Clear_Popup.png 교체 및 OK 버튼 분리) -->
     <div id="reward-popup" class="modal">
-        <div class="modal-content-horizontal">
+        <div class="modal-content-horizontal" style="background-image: url('DD_Clear_Popup.png');">
             <div class="popup-safe-box-horizontal">
                 <h2 style="margin: 0 0 10px 0; font-size: 26px;">🌴 스테이지 클리어! 🌴</h2>
-                <!-- 등급 뱃지 제거됨 -->
                 <p id="popup-playtime-result" style="font-weight: bold; margin: 0; font-size: 18px;">최종 클리어 시간: 0.00초</p>
                 <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
                 
                 <p style="margin: 15px 0 5px 0; font-weight: bold; font-size:13px; color:#333;">🎁 하와이 기념 도감 보상 🎁</p>
-                <!-- 텍스트 대신 이미지 아이콘 렌더링 -->
-                <div id="reward-item-name" style="margin-bottom: 15px; width: 60px; height: 60px; display:flex; justify-content:center; align-items:center;">
+                
+                <!-- 👑 도감 보상 이미지 2.5배 뻥튀기 (width/height 150px) -->
+                <div id="reward-item-name" style="margin-bottom: 15px; width: 150px; height: 150px; display:flex; justify-content:center; align-items:center;">
                     <!-- 스크립트에서 이미지가 들어감 -->
                 </div>
-                
-                <div class="btn-with-guide-container">
-                    <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
-                        <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
-                    </button>
-                    <span class="space-shortcut-guide" style="color:#000;">(space)</span>
-                </div>
             </div>
+        </div>
+        
+        <!-- 👑 OK 버튼 팝업 바깥 하단으로 위치 -->
+        <div class="btn-with-guide-container" style="margin-top: 20px;">
+            <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
+                <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
+            </button>
+            <span class="space-shortcut-guide" style="color:#fff;">(space)</span>
         </div>
     </div>
 
@@ -860,7 +876,7 @@
         </div>
     </div>
 
-    <!-- 게임 오버 팝업 (하단으로 내림) -->
+    <!-- 👑 게임 오버 팝업 -->
     <div id="game-over-popup" class="modal">
         <div class="btn-with-guide-container">
             <button id="btn-game-over" class="img-btn origin-size-btn" onclick="closeGameOver()">
@@ -1855,6 +1871,7 @@
         }
     }
 
+    // 👑 도감 UI 이미지 + 이름 함께 렌더링하도록 구조 변경
     function initCollectionUI() {
         let grid = document.getElementById('book-grid-container');
         if (!grid) return;
@@ -1871,18 +1888,31 @@
             } else {
                 img.src = 'DD_Item_Locked.png'; 
                 img.alt = '미획득 아이템';
+                // 👑 5배 크게 설정
+                img.style.transform = 'scale(5)';
             }
+
+            // 도감 아이템 이름 텍스트 노드 추가
+            let nameTxt = document.createElement('div');
+            nameTxt.style.fontSize = '14px';
+            nameTxt.style.color = '#fff';
+            nameTxt.style.marginTop = '8px';
+            nameTxt.style.textAlign = 'center';
+            nameTxt.style.textShadow = '0 1px 2px #000';
+            nameTxt.innerText = unlockedItems.has(i) ? collectionItems[i] : '???';
+
             img.onerror = function() {
                 this.style.display = 'none';
                 let fallback = document.createElement('span');
-                fallback.style.fontSize = '12px';
+                fallback.style.fontSize = unlockedItems.has(i) ? '14px' : '60px'; // 폴백도 크게
                 fallback.style.fontWeight = 'bold';
                 fallback.style.textAlign = 'center';
                 fallback.innerText = unlockedItems.has(i) ? collectionItems[i] : '🔒';
-                this.parentElement.appendChild(fallback);
+                this.parentElement.insertBefore(fallback, nameTxt);
             }
             
             box.appendChild(img);
+            box.appendChild(nameTxt);
             grid.appendChild(box);
         }
     }
