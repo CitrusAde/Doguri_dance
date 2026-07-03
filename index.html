@@ -1097,7 +1097,8 @@
                 if (currentDifficulty === 'easy') { tempoMs = 140; type = 'square'; }
                 else if (currentDifficulty === 'normal') { tempoMs = 110; type = 'triangle'; }
                 else if (currentDifficulty === 'hard') { tempoMs = 85; type = 'sawtooth'; }
-                else if (currentDifficulty === 'special') { tempoMs = 105; type = 'sine'; currentChordsList = introChords; }
+                // 👑 스페셜 BGM: 템포 70으로 매우 빠르게, 강렬한 오락실 사운드(square), 게임 코드(gameChords) 사용으로 텐션업!
+                else if (currentDifficulty === 'special') { tempoMs = 70; type = 'square'; currentChordsList = gameChords; }
             }
 
             let currentChord = currentChordsList[chordIndex % currentChordsList.length];
@@ -1313,7 +1314,8 @@
     
     function checkSpecialStageChance() {
         let btn = document.getElementById('special-stage-btn');
-        if (Math.random() < 0.15) {
+        // 👑 스페셜 스테이지 등장 확률 25%로 상향
+        if (Math.random() < 0.25) {
             btn.style.display = 'block';
         } else {
             btn.style.display = 'none';
