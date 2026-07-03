@@ -194,9 +194,10 @@
             height: auto;
         }
 
+        /* 👑 DANCE 버튼 20px 내림 (bottom 45px -> 25px) */
         .bottom-dance-position {
             position: absolute;
-            bottom: 45px;
+            bottom: 25px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
@@ -308,7 +309,6 @@
         .diff-btn-slot:hover { transform: scale(1.05); }
         .diff-btn-slot:active { transform: scale(0.95); }
 
-        /* 👑 글로우 비율 조정: 중앙 정렬 후 버튼 밖으로 퍼지도록 130% 세팅 */
         .diff-glow-layer {
             position: absolute;
             top: 50%;
@@ -603,7 +603,8 @@
         .square-grid .square-item {
             width: 100%;
             justify-content: flex-start;
-            padding-top: 15px;
+            /* 👑 콘텐츠를 조금 더 중앙으로 모으기 위해 20px로 변경 */
+            padding-top: 20px;
         }
         .square-grid .square-item img {
             width: 70%;
@@ -702,7 +703,8 @@
             </div>
         </div>
 
-        <div class="btn-with-guide-container">
+        <!-- 👑 START 버튼 15px 위로 이동 -->
+        <div class="btn-with-guide-container" style="transform: translateY(-15px);">
             <button id="btn-main-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
                 <img src="DD_Main_Start_Button.png" alt="START" onerror="this.style.display='none'; this.after('[START 버튼]');">
             </button>
@@ -799,7 +801,6 @@
             </div>
         </div>
         
-        <!-- 🌴 인게임 스테이지 클리어 UI (원본 크기 복원) -->
         <div id="in-game-clear-ui">
             <img src="DD_Stage_Clear.png" alt="STAGE CLEAR!" onerror="this.style.display='none'; this.after('STAGE CLEAR!');">
             
@@ -816,10 +817,12 @@
     <div id="reward-popup" class="modal">
         <div class="modal-content-horizontal" style="background-image: url('DD_Clear_Popup.png');">
             <div class="popup-safe-box-horizontal">
-                <p id="popup-playtime-result" style="font-weight: bold; margin: 10px 0 0 0; font-size: 22px;">최종 클리어 시간: 0.00초</p>
+                <!-- 👑 색상 #fff로 변경 -->
+                <p id="popup-playtime-result" style="color: #fff; font-weight: bold; margin: 10px 0 0 0; font-size: 22px;">최종 클리어 시간: 0.00초</p>
                 <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:14px; margin:5px 0;">순위 판단 중...</p>
                 
-                <p style="margin: 20px 0 10px 0; font-weight: bold; font-size:16px; color:#333;">🎁 하와이 기념 도감 보상 🎁</p>
+                <!-- 👑 색상 #fff로 변경 -->
+                <p style="margin: 20px 0 10px 0; font-weight: bold; font-size:16px; color:#fff;">🎁 하와이 기념 도감 보상 🎁</p>
                 
                 <div id="reward-item-name" class="square-item" style="width: 140px; height: 140px; margin-bottom: 0;">
                     <!-- 스크립트에서 이미지가 들어감 -->
@@ -835,32 +838,37 @@
         </div>
     </div>
 
-    <!-- 세로형 688x854 리더보드 팝업 -->
+    <!-- 👑 세로형 688x854 리더보드 팝업 (내부 요소를 0.8로 스케일) -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content-vertical" style="background-image: url('DD_Highscore_popup.png');">
             <div class="popup-safe-box-vertical">
-                <div class="rank-tabs">
-                    <button id="tab-easy" class="rank-tab-btn" onclick="fetchServerLeaderboard('easy')">쉬움</button>
-                    <button id="tab-normal" class="rank-tab-btn" onclick="fetchServerLeaderboard('normal')">보통</button>
-                    <button id="tab-hard" class="rank-tab-btn" onclick="fetchServerLeaderboard('hard')">어려움</button>
+                <!-- 내부 래퍼 추가하여 80% 축소 적용 -->
+                <div style="width: 100%; height: 100%; transform: scale(0.8); transform-origin: top center; display: flex; flex-direction: column; align-items: center;">
+                    <div class="rank-tabs">
+                        <button id="tab-easy" class="rank-tab-btn" onclick="fetchServerLeaderboard('easy')">쉬움</button>
+                        <button id="tab-normal" class="rank-tab-btn" onclick="fetchServerLeaderboard('normal')">보통</button>
+                        <button id="tab-hard" class="rank-tab-btn" onclick="fetchServerLeaderboard('hard')">어려움</button>
+                    </div>
+                    <div class="leaderboard-modal-list" id="modal-rank-rows"></div>
                 </div>
-                <div class="leaderboard-modal-list" id="modal-rank-rows"></div>
                 <div class="modal-space-hint">(space/esc)</div>
             </div>
         </div>
     </div>
 
-    <!-- 세로형 688x854 도감 팝업 -->
+    <!-- 👑 세로형 688x854 도감 팝업 (내부 요소를 0.8로 스케일, 20px 마진 적용) -->
     <div id="collection-modal" class="modal">
         <div class="modal-content-vertical" style="background-image: url('DD_Gift_popup.png');">
             <div class="popup-safe-box-vertical">
-                <div class="square-grid" id="book-grid-container"></div>
+                <!-- 내부 래퍼 추가하여 80% 축소 및 마진(내려감) 적용 -->
+                <div style="width: 100%; height: 100%; transform: scale(0.8); transform-origin: top center; margin-top: 25px; display: flex; flex-direction: column; align-items: center;">
+                    <div class="square-grid" id="book-grid-container"></div>
+                </div>
                 <div class="modal-space-hint">(space/esc)</div>
             </div>
         </div>
     </div>
 
-    <!-- 👑 게임 오버 팝업 -->
     <div id="game-over-popup" class="modal">
         <div class="btn-with-guide-container">
             <button id="btn-game-over" class="img-btn origin-size-btn" onclick="closeGameOver()">
@@ -917,10 +925,11 @@
         'DD_Main_Image_PM6.png'
     ];
 
+    // 👑 이모티콘 제거된 도감 아이템
     const collectionItems = [
-        "🍍 하와이안 파인애플", "🌸 알로하 레이", "🕶️ 선글라스",
-        "🏄 미니 서프보드", "🥥 코코넛 주스", "🎸 우쿨렐레",
-        "🩴 비치 샌들", "👕 하와이안 셔츠", "🏖️ 도구리 튜브"
+        "하와이안 파인애플", "알로하 레이", "선글라스",
+        "미니 서프보드", "코코넛 주스", "우쿨렐레",
+        "비치 샌들", "하와이안 셔츠", "도구리 튜브"
     ];
     let unlockedItems = new Set();
     const STORAGE_KEY_ITEMS = "doguri_unlocked_items_firebase_v1";
@@ -1393,7 +1402,6 @@
         let inputVal = document.getElementById('user-name-input').value.trim();
         globalNickname = inputVal ? inputVal : "도구리";
         
-        // 👑 시작 화면 진입 시 무조건 쉬움 난이도로 자동 초기화 (스페셜 연속 방지)
         selectDifficulty('easy');
         showScreen('screen-start'); 
     }
