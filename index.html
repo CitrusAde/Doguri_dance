@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V34</title>
+    <title>도구리 하와이 댄스 게임 - V35</title>
     <style>
         /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -107,7 +107,6 @@
             cursor: pointer;
         }
 
-        /* 메인 로고 30px 내림 */
         #main-logo {
             display: block;
             max-width: 90%;
@@ -124,8 +123,6 @@
             gap: 15px;
             margin-bottom: 25px;
         }
-        
-        /* 닉네임 타이틀 20px 내림 (레이아웃 변동 방지) */
         .nick-title-img {
             display: block;
             max-width: 100%;
@@ -167,7 +164,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 5px; /* 👑 (space) 텍스트를 버튼에 5px로 붙임 */
         }
         .space-shortcut-guide {
             color: rgba(255, 255, 255, 0.8);
@@ -263,7 +260,6 @@
             text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
-        /* 👑 스페셜 스테이지 버튼 오른쪽 10px 이동 */
         @keyframes floatSpecial {
             0%, 100% { margin-top: 0px; }
             50% { margin-top: -10px; }
@@ -271,7 +267,7 @@
         #special-stage-btn {
             position: absolute;
             top: 50%;
-            left: calc(50% + 280px); /* 270px -> 280px */
+            left: calc(50% + 280px);
             transform: translateY(-50%);
             cursor: pointer;
             z-index: 15;
@@ -287,10 +283,10 @@
             transition: transform 0.1s ease;
         }
 
-        /* 난이도 이미지 버튼 그룹 */
+        /* 👑 난이도 이미지 버튼 그룹 (10px 올림) */
         .difficulty-group {
             position: absolute;
-            bottom: 100px; 
+            bottom: 110px; /* 기존 100px -> 110px */
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -305,6 +301,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 5px; /* 👑 (1) (2) (3) 텍스트를 버튼 바로 밑 5px에 위치 */
             transition: transform 0.1s ease;
             transform-origin: center center;
         }
@@ -336,7 +333,6 @@
             height: auto;
         }
 
-        /* 👑 상단 상태 판넬 */
         .game-status {
             position: absolute;
             top: 35px;
@@ -352,7 +348,6 @@
             gap: 15px;
         }
 
-        /* 라이프 패널 */
         .life-container-wrapper {
             position: absolute;
             bottom: 40px;
@@ -388,7 +383,6 @@
             opacity: 0;
         }
 
-        /* 인게임 무대 배치 */
         #game-table {
             position: absolute;
             bottom: 120px;
@@ -410,7 +404,6 @@
             z-index: 2;
         }
 
-        /* 리듬 시퀀스 박스 */
         .rhythm-container {
             position: absolute;
             bottom: 80px;
@@ -445,7 +438,6 @@
             object-fit: contain;
         }
 
-        /* 👑 점멸 2배 느리게 (0.4s) */
         @keyframes blinkArrow {
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
@@ -493,14 +485,16 @@
             justify-content: center;
             align-items: center;
             z-index: 120;
-            flex-direction: column; /* 팝업 밖 버튼 분리를 위한 속성 */
+            flex-direction: column;
         }
 
-        /* 👑 가로형 보상 팝업 */
+        /* 👑 가로형 보상 팝업 (검은 배경 제거 및 원본 비율 복구) */
         .modal-content-horizontal {
-            background-size: 100% 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
             width: 826px; height: 461px;
-            transform: scale(0.7);
+            transform: scale(0.85); /* 화면에 적절히 핏되게 약간만 축소 */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -512,9 +506,9 @@
             color: #000;
         }
 
-        /* 세로형 팝업 (도감, 랭킹) */
+        /* 👑 세로형 팝업 도감, 랭킹 (검은 배경 제거 및 원본 비율 유지) */
         .modal-content-vertical {
-            background-size: 100% 100%;
+            background-size: contain;
             background-repeat: no-repeat;
             background-position: center center;
             width: 688px; 
@@ -584,7 +578,19 @@
             color: #ffeb3b;
         }
 
-        /* 도감 3x3 정사각형 그리드 */
+        /* 도감 공통 배경 상자 */
+        .square-item {
+            aspect-ratio: 1 / 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
         .square-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -592,21 +598,12 @@
             width: 100%;
             margin-top: 10px;
         }
-        .square-item {
+        .square-grid .square-item {
             width: 100%;
-            aspect-ratio: 1 / 1;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column; /* 텍스트와 이미지 세로정렬 */
             justify-content: flex-start;
-            align-items: center;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            padding-top: 15px; /* 상단에서 약간 띄움 */
+            padding-top: 15px;
         }
-        .square-item img {
+        .square-grid .square-item img {
             width: 70%;
             height: 70%;
             object-fit: contain;
@@ -623,7 +620,7 @@
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
         }
 
-        /* 인게임 스테이지 클리어 (팝업 없음) */
+        /* 인게임 스테이지 클리어 */
         #in-game-clear-ui {
             position: absolute;
             top: 0; left: 0;
@@ -635,27 +632,22 @@
             align-items: center;
             z-index: 50;
         }
-        /* 👑 DD_Stage_Clear.png 2배 확대 */
-        #in-game-clear-ui img.clear-title-img {
-            transform: scale(2);
-        }
 
-        /* 👑 게임 오버 화면 하단 내림 & 버튼 크기 축소 */
+        /* 👑 게임 오버 화면 (게이지 위치에 배치) */
         #game-over-popup {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); 
             display: none;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 200;
         }
-        #btn-game-over img {
-            transform: scale(0.5); /* 버튼 크기 절반 축소 */
-        }
+        /* 게임 오버 버튼 컨테이너를 타이머 게이지 위치(bottom: 80px)에 절대 배치 */
         #game-over-popup .btn-with-guide-container {
-            transform: translateY(50px); /* 버튼 위치 50px 내림 */
+            position: absolute;
+            bottom: 80px; 
+            transform: none;
         }
     </style>
 
@@ -699,11 +691,9 @@
     </div>
     
     <div id="screen-intro" class="screen active">
-        <!-- 👑 로고 이미지 30px 이동됨 -->
         <img id="main-logo" src="DD_Logo.png" alt="도구리 로고" onerror="this.style.display='none'; this.after('[DD_Logo]');">
         
         <div class="nickname-area-container">
-            <!-- 👑 닉네임 텍스트 20px 이동됨 -->
             <img class="nick-title-img" src="DD_Nick_Text.png" alt="플레이어 닉네임 입력" onerror="this.style.display='none'; this.after('플레이어 닉네임 입력');">
             <div class="nick-input-wrapper">
                 <img class="nick-bg-img" src="DD_Nick_Bg.png" alt="닉네임 배경">
@@ -729,7 +719,6 @@
             <div class="arrow-sequence-box" id="practice-sequence-area"></div>
         </div>
 
-        <!-- 👑 스페셜 스테이지 버튼 (15% 확률) -->
         <div id="special-stage-btn" onclick="startSpecialStage()">
             <img src="DD_Special_Stage.png" alt="스페셜 스테이지" onerror="this.style.display='none'; this.after('[스페셜 스테이지]');">
         </div>
@@ -742,8 +731,7 @@
                         <img src="DD_Easy_Button.png" alt="쉬움" onerror="this.style.display='none'; this.after('쉬움');">
                     </div>
                 </div>
-                <!-- 👑 (1), (2), (3) 텍스트 15px 위로 이동됨 -->
-                <div class="space-shortcut-guide" style="margin-top: -10px;">(1)</div>
+                <div class="space-shortcut-guide">(1)</div>
             </div>
             <div id="slot-normal" class="diff-btn-slot" onclick="selectDifficulty('normal')">
                 <div style="position:relative;">
@@ -752,7 +740,7 @@
                         <img src="DD_Normal_Button.png" alt="보통" onerror="this.style.display='none'; this.after('보통');">
                     </div>
                 </div>
-                <div class="space-shortcut-guide" style="margin-top: -10px;">(2)</div>
+                <div class="space-shortcut-guide">(2)</div>
             </div>
             <div id="slot-hard" class="diff-btn-slot" onclick="selectDifficulty('hard')">
                 <div style="position:relative;">
@@ -761,7 +749,7 @@
                         <img src="DD_Hard_Button.png" alt="어려움" onerror="this.style.display='none'; this.after('어려움');">
                     </div>
                 </div>
-                <div class="space-shortcut-guide" style="margin-top: -10px;">(3)</div>
+                <div class="space-shortcut-guide">(3)</div>
             </div>
         </div>
 
@@ -810,12 +798,10 @@
             </div>
         </div>
         
-        <!-- 🌴 인게임 스테이지 클리어 UI -->
+        <!-- 🌴 인게임 스테이지 클리어 UI (원본 크기) -->
         <div id="in-game-clear-ui">
-            <!-- 👑 2배 커진 클리어 이미지 -->
-            <img class="clear-title-img" src="DD_Stage_Clear.png" alt="STAGE CLEAR!" onerror="this.style.display='none'; this.after('STAGE CLEAR!');">
+            <img src="DD_Stage_Clear.png" alt="STAGE CLEAR!" onerror="this.style.display='none'; this.after('STAGE CLEAR!');">
             
-            <!-- 👑 NEXT 버튼 위치 100px 밑으로 내림 -->
             <div class="btn-with-guide-container" style="margin-top: 100px;">
                 <button id="btn-next-stage" class="img-btn origin-size-btn" onclick="goToNextStage()">
                     <img src="DD_Main_Next_Button.png" alt="NEXT" onerror="this.style.display='none'; this.after('[NEXT 버튼]');">
@@ -825,24 +811,23 @@
         </div>
     </div>
 
-    <!-- 👑 최종 클리어 리워드 팝업 (팝업 이미지 DD_Clear_Popup.png 교체 및 OK 버튼 분리) -->
+    <!-- 👑 최종 클리어 리워드 팝업 -->
     <div id="reward-popup" class="modal">
         <div class="modal-content-horizontal" style="background-image: url('DD_Clear_Popup.png');">
             <div class="popup-safe-box-horizontal">
-                <h2 style="margin: 0 0 10px 0; font-size: 26px;">🌴 스테이지 클리어! 🌴</h2>
-                <p id="popup-playtime-result" style="font-weight: bold; margin: 0; font-size: 18px;">최종 클리어 시간: 0.00초</p>
-                <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:12px; margin:2px 0;">순위 판단 중...</p>
+                <!-- 👑 불필요한 "스테이지 클리어!" 텍스트 제거 및 간격 조절 -->
+                <p id="popup-playtime-result" style="font-weight: bold; margin: 10px 0 0 0; font-size: 22px;">최종 클리어 시간: 0.00초</p>
+                <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:14px; margin:5px 0;">순위 판단 중...</p>
                 
-                <p style="margin: 15px 0 5px 0; font-weight: bold; font-size:13px; color:#333;">🎁 하와이 기념 도감 보상 🎁</p>
+                <p style="margin: 20px 0 10px 0; font-weight: bold; font-size:16px; color:#333;">🎁 하와이 기념 도감 보상 🎁</p>
                 
-                <!-- 👑 도감 보상 이미지 2.5배 뻥튀기 (width/height 150px) -->
-                <div id="reward-item-name" style="margin-bottom: 15px; width: 150px; height: 150px; display:flex; justify-content:center; align-items:center;">
+                <!-- 👑 도감 보상 이미지 + 정사각형 뒷배경 적용 -->
+                <div id="reward-item-name" class="square-item" style="width: 140px; height: 140px;">
                     <!-- 스크립트에서 이미지가 들어감 -->
                 </div>
             </div>
         </div>
         
-        <!-- 👑 OK 버튼 팝업 바깥 하단으로 위치 -->
         <div class="btn-with-guide-container" style="margin-top: 20px;">
             <button id="btn-reward-ok" class="img-btn origin-size-btn" onclick="closeRewardPopup()">
                 <img src="DD_OK_Text.png" alt="확인" onerror="this.style.display='none'; this.after('[확인]');">
@@ -880,7 +865,8 @@
     <div id="game-over-popup" class="modal">
         <div class="btn-with-guide-container">
             <button id="btn-game-over" class="img-btn origin-size-btn" onclick="closeGameOver()">
-                <img src="DD_GAMEOVER.png" alt="GAME OVER" onerror="this.style.display='none'; this.after('[GAME OVER - 클릭하여 돌아가기]');">
+                <!-- 이미지 자체 너비를 제어해서 작게 만듦 -->
+                <img src="DD_GAMEOVER.png" style="width: 300px; height: auto;" alt="GAME OVER" onerror="this.style.display='none'; this.after('[GAME OVER - 클릭하여 돌아가기]');">
             </button>
             <span class="space-shortcut-guide">(space)</span>
         </div>
@@ -962,8 +948,8 @@
             modal.addEventListener('click', function(e) {
                 if (e.target === this) {
                     this.style.display = 'none';
-                    if(this.id === 'reward-popup') goToGameStart();
-                    if(this.id === 'game-over-popup') showScreen('screen-start');
+                    if(this.id === 'reward-popup') closeRewardPopup();
+                    if(this.id === 'game-over-popup') closeGameOver();
                 }
             });
         });
@@ -1013,7 +999,6 @@
         updateMasterVolume();
     }
 
-    // 🔊 드럼 비트(신나는 BGM용)
     function playDrumKick() {
         if (!audioCtx || isAudioMuted) return;
         let osc = audioCtx.createOscillator();
@@ -1036,10 +1021,7 @@
             let bufferSize = audioCtx.sampleRate * 5; 
             let buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             let data = buffer.getChannelData(0);
-            
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = Math.random() * 2 - 1;
-            }
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
 
             let noiseSource = audioCtx.createBufferSource();
             noiseSource.buffer = buffer;
@@ -1062,7 +1044,6 @@
             function waveLoop() {
                 if (!isBgmPlaying) return;
                 let now = audioCtx.currentTime;
-                // 인게임 시 파도소리를 좀 줄여서 BGM이 잘 들리게 함
                 let isGame = document.getElementById('screen-game').classList.contains('active');
                 let maxVol = isGame ? 0.03 : 0.1;
 
@@ -1074,7 +1055,7 @@
         } catch (e) { console.error("파도 생성 실패:", e); }
     }
 
-    // 👑 동적 BGM 엔진
+    // 👑 난이도별 BGM 엔진 차별화
     function startHawaiiBgmEngine() {
         isBgmPlaying = true;
         createOceanWaveSound(); 
@@ -1085,7 +1066,6 @@
             [174.61, 218.27, 261.63, 349.23], 
             [196.00, 246.94, 293.66, 392.00]  
         ];
-
         const gameChords = [
             [261.63, 392.00, 523.25, 659.25], 
             [261.63, 392.00, 523.25, 659.25], 
@@ -1100,9 +1080,19 @@
             if (!isBgmPlaying) return;
 
             let isGameActive = document.getElementById('screen-game').classList.contains('active');
-            let tempoMs = isGameActive ? 120 : 180;
-            let type = isGameActive ? 'square' : 'triangle';
-            let currentChordsList = isGameActive ? gameChords : introChords;
+            let tempoMs = 180;
+            let type = 'triangle';
+            let currentChordsList = introChords;
+
+            // 난이도별 사운드 세팅
+            if (isGameActive) {
+                currentChordsList = gameChords;
+                if (currentDifficulty === 'easy') { tempoMs = 140; type = 'square'; }
+                else if (currentDifficulty === 'normal') { tempoMs = 110; type = 'triangle'; }
+                else if (currentDifficulty === 'hard') { tempoMs = 85; type = 'sawtooth'; }
+                else if (currentDifficulty === 'special') { tempoMs = 105; type = 'sine'; currentChordsList = introChords; }
+            }
+
             let currentChord = currentChordsList[chordIndex % currentChordsList.length];
             let noteFreq = currentChord[noteIndex];
 
@@ -1133,7 +1123,6 @@
                     chordIndex++;
                 }
             }
-            
             bgmMusicTimeoutId = setTimeout(playNextBgmNote, tempoMs);
         }
         playNextBgmNote();
@@ -1163,9 +1152,16 @@
         } catch (e) { console.error("사운드 에러:", e); }
     }
 
+    // 👑 난이도별 히트 사운드 적용
     function playHitSound(comboIndex) {
-        let targetFreq = 320 + (comboIndex * 60);
-        playBeep(targetFreq, 0.08, 'triangle'); 
+        if (currentDifficulty === 'special') {
+            // 스페셜: 영롱한 실로폰(Sine) 느낌의 다른 사운드
+            let targetFreq = 500 + (comboIndex * 40);
+            playBeep(targetFreq, 0.1, 'sine');
+        } else {
+            let targetFreq = 320 + (comboIndex * 60);
+            playBeep(targetFreq, 0.08, 'triangle'); 
+        }
     }
 
     function playFailSound() {
@@ -1310,7 +1306,7 @@
         }
     }
     
-    // 👑 시작화면으로 갈 때 확률(15%)로 스페셜 스테이지 출현
+    // 시작화면으로 갈 때 확률(15%)로 스페셜 스테이지 출현
     function checkSpecialStageChance() {
         let btn = document.getElementById('special-stage-btn');
         if (Math.random() < 0.15) {
@@ -1336,7 +1332,6 @@
         document.getElementById('game-container').style.backgroundImage = `url('${randBg}')`;
     }
 
-    // 연습 모드 초기화
     function initPracticeMode() {
         isPracticeProcessing = false;
         practiceIndex = 0;
@@ -1404,6 +1399,11 @@
         initAudioContext(); 
         let inputVal = document.getElementById('user-name-input').value.trim();
         globalNickname = inputVal ? inputVal : "도구리";
+        
+        // 👑 스페셜 스테이지 종료/초기화 시 무조건 '쉬움'으로 리셋되도록 보완
+        if (currentDifficulty === 'special') {
+            selectDifficulty('easy');
+        }
         showScreen('screen-start'); 
     }
 
@@ -1422,7 +1422,6 @@
         playSelectTickSound();
     }
     
-    // 👑 스페셜 스테이지 진입 함수
     function startSpecialStage() {
         initAudioContext();
         currentDifficulty = 'special';
@@ -1451,7 +1450,6 @@
 
     function startStopwatch() {
         if(stopwatchIntervalId) clearInterval(stopwatchIntervalId);
-        // 타이머가 멈췄다가 다시 시작해도 이전 경과 시간을 유지하도록 처리
         totalStartTime = Date.now() - totalElapsedTime;
         stopwatchIntervalId = setInterval(() => {
             if(isStageClearedWait || isRoundFinished) return;
@@ -1497,7 +1495,6 @@
         currentArrowIndex = 0;
         stopRoundTimer();
         
-        // 난이도별 타이머 세팅
         if (currentDifficulty === 'easy' || currentDifficulty === 'special') {
             timeLimit = 5000;
         } else if (currentDifficulty === 'normal') {
@@ -1556,14 +1553,12 @@
                 targetArrowSequence.push('Space');
             }
             
-            // 배열 셔플
             for (let i = targetArrowSequence.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [targetArrowSequence[i], targetArrowSequence[j]] = [targetArrowSequence[j], targetArrowSequence[i]];
             }
         }
 
-        // 어려움 모드일 경우 깜빡이는 키 인덱스 지정 (스테이지2: 1개, 스테이지3: 2개)
         let blinkingIndices = [];
         if (currentDifficulty === 'hard') {
             let blinkCount = 0;
@@ -1581,7 +1576,6 @@
             }
         }
 
-        // 아이콘 렌더링
         for(let i=0; i<targetArrowSequence.length; i++) {
             let key = targetArrowSequence[i];
             let assetName = currentDifficulty === 'special' ? 'Star' : (key === 'Space' ? 'Space' : arrowNames[key]);
@@ -1591,7 +1585,6 @@
             slot.className = 'arrow-icon-slot';
             slot.id = `arrow-slot-${i}`;
 
-            // 어려움 깜빡임 적용
             if (blinkingIndices.includes(i)) {
                 slot.classList.add('blinking-arrow');
             }
@@ -1674,10 +1667,9 @@
 
     function closeGameOver() {
         document.getElementById('game-over-popup').style.display = 'none';
-        showScreen('screen-start');
+        goToGameStart(); // 👑 수정됨: Game over시에도 스페셜 난이도 리셋 체크를 위해 연결
     }
 
-    // 👑 인게임 키보드 판정 (팝업 및 단축키 적용)
     window.addEventListener('keydown', function(e) {
         let introActive = document.getElementById('screen-intro').classList.contains('active');
         let startActive = document.getElementById('screen-start').classList.contains('active');
@@ -1693,19 +1685,16 @@
         
         initAudioContext(); 
 
-        // Esc키로 스코어보드/도감 닫기 (및 뒤로가기)
         if (e.key === 'Escape' || e.key === 'Esc') {
             if(leaderboardModalVisible) { e.preventDefault(); document.getElementById('leaderboard-modal').style.display = 'none'; return; }
             if(collectionModalVisible) { e.preventDefault(); document.getElementById('collection-modal').style.display = 'none'; return; }
             if (startActive) { simulateBtnClick('btn-main-back', goToIntro); return; }
         }
 
-        // 팝업이 띄워져 있는 상태일 경우, 방향키 등 다른 버튼 무시
         if (rewardPopupVisible || gameOverPopupVisible || leaderboardModalVisible || collectionModalVisible || inGameClearUIVisible) {
             if (e.key !== ' ' && e.key !== 'Spacebar') return; 
         }
 
-        // 스페이스바 처리
         if (e.key === ' ' || e.key === 'Spacebar') {
             if (leaderboardModalVisible) { e.preventDefault(); document.getElementById('leaderboard-modal').style.display = 'none'; return; }
             if (collectionModalVisible) { e.preventDefault(); document.getElementById('collection-modal').style.display = 'none'; return; }
@@ -1726,7 +1715,6 @@
             }
         }
 
-        // 게임 진행 중일 경우
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
         let validRhythmKeys = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' ', 'Spacebar'];
@@ -1739,7 +1727,7 @@
             let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
 
             if(slotEl) {
-                slotEl.classList.remove('blinking-arrow'); // 맞추면 깜빡임 제거
+                slotEl.classList.remove('blinking-arrow');
                 slotEl.classList.add('hit');
                 setTimeout(() => slotEl.classList.remove('hit'), 80);
             }
@@ -1749,7 +1737,6 @@
                 playHitSound(currentArrowIndex);
                 currentArrowIndex++;
 
-                // 👑 스페셜 댄스 성공 시 1~6개의 랜덤 캐릭터 등장
                 let randomDanceNum = Math.floor(Math.random() * 6) + 1;
                 setCharacterImage(`DD_Special_Dance_${randomDanceNum}.png`, `스페셜 댄스 ${randomDanceNum}`);
 
@@ -1786,7 +1773,6 @@
         }
     });
 
-    // 👑 스테이지 클리어 로직 (인게임 화면 위에 띄우기)
     function handleRoundSuccess() {
         let maxRounds = currentDifficulty === 'special' ? 10 : 5;
         let maxStages = currentDifficulty === 'special' ? 1 : 3;
@@ -1797,7 +1783,7 @@
             playStageClearSound(); 
             
             if (currentStage < maxStages) {
-                stopStopwatch(); // 타이머 정지
+                stopStopwatch();
                 document.getElementById('in-game-clear-ui').style.display = 'flex';
             } else {
                 stopStopwatch();
@@ -1810,13 +1796,12 @@
         }
     }
 
-    // 👑 다음 스테이지(NEXT)로 넘어갈 때
     window.goToNextStage = function() {
         document.getElementById('in-game-clear-ui').style.display = 'none';
         currentStage++;
         currentRound = 1;
         changeRandomBackground(); 
-        startStopwatch(); // 정지된 시점부터 이어서 흐름
+        startStopwatch();
         initRound();
     }
 
@@ -1846,8 +1831,8 @@
         rewardBox.innerHTML = '';
         let rewardImg = document.createElement('img');
         rewardImg.src = `DD_Item_${randomIndex}.png`;
-        rewardImg.style.width = '100%';
-        rewardImg.style.height = '100%';
+        rewardImg.style.width = '80%';
+        rewardImg.style.height = '80%';
         rewardImg.style.objectFit = 'contain';
         rewardImg.alt = collectionItems[randomIndex];
         rewardBox.appendChild(rewardImg);
@@ -1871,7 +1856,6 @@
         }
     }
 
-    // 👑 도감 UI 이미지 + 이름 함께 렌더링하도록 구조 변경
     function initCollectionUI() {
         let grid = document.getElementById('book-grid-container');
         if (!grid) return;
@@ -1888,11 +1872,9 @@
             } else {
                 img.src = 'DD_Item_Locked.png'; 
                 img.alt = '미획득 아이템';
-                // 👑 5배 크게 설정
                 img.style.transform = 'scale(5)';
             }
 
-            // 도감 아이템 이름 텍스트 노드 추가
             let nameTxt = document.createElement('div');
             nameTxt.style.fontSize = '14px';
             nameTxt.style.color = '#fff';
@@ -1904,7 +1886,7 @@
             img.onerror = function() {
                 this.style.display = 'none';
                 let fallback = document.createElement('span');
-                fallback.style.fontSize = unlockedItems.has(i) ? '14px' : '60px'; // 폴백도 크게
+                fallback.style.fontSize = unlockedItems.has(i) ? '14px' : '60px'; 
                 fallback.style.fontWeight = 'bold';
                 fallback.style.textAlign = 'center';
                 fallback.innerText = unlockedItems.has(i) ? collectionItems[i] : '🔒';
