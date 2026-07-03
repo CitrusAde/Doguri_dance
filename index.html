@@ -722,8 +722,10 @@
             <div class="arrow-sequence-box" id="practice-sequence-area"></div>
         </div>
 
+        <!-- 👑 스페셜 버튼 아래에 (4) 가이드 추가 -->
         <div id="special-stage-btn" onclick="startSpecialStage()">
             <img src="DD_Special_Stage.png" alt="스페셜 스테이지" onerror="this.style.display='none'; this.after('[스페셜 스테이지]');">
+            <div class="space-shortcut-guide" style="text-align: center; margin-top: 5px;">(4)</div>
         </div>
 
         <div class="difficulty-group">
@@ -1708,6 +1710,8 @@
             if (e.key === '1') { simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy')); return; }
             if (e.key === '2') { simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal')); return; }
             if (e.key === '3') { simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard')); return; }
+            // 👑 4번 키 입력 시 스페셜 스테이지 실행되도록 한 줄 추가
+            if (e.key === '4') { simulateSlotKeyClick('special-stage-btn', () => startSpecialStage()); return; }
             if (arrowKeyCodes.includes(e.key)) {
                 handlePracticeInput(e.key);
                 return;
