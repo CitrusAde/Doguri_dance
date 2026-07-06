@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도구리 하와이 댄스 게임 - V36</title>
+    <title>도구리 하와이 댄스 게임 - V2</title>
     <style>
         /* 👑 커스텀 NPS 폰트 등록 */
         @font-face {
@@ -187,14 +187,13 @@
         }
         .img-btn:hover { transform: scale(1.05); }
         .img-btn.pressed { transform: scale(0.95); }
-
         .origin-size-btn img {
             display: block;
             max-width: 100%;
             height: auto;
         }
 
-        /* 👑 DANCE 버튼 20px 내림 (bottom 45px -> 25px) */
+        /* 👑 DANCE 버튼 */
         .bottom-dance-position {
             position: absolute;
             bottom: 25px;
@@ -423,6 +422,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 20px;
+            flex-wrap: wrap; 
         }
         .arrow-icon-slot {
             width: 75px;
@@ -432,12 +432,71 @@
             justify-content: center;
             transition: transform 0.08s ease;
             transform-origin: center center;
+            position: relative;
         }
         .arrow-icon-slot.hit { transform: scale(1.25); }
         .arrow-icon-slot img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+            transition: transform 0.2s ease;
+        }
+
+        /* 👑 익스트림 특수 기믹 CSS */
+        .note-inversion img {
+            border: 3px solid #ff1744;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(255, 23, 68, 0.8);
+        }
+
+        /* 롱 프레스 라벨 (노트 위에 띄우기) */
+        .long-type-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 45px !important; /* 라벨 크기 (필요시 조절) */
+            height: auto !important;
+            z-index: 5;
+        }
+
+        /* 롱 프레스 기본 노트 (노랑 테두리) */
+        .long-press-base-img {
+            border: 3px solid #ffeb3b;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(255, 235, 59, 0.8);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 롱 프레스 발광 게이지 래퍼 (아래에서 위로 차오름) */
+        .lp-gauge-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            overflow: hidden;
+            transition: height 0.5s linear;
+            z-index: 3;
+            pointer-events: none;
+            border-radius: 12px;
+        }
+
+        /* 애디티브 혼합 이미지 (동일한 이미지 중첩 발광 효과) */
+        .lp-additive-img {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 75px !important; /* 슬롯 고정 크기(75px)와 동일하게 맞춰야 안 찌그러짐 */
+            height: 75px !important;
+            object-fit: contain;
+            mix-blend-mode: color-dodge; /* 애디티브(더하기) 느낌의 블렌딩 모드 */
+            filter: drop-shadow(0 0 6px #ffeb3b) brightness(1.8); /* 겹쳤을 때 빛나는 효과 */
+        }
+        .long-press-slot img {
+            position: relative;
+            z-index: 1;
         }
 
         @keyframes blinkArrow {
@@ -593,9 +652,10 @@
             overflow: hidden;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
+        /* 👑 도감 3x4(총 12개)로 원상복구 및 적용 */
         .square-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(3, 1fr); 
             gap: 15px;
             width: 100%;
             margin-top: 10px;
@@ -603,12 +663,11 @@
         .square-grid .square-item {
             width: 100%;
             justify-content: flex-start;
-            /* 👑 콘텐츠를 조금 더 중앙으로 모으기 위해 20px로 변경 */
-            padding-top: 20px;
+            padding-top: 15px;
         }
         .square-grid .square-item img {
-            width: 70%;
-            height: 70%;
+            width: 60%;
+            height: 60%;
             object-fit: contain;
         }
 
@@ -703,7 +762,6 @@
             </div>
         </div>
 
-        <!-- 👑 START 버튼 15px 위로 이동 -->
         <div class="btn-with-guide-container" style="transform: translateY(-15px);">
             <button id="btn-main-start" class="img-btn origin-size-btn" onclick="goToGameStart()">
                 <img src="DD_Main_Start_Button.png" alt="START" onerror="this.style.display='none'; this.after('[START 버튼]');">
@@ -722,10 +780,9 @@
             <div class="arrow-sequence-box" id="practice-sequence-area"></div>
         </div>
 
-        <!-- 👑 스페셜 버튼 아래에 (4) 가이드 추가 -->
         <div id="special-stage-btn" onclick="startSpecialStage()">
             <img src="DD_Special_Stage.png" alt="스페셜 스테이지" onerror="this.style.display='none'; this.after('[스페셜 스테이지]');">
-            <div class="space-shortcut-guide" style="text-align: center; margin-top: 5px;">(4)</div>
+            <div class="space-shortcut-guide" style="text-align: center; margin-top: 5px;">(5)</div>
         </div>
 
         <div class="difficulty-group">
@@ -755,6 +812,16 @@
                     </div>
                 </div>
                 <div class="space-shortcut-guide">(3)</div>
+            </div>
+            <!-- 👑 익스트림 난이도 버튼 -->
+            <div id="slot-extreme" class="diff-btn-slot" onclick="selectDifficulty('extreme')">
+                <div style="position:relative;">
+                    <img class="diff-glow-layer" src="DD_Extreme_Button_Glow.png" alt="익스트림 글로우" onerror="this.style.display='none';">
+                    <div class="diff-img-btn">
+                        <img src="DD_Extreme_Button.png" alt="익스트림" onerror="this.style.display='none'; this.after('익스트림');">
+                    </div>
+                </div>
+                <div class="space-shortcut-guide">(4)</div>
             </div>
         </div>
 
@@ -815,19 +882,15 @@
         </div>
     </div>
 
-    <!-- 👑 최종 클리어 리워드 팝업 -->
     <div id="reward-popup" class="modal">
         <div class="modal-content-horizontal" style="background-image: url('DD_Clear_Popup.png');">
             <div class="popup-safe-box-horizontal">
-                <!-- 👑 색상 #fff로 변경 -->
                 <p id="popup-playtime-result" style="color: #fff; font-weight: bold; margin: 10px 0 0 0; font-size: 22px;">최종 클리어 시간: 0.00초</p>
                 <p id="popup-firebase-status" style="color: #ff1744; font-weight: bold; font-size:14px; margin:5px 0;">순위 판단 중...</p>
                 
-                <!-- 👑 색상 #fff로 변경 -->
                 <p style="margin: 20px 0 10px 0; font-weight: bold; font-size:16px; color:#fff;">🎁 하와이 기념 도감 보상 🎁</p>
                 
                 <div id="reward-item-name" class="square-item" style="width: 140px; height: 140px; margin-bottom: 0;">
-                    <!-- 스크립트에서 이미지가 들어감 -->
                 </div>
             </div>
         </div>
@@ -840,16 +903,15 @@
         </div>
     </div>
 
-    <!-- 👑 세로형 688x854 리더보드 팝업 (내부 요소를 0.8로 스케일) -->
     <div id="leaderboard-modal" class="modal">
         <div class="modal-content-vertical" style="background-image: url('DD_Highscore_popup.png');">
             <div class="popup-safe-box-vertical">
-                <!-- margin-top: 50px; 추가하여 통째로 50px 내림 -->
                 <div style="width: 100%; height: 100%; transform: scale(0.8); transform-origin: top center; margin-top: 70px; display: flex; flex-direction: column; align-items: center;">
                     <div class="rank-tabs">
                         <button id="tab-easy" class="rank-tab-btn" onclick="fetchServerLeaderboard('easy')">쉬움</button>
                         <button id="tab-normal" class="rank-tab-btn" onclick="fetchServerLeaderboard('normal')">보통</button>
                         <button id="tab-hard" class="rank-tab-btn" onclick="fetchServerLeaderboard('hard')">어려움</button>
+                        <button id="tab-extreme" class="rank-tab-btn" onclick="fetchServerLeaderboard('extreme')">익스트림</button>
                     </div>
                     <div class="leaderboard-modal-list" id="modal-rank-rows"></div>
                 </div>
@@ -858,12 +920,10 @@
         </div>
     </div>
 
-    <!-- 👑 세로형 688x854 도감 팝업 (내부 요소를 0.8로 스케일, 20px 마진 적용) -->
     <div id="collection-modal" class="modal">
         <div class="modal-content-vertical" style="background-image: url('DD_Gift_popup.png');">
             <div class="popup-safe-box-vertical">
-                <!-- margin-top을 25px에서 75px로 변경하여 50px 더 내림 -->
-                <div style="width: 100%; height: 100%; transform: scale(0.8); transform-origin: top center; margin-top: 95px; display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 100%; height: 100%; transform: scale(0.8); transform-origin: top center; margin-top: 55px; display: flex; flex-direction: column; align-items: center;">
                     <div class="square-grid" id="book-grid-container"></div>
                 </div>
                 <div class="modal-space-hint">(space/esc)</div>
@@ -890,11 +950,19 @@
     let userLives = 5;              
     let globalNickname = "도구리";
 
+    // 객체 기반 노트 시퀀스
     let targetArrowSequence = [];
     let currentArrowIndex = 0; 
     let isRoundFinished = false;
     let isStageClearedWait = false; 
     let isRewardGivenThisGame = false; 
+
+    // 익스트림 전용 상태
+    let doubleInputPending = false;
+    let doubleInputKey = null;
+    let doubleInputTimer = null;
+    let isHoldingLongPress = false;
+    let longPressStartTime = 0;
 
     // 연습모드 변수
     let practiceSequence = [];
@@ -927,19 +995,23 @@
         'DD_Main_Image_PM6.png'
     ];
 
-    // 👑 이모티콘 제거된 도감 아이템
+    // 컬렉션
     const collectionItems = [
         "하와이안 파인애플", "알로하 레이", "선글라스",
         "미니 서프보드", "코코넛 주스", "우쿨렐레",
         "비치 샌들", "하와이안 셔츠", "도구리 튜브"
     ];
+    const extremeCollectionItems = ["엔젤링", "천상의 하프", "성수"];
     let unlockedItems = new Set();
-    const STORAGE_KEY_ITEMS = "doguri_unlocked_items_firebase_v1";
+    let unlockedExtremeItems = new Set();
 
+    const STORAGE_KEY_ITEMS = "doguri_unlocked_items_firebase_v1";
+    const STORAGE_KEY_EXTREME_ITEMS = "doguri_extreme_items_v1";
     const DOGURI_BASE = "doguri_image_base.png";
 
     const arrowKeyCodes = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp'];
     const arrowNames = { 'ArrowLeft': 'Left', 'ArrowRight': 'Right', 'ArrowDown': 'Down', 'ArrowUp': 'Up' };
+    const flipMap = { 'ArrowLeft': 'ArrowRight', 'ArrowRight': 'ArrowLeft', 'ArrowUp': 'ArrowDown', 'ArrowDown': 'ArrowUp' };
 
     window.onload = function() {
         loadLocalStorageData();
@@ -951,6 +1023,21 @@
         document.body.addEventListener('click', () => { initAudioContext(); }, { once: true });
         document.body.addEventListener('keydown', () => { initAudioContext(); }, { once: true });
     };
+
+    // 👑 노트 스킨 불러오기
+    function getNoteImgPath(key, state) {
+        if (key === 'Space') return `DD_Space_Button_${state === 'Normal' ? 'Normal' : state}.png`;
+        if (key === 'Star') return (state === 'Normal') ? 'DD_Star_Button.png' : `DD_Star_${state}.png`;
+        
+        // 👑 동시 입력용 제공 이미지 사용
+        if (key === 'UpDown') return `DD_UpDown_Button_${state}.png`;
+        if (key === 'LeftRight') return `DD_LeftRight_Button_${state}.png`;
+
+        let isGold = (unlockedExtremeItems.size === 3);
+        let name = arrowNames[key]; // Left, Right, Up, Down
+        let prefix = isGold ? 'DD_Gold_' : 'DD_';
+        return `${prefix}${name}_Button_${state}.png`;
+    }
 
     function setupModalOutsideClick() {
         document.querySelectorAll('.modal').forEach(modal => {
@@ -1014,12 +1101,9 @@
         let gain = audioCtx.createGain();
         osc.frequency.setValueAtTime(150, audioCtx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-        
-        // 👑 0.5 -> 1.0 으로 2배 증폭
         let kickVol = 1.0 * globalVolumeValue;
         gain.gain.setValueAtTime(kickVol, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-        
         osc.connect(gain);
         gain.connect(masterGainNode);
         osc.start();
@@ -1056,7 +1140,6 @@
                 let now = audioCtx.currentTime;
                 let isGame = document.getElementById('screen-game').classList.contains('active');
                 let maxVol = isGame ? 0.03 : 0.1;
-
                 waveGain.gain.linearRampToValueAtTime(maxVol, now + 2.0); 
                 waveGain.gain.linearRampToValueAtTime(0.01, now + 4.5); 
                 setTimeout(waveLoop, 4500);
@@ -1081,6 +1164,14 @@
             [349.23, 440.00, 523.25, 698.46], 
             [196.00, 293.66, 392.00, 587.33]  
         ];
+        
+        // 👇 여기에 익스트림 전용 맑고 높은 천국 화음 추가
+        const extremeChords = [
+            [523.25, 659.25, 783.99, 1046.50], 
+            [587.33, 783.99, 880.00, 1174.66], 
+            [698.46, 880.00, 1046.50, 1396.91], 
+            [783.99, 987.77, 1174.66, 1567.98] 
+        ];
 
         let chordIndex = 0;
         let noteIndex = 0;
@@ -1093,21 +1184,20 @@
             let type = 'triangle';
             let currentChordsList = introChords;
 
+            // 몽환적이고 영롱하게 템포와 신스 타입(sine) 변경
             if (isGameActive) {
                 currentChordsList = gameChords;
                 if (currentDifficulty === 'easy') { tempoMs = 140; type = 'square'; }
                 else if (currentDifficulty === 'normal') { tempoMs = 110; type = 'triangle'; }
                 else if (currentDifficulty === 'hard') { tempoMs = 85; type = 'sawtooth'; }
-                // 👑 스페셜 BGM: 템포 70으로 매우 빠르게, 강렬한 오락실 사운드(square), 게임 코드(gameChords) 사용으로 텐션업!
+                else if (currentDifficulty === 'extreme') { tempoMs = 120; type = 'sine'; currentChordsList = extremeChords; } // 👈 이 줄 교체
                 else if (currentDifficulty === 'special') { tempoMs = 70; type = 'square'; currentChordsList = gameChords; }
             }
 
             let currentChord = currentChordsList[chordIndex % currentChordsList.length];
             let noteFreq = currentChord[noteIndex];
 
-            if (isGameActive && (noteIndex === 0 || noteIndex === 2)) {
-                playDrumKick();
-            }
+            if (isGameActive && (noteIndex === 0 || noteIndex === 2)) playDrumKick();
 
             let osc = audioCtx.createOscillator();
             let gainNode = audioCtx.createGain();
@@ -1115,7 +1205,6 @@
             osc.type = type; 
             osc.frequency.setValueAtTime(noteFreq, audioCtx.currentTime);
 
-            // 👑 0.07 -> 0.14 / 0.12 -> 0.24 로 2배 증폭
             let noteVolume = isGameActive ? (0.14 * globalVolumeValue) : (0.24 * globalVolumeValue); 
             gainNode.gain.setValueAtTime(noteVolume, audioCtx.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + (isGameActive ? 0.2 : 0.4)); 
@@ -1129,9 +1218,7 @@
             noteIndex++;
             if (noteIndex >= 4) {
                 noteIndex = 0;
-                if (Math.random() > 0.3) { 
-                    chordIndex++;
-                }
+                if (Math.random() > 0.3) chordIndex++;
             }
             bgmMusicTimeoutId = setTimeout(playNextBgmNote, tempoMs);
         }
@@ -1143,20 +1230,13 @@
             initAudioContext();
             let osc = audioCtx.createOscillator();
             let gainNode = audioCtx.createGain();
-
             osc.type = type; 
             osc.frequency.setValueAtTime(frequency, audioCtx.currentTime);
-            
-            if (customEndFreq !== null) {
-                osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
-            }
-
+            if (customEndFreq !== null) osc.frequency.exponentialRampToValueAtTime(customEndFreq, audioCtx.currentTime + duration);
             gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime); 
             gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-
             osc.connect(gainNode);
             gainNode.connect(masterGainNode); 
-
             osc.start();
             osc.stop(audioCtx.currentTime + duration);
         } catch (e) { console.error("사운드 에러:", e); }
@@ -1172,14 +1252,8 @@
         }
     }
 
-    function playFailSound() {
-        playBeep(220, 0.35, 'square', 80); 
-    }
-
-    function playSelectTickSound() {
-        playBeep(440, 0.05, 'triangle');
-    }
-
+    function playFailSound() { playBeep(220, 0.35, 'square', 80); }
+    function playSelectTickSound() { playBeep(440, 0.05, 'triangle'); }
     function playStageClearSound() {
         playBeep(523.25, 0.1, 'square'); 
         setTimeout(() => { playBeep(659.25, 0.25, 'square'); }, 80);
@@ -1189,12 +1263,15 @@
         try {
             let savedItems = localStorage.getItem(STORAGE_KEY_ITEMS);
             if(savedItems) unlockedItems = new Set(JSON.parse(savedItems));
+            let savedExtreme = localStorage.getItem(STORAGE_KEY_EXTREME_ITEMS);
+            if(savedExtreme) unlockedExtremeItems = new Set(JSON.parse(savedExtreme));
         } catch(e) { console.error("로컬 세이브 오류:", e); }
     }
 
     function saveGameDataToStorage() {
         try {
             localStorage.setItem(STORAGE_KEY_ITEMS, JSON.stringify(Array.from(unlockedItems)));
+            localStorage.setItem(STORAGE_KEY_EXTREME_ITEMS, JSON.stringify(Array.from(unlockedExtremeItems)));
         } catch(e) { console.error("로컬 세이브 저장 실패:", e); }
     }
 
@@ -1212,19 +1289,16 @@
         window.dbOnValue(rankQuery, (snapshot) => {
             let rowsContainer = document.getElementById('modal-rank-rows');
             rowsContainer.innerHTML = '';
-
             if (!snapshot.exists()) {
                 rowsContainer.innerHTML = '<div style="text-align:center; color:rgba(255,255,255,0.7); padding-top:40px;">등록된 기록이 없습니다.</div>';
                 return;
             }
-
             let rankIndex = 1;
             snapshot.forEach((childSnapshot) => {
                 let data = childSnapshot.val();
                 let row = document.createElement('div');
                 row.className = 'leaderboard-row';
                 if(data.name === globalNickname) row.classList.add('my-row');
-
                 let timeSec = (data.playTime / 1000).toFixed(2);
                 row.innerHTML = `<span>${rankIndex}. ${data.name}</span> <span>${timeSec}s</span>`;
                 rowsContainer.appendChild(row);
@@ -1250,12 +1324,7 @@
                 statusText.innerText = "⭐ TOP 10 랭크인 진입! 기록 업로드 중...";
                 const scoreListRef = window.dbRef(window.firebaseDb, `scores/${currentDifficulty}`);
                 const newScoreRef = window.dbPush(scoreListRef);
-
-                window.dbSet(newScoreRef, {
-                    name: nickname,
-                    playTime: elapsedMs,
-                    timestamp: Date.now()
-                }).then(() => {
+                window.dbSet(newScoreRef, { name: nickname, playTime: elapsedMs, timestamp: Date.now() }).then(() => {
                     statusText.innerText = "✓ 글로벌 실시간 10위권 등록 성공!";
                     statusText.style.color = "#4caf50";
                 }).catch(() => {
@@ -1274,10 +1343,7 @@
     function setupButtonEffects() {
         const btns = document.querySelectorAll('.img-btn, .rank-tab-btn');
         btns.forEach(btn => {
-            btn.addEventListener('mousedown', () => {
-                initAudioContext(); 
-                btn.classList.add('pressed');
-            });
+            btn.addEventListener('mousedown', () => { initAudioContext(); btn.classList.add('pressed'); });
             btn.addEventListener('mouseup', () => btn.classList.remove('pressed'));
             btn.addEventListener('mouseleave', () => btn.classList.remove('pressed'));
         });
@@ -1287,10 +1353,7 @@
         let btn = document.getElementById(btnId);
         if (btn) {
             btn.classList.add('pressed');
-            setTimeout(() => {
-                btn.classList.remove('pressed');
-                callback();
-            }, 80);
+            setTimeout(() => { btn.classList.remove('pressed'); callback(); }, 80);
         }
     }
 
@@ -1298,10 +1361,7 @@
         let slot = document.getElementById(slotId);
         if (slot) {
             slot.style.transform = "scale(0.95)";
-            setTimeout(() => {
-                slot.style.transform = "none";
-                callback();
-            }, 80);
+            setTimeout(() => { slot.style.transform = "none"; callback(); }, 80);
         }
     }
 
@@ -1316,12 +1376,7 @@
     
     function checkSpecialStageChance() {
         let btn = document.getElementById('special-stage-btn');
-        // 👑 스페셜 스테이지 등장 확률 25%로 상향
-        if (Math.random() < 0.25) {
-            btn.style.display = 'block';
-        } else {
-            btn.style.display = 'none';
-        }
+        if (Math.random() < 0.25) { btn.style.display = 'block'; } else { btn.style.display = 'none'; }
     }
 
     function setCharacterImage(srcPath, fallbackText) {
@@ -1335,9 +1390,18 @@
         }
     }
 
-    function changeRandomBackground() {
+    // 👑 인트로 복귀 시 또는 노말 게임 시에는 무조건 일반 랜덤 배경
+    function resetToDefaultBackground() {
         let randBg = bgImages[Math.floor(Math.random() * bgImages.length)];
         document.getElementById('game-container').style.backgroundImage = `url('${randBg}')`;
+    }
+
+    function changeRandomBackground() {
+        if (currentDifficulty === 'extreme') {
+            document.getElementById('game-container').style.backgroundImage = `url('DD_Extreme_BG_1.png')`;
+        } else {
+            resetToDefaultBackground();
+        }
     }
 
     function initPracticeMode() {
@@ -1345,7 +1409,6 @@
         practiceIndex = 0;
         let count = Math.floor(Math.random() * 3) + 3; 
         practiceSequence = [];
-        
         let area = document.getElementById('practice-sequence-area');
         if(!area) return;
         area.innerHTML = '';
@@ -1353,22 +1416,12 @@
         for(let i=0; i<count; i++) {
             let key = arrowKeyCodes[Math.floor(Math.random() * 4)];
             practiceSequence.push(key);
-            
             let slot = document.createElement('div');
             slot.className = 'arrow-icon-slot';
             slot.id = `prac-slot-${i}`;
-            
             let img = document.createElement('img');
             img.src = `DD_${arrowNames[key]}_Button_Normal.png`;
             img.id = `prac-img-${i}`;
-            img.alt = arrowNames[key];
-            
-            img.onerror = function() {
-                this.style.display = 'none';
-                let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑'};
-                this.parentElement.innerText = sym[key];
-            };
-            
             slot.appendChild(img);
             area.appendChild(slot);
         }
@@ -1376,7 +1429,6 @@
 
     function handlePracticeInput(key) {
         if(isPracticeProcessing) return;
-        
         let targetKey = practiceSequence[practiceIndex];
         let slotEl = document.getElementById(`prac-slot-${practiceIndex}`);
         let imgEl = document.getElementById(`prac-img-${practiceIndex}`);
@@ -1390,7 +1442,6 @@
             if(imgEl) imgEl.src = `DD_${arrowNames[key]}_Button_Success.png`;
             playHitSound(practiceIndex);
             practiceIndex++;
-            
             if(practiceIndex >= practiceSequence.length) {
                 isPracticeProcessing = true;
                 setTimeout(initPracticeMode, 500); 
@@ -1407,14 +1458,13 @@
         initAudioContext(); 
         let inputVal = document.getElementById('user-name-input').value.trim();
         globalNickname = inputVal ? inputVal : "도구리";
-        
         selectDifficulty('easy');
         showScreen('screen-start'); 
     }
 
     function goToIntro() { 
-        stopRoundTimer();
-        stopStopwatch();
+        stopRoundTimer(); stopStopwatch(); 
+        resetToDefaultBackground(); // 👑 인트로로 돌아갈 때 무조건 배경 리셋
         showScreen('screen-intro'); 
     }
 
@@ -1439,16 +1489,20 @@
         initAudioContext();
         showScreen('screen-game');
         
+        if (currentDifficulty === 'extreme') {
+            document.getElementById('game-table').src = 'DD_Extreme_Game_Table.png';
+        } else {
+            document.getElementById('game-table').src = 'DD_Game_Table.png';
+        }
         changeRandomBackground(); 
 
         currentStage = 1;
         currentRound = 1;
         userLives = 5; 
         isRewardGivenThisGame = false; 
-        
         totalElapsedTime = 0;
+        
         startStopwatch();
-
         updateHeartsUI();
         initRound();
     }
@@ -1473,22 +1527,10 @@
     function updateHeartsUI() {
         let container = document.getElementById('hearts-display-images');
         container.innerHTML = '';
-        
         for(let i=1; i<=5; i++) {
             let heartImg = document.createElement('img');
             heartImg.src = "DD_Heart.png";
             heartImg.className = "heart-img-slot";
-            heartImg.alt = "라이프 하트";
-            
-            heartImg.onerror = function() {
-                this.style.display = 'none';
-                let txt = document.createElement('span');
-                txt.innerText = '❤️';
-                txt.style.fontSize = '24px';
-                if(i > userLives) txt.style.opacity = '0.2';
-                this.parentElement.appendChild(txt);
-            };
-
             if (i > userLives) heartImg.classList.add('hidden-life');
             container.appendChild(heartImg);
         }
@@ -1498,26 +1540,28 @@
         isRoundFinished = false;
         isStageClearedWait = false;
         currentArrowIndex = 0;
+        
+        // 리셋 상태 변수
+        doubleInputPending = false;
+        doubleInputKey = null;
+        if(doubleInputTimer) clearTimeout(doubleInputTimer);
+        isHoldingLongPress = false;
+        
         stopRoundTimer();
         
-        if (currentDifficulty === 'easy' || currentDifficulty === 'special') {
-            timeLimit = 5000;
-        } else if (currentDifficulty === 'normal') {
-            timeLimit = 4000;
-        } else if (currentDifficulty === 'hard') {
-            timeLimit = 3000;
-        }
+        if (currentDifficulty === 'easy' || currentDifficulty === 'special') timeLimit = 5000;
+        else if (currentDifficulty === 'normal') timeLimit = 4000;
+        else if (currentDifficulty === 'hard' || currentDifficulty === 'extreme') timeLimit = 3000;
 
         updateDoguriImage();
         
-        let diffKo = currentDifficulty === 'special' ? '스페셜' : (currentDifficulty === 'easy' ? '쉬움' : (currentDifficulty === 'normal' ? '보통' : '어려움'));
-        let maxStages = currentDifficulty === 'special' ? 1 : 3;
+        let diffKo = currentDifficulty === 'special' ? '스페셜' : (currentDifficulty === 'easy' ? '쉬움' : (currentDifficulty === 'normal' ? '보통' : (currentDifficulty === 'hard' ? '어려움' : '익스트림')));
+        let maxStages = currentDifficulty === 'special' ? 1 : (currentDifficulty === 'extreme' ? 4 : 3);
         let maxRounds = currentDifficulty === 'special' ? 10 : 5;
         
         document.getElementById('txt-difficulty').innerText = `난이도: ${diffKo}`;
         document.getElementById('txt-stage').innerText = `스테이지: ${currentStage}/${maxStages}`;
         document.getElementById('txt-round').innerText = `판수: ${currentRound}/${maxRounds}`;
-        
         document.getElementById('judgment-text').innerText = '';
         
         let sequenceArea = document.getElementById('arrow-sequence-area');
@@ -1525,87 +1569,150 @@
         
         targetArrowSequence = [];
         
+        // --- 시퀀스 생성 로직 ---
         if (currentDifficulty === 'special') {
             let arrowCount = Math.floor(Math.random() * 3) + 5;
-            for (let i = 0; i < arrowCount; i++) {
-                targetArrowSequence.push('Space');
-            }
-        } else {
-            let maxArrows = 5;
-            let spaceCount = 0;
+            for (let i = 0; i < arrowCount; i++) targetArrowSequence.push({ type: 'single', key: 'Space', blink: false });
+        } else if (currentDifficulty === 'extreme') {
+            let maxArrows = 6 + currentRound; 
+            if(maxArrows > 8) maxArrows = 8;
             
-            if (currentDifficulty === 'easy') {
-                maxArrows = 5;
-                if (currentStage === 3) spaceCount = 1;
-            } else if (currentDifficulty === 'normal') {
-                maxArrows = 6;
-                if (currentStage === 2) spaceCount = 1;
-                if (currentStage === 3) spaceCount = 2;
-            } else if (currentDifficulty === 'hard') {
-                maxArrows = 7;
-                if (currentStage === 1) spaceCount = 1;
-                if (currentStage === 2) spaceCount = 2;
-                if (currentStage === 3) spaceCount = 3;
+            let doubleCount = 0;
+            let invertCount = 0;
+            let longCount = 0;
+            let blinkCount = 1;
+            
+            if (currentStage >= 2) doubleCount = 1;
+            if (currentStage >= 3) invertCount = 1;
+            if (currentStage >= 4) longCount = 1; // 👈 4를 1으로 수정
+            if (currentStage === 4) blinkCount = 2;
+
+            let availableTypes = [];
+            for(let i=0; i < maxArrows - doubleCount - invertCount - longCount; i++) availableTypes.push('single');
+            for(let i=0; i < doubleCount; i++) availableTypes.push('double');
+            for(let i=0; i < invertCount; i++) availableTypes.push('inversion');
+            for(let i=0; i < longCount; i++) availableTypes.push('long');
+            
+            // 셔플
+            for (let i = availableTypes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableTypes[i], availableTypes[j]] = [availableTypes[j], availableTypes[i]];
             }
+            
+            for (let i = 0; i < availableTypes.length; i++) {
+                let type = availableTypes[i];
+                let rndKey = arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)];
+                let obj = { type: type, blink: false };
+                
+                if (type === 'single' || type === 'long') {
+                    obj.key = rndKey;
+                } else if (type === 'double') {
+                    // 👑 동시 입력 단일 이미지 키 지정
+                    let isUpDown = Math.random() > 0.5;
+                    obj.key = isUpDown ? 'UpDown' : 'LeftRight';
+                    obj.keys = isUpDown ? ['ArrowUp', 'ArrowDown'] : ['ArrowLeft', 'ArrowRight'];
+                } else if (type === 'inversion') {
+                    obj.key = flipMap[rndKey]; 
+                    obj.originalKey = rndKey;
+                    obj.isFlipped = false;
+                }
+                targetArrowSequence.push(obj);
+            }
+            // 점멸 추가
+            let availIdx = [];
+            for(let i=0; i<targetArrowSequence.length; i++) availIdx.push(i);
+            for(let i=0; i<blinkCount; i++) {
+                if (availIdx.length === 0) break;
+                let r = Math.floor(Math.random() * availIdx.length);
+                targetArrowSequence[availIdx[r]].blink = true;
+                availIdx.splice(r, 1);
+            }
+
+        } else {
+            let maxArrows = 5; let spaceCount = 0;
+            if (currentDifficulty === 'easy') { maxArrows = 5; if (currentStage === 3) spaceCount = 1; }
+            else if (currentDifficulty === 'normal') { maxArrows = 6; if (currentStage === 2) spaceCount = 1; if (currentStage === 3) spaceCount = 2; }
+            else if (currentDifficulty === 'hard') { maxArrows = 7; if (currentStage === 1) spaceCount = 1; if (currentStage === 2) spaceCount = 2; if (currentStage === 3) spaceCount = 3; }
             
             let arrowCount = Math.min(2 + currentRound, maxArrows);
             spaceCount = Math.min(spaceCount, arrowCount); 
             
-            for (let i = 0; i < arrowCount - spaceCount; i++) {
-                targetArrowSequence.push(arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)]);
-            }
-            for (let i = 0; i < spaceCount; i++) {
-                targetArrowSequence.push('Space');
+            let keysTemp = [];
+            for (let i = 0; i < arrowCount - spaceCount; i++) keysTemp.push(arrowKeyCodes[Math.floor(Math.random() * arrowKeyCodes.length)]);
+            for (let i = 0; i < spaceCount; i++) keysTemp.push('Space');
+            
+            for (let i = keysTemp.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [keysTemp[i], keysTemp[j]] = [keysTemp[j], keysTemp[i]];
             }
             
-            for (let i = targetArrowSequence.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [targetArrowSequence[i], targetArrowSequence[j]] = [targetArrowSequence[j], targetArrowSequence[i]];
+            for(let k of keysTemp) targetArrowSequence.push({ type: 'single', key: k, blink: false });
+
+            if (currentDifficulty === 'hard') {
+                let blinkCount = 0;
+                if (currentStage === 2) blinkCount = 1;
+                if (currentStage === 3) blinkCount = 2;
+                let availIdx = [];
+                for (let i = 0; i < targetArrowSequence.length; i++) availIdx.push(i);
+                for (let i = 0; i < blinkCount; i++) {
+                    if (availIdx.length === 0) break;
+                    let rnd = Math.floor(Math.random() * availIdx.length);
+                    targetArrowSequence[availIdx[rnd]].blink = true;
+                    availIdx.splice(rnd, 1);
+                }
             }
         }
 
-        let blinkingIndices = [];
-        if (currentDifficulty === 'hard') {
-            let blinkCount = 0;
-            if (currentStage === 2) blinkCount = 1;
-            if (currentStage === 3) blinkCount = 2;
-
-            let available = [];
-            for (let i = 0; i < targetArrowSequence.length; i++) available.push(i);
-
-            for (let i = 0; i < blinkCount; i++) {
-                if (available.length === 0) break;
-                let rnd = Math.floor(Math.random() * available.length);
-                blinkingIndices.push(available[rnd]);
-                available.splice(rnd, 1);
-            }
-        }
-
+        // --- UI 렌더링 ---
         for(let i=0; i<targetArrowSequence.length; i++) {
-            let key = targetArrowSequence[i];
-            let assetName = currentDifficulty === 'special' ? 'Star' : (key === 'Space' ? 'Space' : arrowNames[key]);
-            let normalImg = currentDifficulty === 'special' ? 'DD_Star_Button.png' : `DD_${assetName}_Button_Normal.png`;
-
+            let target = targetArrowSequence[i];
             let slot = document.createElement('div');
             slot.className = 'arrow-icon-slot';
             slot.id = `arrow-slot-${i}`;
+            if (target.blink) slot.classList.add('blinking-arrow');
 
-            if (blinkingIndices.includes(i)) {
-                slot.classList.add('blinking-arrow');
+            if (target.type === 'inversion') {
+                slot.classList.add('note-inversion');
+                let img = document.createElement('img'); 
+                img.src = getNoteImgPath(target.originalKey, 'Normal'); 
+                img.id = `arrow-img-${i}`;
+                slot.appendChild(img);
+            } else if (target.type === 'long') {
+                slot.style.overflow = 'visible'; // 상단 라벨이 잘리지 않도록 설정
+
+                // 1. 상단 안내 이미지 (DD_Long_type.png)
+                let typeLabel = document.createElement('img');
+                typeLabel.src = 'DD_Long_type.png';
+                typeLabel.className = 'long-type-label';
+                
+                // 2. 기본 노트 이미지 (노랑 테두리 적용)
+                let img = document.createElement('img'); 
+                img.src = getNoteImgPath(target.key, 'Normal'); 
+                img.id = `arrow-img-${i}`;
+                img.className = 'long-press-base-img';
+                
+                // 3. 차오르는 발광 게이지 래퍼
+                let gaugeWrapper = document.createElement('div'); 
+                gaugeWrapper.className = 'lp-gauge-wrapper'; 
+                gaugeWrapper.id = `gauge-fill-${i}`;
+                
+                // 4. 발광 효과용 복제 이미지
+                let additiveImg = document.createElement('img');
+                additiveImg.src = getNoteImgPath(target.key, 'Normal');
+                additiveImg.className = 'lp-additive-img';
+                
+                gaugeWrapper.appendChild(additiveImg);
+                
+                slot.appendChild(typeLabel);
+                slot.appendChild(img);
+                slot.appendChild(gaugeWrapper);
+            } else {
+                // single 및 double 모두 한 장의 이미지로 렌더링
+                let img = document.createElement('img');
+                img.src = getNoteImgPath(currentDifficulty === 'special' ? 'Star' : target.key, 'Normal');
+                img.id = `arrow-img-${i}`;
+                slot.appendChild(img);
             }
-            
-            let img = document.createElement('img');
-            img.src = normalImg;
-            img.id = `arrow-img-${i}`;
-            img.alt = assetName;
-            
-            img.onerror = function() {
-                this.style.display = 'none';
-                let sym = {'ArrowLeft':'←','ArrowRight':'→','ArrowDown':'↓','ArrowUp':'↑', 'Space':'[Space]'};
-                this.parentElement.innerText = (currentDifficulty === 'special') ? '★' : (sym[key] || key);
-            };
-
-            slot.appendChild(img);
             sequenceArea.appendChild(slot);
         }
         
@@ -1616,63 +1723,111 @@
     function startRoundTimer() {
         timeRemaining = timeLimit;
         document.getElementById('timer-bar').style.width = '100%';
-
         roundTimerId = setInterval(() => {
-            if (isRoundFinished || isStageClearedWait) {
-                stopRoundTimer();
-                return;
-            }
+            if (isRoundFinished || isStageClearedWait) { stopRoundTimer(); return; }
             timeRemaining -= 50;
             let percent = (timeRemaining / timeLimit) * 100;
             document.getElementById('timer-bar').style.width = percent + '%';
-
             if (timeRemaining <= 0) {
-                stopRoundTimer();
+                if (isRoundFinished) return;
+                isRoundFinished = true; // 👑 타임오버 시 즉시 자물쇠 잠그기
+                stopRoundTimer(); 
                 playFailSound(); 
                 handleRoundFailure("TIME OVER!");
             }
         }, 50);
     }
-
     function stopRoundTimer() {
-        if (roundTimerId) {
-            clearInterval(roundTimerId);
-            roundTimerId = null;
-        }
+        if (roundTimerId) { clearInterval(roundTimerId); roundTimerId = null; }
     }
 
     function handleRoundFailure(reasonText) {
         if (currentDifficulty === 'special') {
             let jTxt = document.getElementById('judgment-text');
-            jTxt.innerText = "KEEP GOING!";
-            jTxt.style.color = "#ffeb3b";
-            initRound();
-            return;
+            jTxt.innerText = "KEEP GOING!"; jTxt.style.color = "#ffeb3b";
+            initRound(); return;
         }
-
         userLives--;
         updateHeartsUI();
         setCharacterImage('DD_Dance_Fail.png', '도구리 실패 연출');
 
         if (userLives <= 0) {
-            stopRoundTimer();
-            stopStopwatch();
-            setTimeout(() => {
-                document.getElementById('game-over-popup').style.display = 'flex';
-            }, 100);
+            stopRoundTimer(); stopStopwatch();
+            resetToDefaultBackground(); // 게임 오버 시 롤백
+            setTimeout(() => { document.getElementById('game-over-popup').style.display = 'flex'; }, 100);
             return;
         }
-
         let jTxt = document.getElementById('judgment-text');
-        jTxt.innerText = reasonText;
-        jTxt.style.color = "#f44336";
-
+        jTxt.innerText = reasonText; jTxt.style.color = "#f44336";
         initRound();
     }
 
     function closeGameOver() {
         document.getElementById('game-over-popup').style.display = 'none';
         goToGameStart(); 
+    }
+
+    function handleNoteVisualSuccess(index) {
+        let slotEl = document.getElementById(`arrow-slot-${index}`);
+        let target = targetArrowSequence[index];
+        if (slotEl) {
+            slotEl.classList.remove('blinking-arrow');
+            slotEl.classList.add('hit');
+            setTimeout(() => slotEl.classList.remove('hit'), 80);
+        }
+        
+        let imgEl = document.getElementById(`arrow-img-${index}`);
+        if(imgEl) {
+            let keyBase = (currentDifficulty === 'special') ? 'Star' : target.key;
+            imgEl.src = getNoteImgPath(keyBase, 'Success');
+        }
+        
+        playHitSound(index);
+        let randomDanceNum = Math.floor(Math.random() * 9) + 1;
+        setCharacterImage(currentDifficulty === 'special' ? `DD_Special_Dance_${Math.floor(Math.random()*10)+1}.png` : `DD_Dance_${randomDanceNum}.png`, '댄스 연출');
+    }
+
+    function handleNoteVisualFail(index, wrongKey) {
+        if (isRoundFinished) return; // 👑 이미 실패/성공 처리 중이면 중복 실행 완벽 차단!
+        isRoundFinished = true;      // 👑 자물쇠 잠그기
+
+        let slotEl = document.getElementById(`arrow-slot-${index}`);
+        let target = targetArrowSequence[index];
+        let imgEl = document.getElementById(`arrow-img-${index}`);
+        if(imgEl) {
+            let failKey = wrongKey && arrowKeyCodes.includes(wrongKey) ? wrongKey : (target.key || 'Space');
+            if(target.type === 'double') failKey = target.key; 
+            imgEl.src = getNoteImgPath(failKey, 'Fail');
+        }
+        stopRoundTimer();
+        playFailSound(); 
+        handleRoundFailure("FAIL!");
+    }
+
+    function finishNoteSuccess() {
+        handleNoteVisualSuccess(currentArrowIndex);
+        currentArrowIndex++;
+
+        // 다음 노트가 Inversion 이면 반전시킴
+        if (currentArrowIndex < targetArrowSequence.length) {
+            let nextTarget = targetArrowSequence[currentArrowIndex];
+            if (nextTarget.type === 'inversion' && !nextTarget.isFlipped) {
+                nextTarget.isFlipped = true;
+                let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
+                let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
+                if (slotEl) slotEl.classList.remove('note-inversion');
+                if (imgEl) {
+                    imgEl.style.transform = 'none';
+                    imgEl.src = getNoteImgPath(nextTarget.key, 'Normal');
+                }
+            }
+        } else {
+            // 👑 마지막 노트 성공 시 추가 입력 차단 (자물쇠 잠그기)
+            if (isRoundFinished) return;
+            isRoundFinished = true; 
+            stopRoundTimer();
+            handleRoundSuccess();
+        }
     }
 
     window.addEventListener('keydown', function(e) {
@@ -1687,7 +1842,6 @@
         let inGameClearUIVisible = document.getElementById('in-game-clear-ui').style.display === 'flex';
 
         if(document.activeElement === document.getElementById('user-name-input')) return;
-        
         initAudioContext(); 
 
         if (e.key === 'Escape' || e.key === 'Esc') {
@@ -1695,7 +1849,6 @@
             if(collectionModalVisible) { e.preventDefault(); document.getElementById('collection-modal').style.display = 'none'; return; }
             if (startActive) { simulateBtnClick('btn-main-back', goToIntro); return; }
         }
-
         if (rewardPopupVisible || gameOverPopupVisible || leaderboardModalVisible || collectionModalVisible || inGameClearUIVisible) {
             if (e.key !== ' ' && e.key !== 'Spacebar') return; 
         }
@@ -1714,77 +1867,118 @@
             if (e.key === '1') { simulateSlotKeyClick('slot-easy', () => selectDifficulty('easy')); return; }
             if (e.key === '2') { simulateSlotKeyClick('slot-normal', () => selectDifficulty('normal')); return; }
             if (e.key === '3') { simulateSlotKeyClick('slot-hard', () => selectDifficulty('hard')); return; }
-            // 👑 4번 키 입력 시 스페셜 스테이지 실행되도록 한 줄 추가
-            if (e.key === '4') { simulateSlotKeyClick('special-stage-btn', () => startSpecialStage()); return; }
-            if (arrowKeyCodes.includes(e.key)) {
-                handlePracticeInput(e.key);
-                return;
-            }
+            if (e.key === '4') { simulateSlotKeyClick('slot-extreme', () => selectDifficulty('extreme')); return; }
+            if (e.key === '5') { simulateSlotKeyClick('special-stage-btn', () => startSpecialStage()); return; } 
+            if (arrowKeyCodes.includes(e.key)) { handlePracticeInput(e.key); return; }
         }
 
         if (!gameActive || isRoundFinished || isStageClearedWait) return;
 
         let validRhythmKeys = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' ', 'Spacebar'];
         
-        if (validRhythmKeys.includes(e.key)) {
-            e.preventDefault(); 
-            let pressedKey = (e.key === ' ' || e.key === 'Spacebar') ? 'Space' : e.key;
+        // 👑 1. 스페셜 모드 원상 복구 로직 (유효 키 누르면 묻지도 따지지도 않고 성공)
+        if (currentDifficulty === 'special' && validRhythmKeys.includes(e.key)) {
+            if(e.key === ' ' || e.key === 'Spacebar') e.preventDefault();
             
             let slotEl = document.getElementById(`arrow-slot-${currentArrowIndex}`);
             let imgEl = document.getElementById(`arrow-img-${currentArrowIndex}`);
-
+            
             if(slotEl) {
                 slotEl.classList.remove('blinking-arrow');
                 slotEl.classList.add('hit');
                 setTimeout(() => slotEl.classList.remove('hit'), 80);
             }
+            if(imgEl) imgEl.src = `DD_Star_Success.png`;
+            playHitSound(currentArrowIndex);
+            currentArrowIndex++;
+
+            let randomDanceNum = Math.floor(Math.random() * 10) + 1;
+            setCharacterImage(`DD_Special_Dance_${randomDanceNum}.png`, `스페셜 댄스 ${randomDanceNum}`);
+
+            if (currentArrowIndex >= targetArrowSequence.length) {
+                stopRoundTimer();
+                handleRoundSuccess();
+            }
+            return;
+        }
+
+        // 일반 및 익스트림 로직
+        if (validRhythmKeys.includes(e.key)) {
+            if(e.key === ' ' || e.key === 'Spacebar') e.preventDefault(); 
+            let pressedKey = (e.key === ' ' || e.key === 'Spacebar') ? 'Space' : e.key;
+            let target = targetArrowSequence[currentArrowIndex];
             
-            if (currentDifficulty === 'special') {
-                if(imgEl) imgEl.src = `DD_Star_Success.png`;
-                playHitSound(currentArrowIndex);
-                currentArrowIndex++;
-
-                // 👑 스페셜 댄스 랜덤 이미지를 10개로 확장
-                let randomDanceNum = Math.floor(Math.random() * 10) + 1;
-                setCharacterImage(`DD_Special_Dance_${randomDanceNum}.png`, `스페셜 댄스 ${randomDanceNum}`);
-
-                if (currentArrowIndex >= targetArrowSequence.length) {
-                    stopRoundTimer();
-                    handleRoundSuccess();
+            if (isHoldingLongPress) return; 
+            
+            if (target.type === 'double') {
+                if (target.keys.includes(pressedKey)) {
+                    if (!doubleInputPending) {
+                        doubleInputPending = true;
+                        doubleInputKey = pressedKey;
+                        doubleInputTimer = setTimeout(() => {
+                            doubleInputPending = false;
+                            // 👑 화면이 메인/인트로로 넘어갔다면 타이머 무시 (안전장치)
+                            if (!document.getElementById('screen-game').classList.contains('active')) return;
+                            handleNoteVisualFail(currentArrowIndex, pressedKey);
+                        }, 120); 
+                    } else {
+                        if (pressedKey !== doubleInputKey) {
+                            clearTimeout(doubleInputTimer);
+                            doubleInputPending = false;
+                            finishNoteSuccess();
+                        }
+                    }
+                } else {
+                    handleNoteVisualFail(currentArrowIndex, pressedKey);
                 }
                 return;
             }
 
-            let targetKey = targetArrowSequence[currentArrowIndex];
-            
-            if (pressedKey === targetKey) {
-                let assetName = targetKey === 'Space' ? 'Space' : arrowNames[targetKey];
-                if(imgEl) imgEl.src = `DD_${assetName}_Button_Success.png`;
-                
-                playHitSound(currentArrowIndex);
-                currentArrowIndex++;
-
-                // 👑 일반 댄스 랜덤 이미지를 9개로 확장
-                let randomDanceNum = Math.floor(Math.random() * 9) + 1;
-                setCharacterImage(`DD_Dance_${randomDanceNum}.png`, `도구리 댄스 ${randomDanceNum}`);
-
-                if (currentArrowIndex >= targetArrowSequence.length) {
-                    stopRoundTimer();
-                    handleRoundSuccess();
+            if (target.type === 'long') {
+                if (pressedKey === target.key) {
+                    isHoldingLongPress = true;
+                    longPressStartTime = Date.now();
+                    document.getElementById(`gauge-fill-${currentArrowIndex}`).style.height = '100%';
+                } else {
+                    handleNoteVisualFail(currentArrowIndex, pressedKey);
                 }
+                return;
+            }
+
+            if (pressedKey === target.key) {
+                finishNoteSuccess();
             } else {
-                let targetAssetName = targetKey === 'Space' ? 'Space' : arrowNames[targetKey];
-                if(imgEl) imgEl.src = `DD_${targetAssetName}_Button_Fail.png`;
-                stopRoundTimer();
-                playFailSound(); 
-                handleRoundFailure("FAIL!");
+                handleNoteVisualFail(currentArrowIndex, pressedKey);
+            }
+        }
+    });
+
+    window.addEventListener('keyup', function(e) {
+        if (!document.getElementById('screen-game').classList.contains('active') || isRoundFinished) return;
+        let validRhythmKeys = ['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' ', 'Spacebar'];
+        
+        if (isHoldingLongPress && validRhythmKeys.includes(e.key)) {
+            let releasedKey = (e.key === ' ' || e.key === 'Spacebar') ? 'Space' : e.key;
+            let target = targetArrowSequence[currentArrowIndex];
+            
+            if (target && target.type === 'long' && releasedKey === target.key) {
+                isHoldingLongPress = false;
+                let holdDuration = Date.now() - longPressStartTime;
+                document.getElementById(`gauge-fill-${currentArrowIndex}`).style.transition = 'none'; 
+                if (holdDuration >= 450) { 
+                    finishNoteSuccess();
+                } else {
+                    handleNoteVisualFail(currentArrowIndex, releasedKey);
+                    let jTxt = document.getElementById('judgment-text');
+                    jTxt.innerText = "TOO FAST!"; 
+                }
             }
         }
     });
 
     function handleRoundSuccess() {
         let maxRounds = currentDifficulty === 'special' ? 10 : 5;
-        let maxStages = currentDifficulty === 'special' ? 1 : 3;
+        let maxStages = currentDifficulty === 'special' ? 1 : (currentDifficulty === 'extreme' ? 4 : 3);
         
         if (currentRound >= maxRounds) {
             isStageClearedWait = true;
@@ -1798,7 +1992,6 @@
                 stopStopwatch();
                 giveRandomRewardAndRank();
             }
-
         } else {
             currentRound++;
             initRound();
@@ -1817,6 +2010,8 @@
     function giveRandomRewardAndRank() {
         if (isRewardGivenThisGame) return;
         isRewardGivenThisGame = true; 
+        
+        resetToDefaultBackground(); // 보상 진입 시 배경 롤백
 
         let finalTimeSec = totalElapsedTime / 1000;
         document.getElementById('popup-playtime-result').innerText = `최종 클리어 시간: ${finalTimeSec.toFixed(2)}초`;
@@ -1829,21 +2024,29 @@
             statusText.style.color = "#ffeb3b";
         }
 
-        let randomIndex = Math.floor(Math.random() * collectionItems.length);
-        unlockedItems.add(randomIndex);
+        let rewardBox = document.getElementById('reward-item-name');
+        rewardBox.innerHTML = '';
+        let rewardImg = document.createElement('img');
+        
+        if (currentDifficulty === 'extreme') {
+            let randomIndex = Math.floor(Math.random() * extremeCollectionItems.length);
+            unlockedExtremeItems.add(randomIndex);
+            rewardImg.src = `DD_Extreme_Gift_${randomIndex + 1}.png`;
+            rewardImg.alt = extremeCollectionItems[randomIndex];
+        } else {
+            let randomIndex = Math.floor(Math.random() * collectionItems.length);
+            unlockedItems.add(randomIndex);
+            rewardImg.src = `DD_Item_${randomIndex}.png`;
+            rewardImg.alt = collectionItems[randomIndex];
+        }
         
         saveGameDataToStorage();
         initCollectionUI();
         updateDoguriImage();
 
-        let rewardBox = document.getElementById('reward-item-name');
-        rewardBox.innerHTML = '';
-        let rewardImg = document.createElement('img');
-        rewardImg.src = `DD_Item_${randomIndex}.png`;
         rewardImg.style.width = '80%';
         rewardImg.style.height = '80%';
         rewardImg.style.objectFit = 'contain';
-        rewardImg.alt = collectionItems[randomIndex];
         rewardBox.appendChild(rewardImg);
         
         document.getElementById('reward-popup').style.display = 'flex';
@@ -1857,6 +2060,7 @@
     function resetAllLocalData() {
         if (confirm("도감 데이터가 전면 초기화됩니다. 진행하시겠습니까?")) {
             unlockedItems.clear();
+            unlockedExtremeItems.clear();
             isRewardGivenThisGame = false;
             saveGameDataToStorage();
             initCollectionUI();
@@ -1870,6 +2074,7 @@
         if (!grid) return;
         grid.innerHTML = '';
         
+        // 일반 도감 9개
         for (let i = 0; i < 9; i++) {
             let box = document.createElement('div');
             box.className = 'square-item';
@@ -1883,28 +2088,49 @@
                 img.alt = '미획득 아이템';
                 img.style.transform = 'scale(5)';
             }
-
             let nameTxt = document.createElement('div');
-            nameTxt.style.fontSize = '14px';
-            nameTxt.style.color = '#fff';
-            nameTxt.style.marginTop = '8px';
-            nameTxt.style.textAlign = 'center';
-            nameTxt.style.textShadow = '0 1px 2px #000';
+            nameTxt.style.fontSize = '12px'; nameTxt.style.color = '#fff'; nameTxt.style.marginTop = '8px'; nameTxt.style.textAlign = 'center'; nameTxt.style.textShadow = '0 1px 2px #000';
             nameTxt.innerText = unlockedItems.has(i) ? collectionItems[i] : '???';
 
             img.onerror = function() {
                 this.style.display = 'none';
                 let fallback = document.createElement('span');
-                fallback.style.fontSize = unlockedItems.has(i) ? '14px' : '60px'; 
-                fallback.style.fontWeight = 'bold';
-                fallback.style.textAlign = 'center';
+                fallback.style.fontSize = unlockedItems.has(i) ? '12px' : '40px'; 
+                fallback.style.fontWeight = 'bold'; fallback.style.textAlign = 'center';
                 fallback.innerText = unlockedItems.has(i) ? collectionItems[i] : '🔒';
                 this.parentElement.insertBefore(fallback, nameTxt);
             }
+            box.appendChild(img); box.appendChild(nameTxt); grid.appendChild(box);
+        }
+        
+        // 익스트림 도감 3개
+        for (let i = 0; i < 3; i++) {
+            let box = document.createElement('div');
+            box.className = 'square-item';
+            box.style.border = '2px solid #ffeb3b'; 
             
-            box.appendChild(img);
-            box.appendChild(nameTxt);
-            grid.appendChild(box);
+            let img = document.createElement('img');
+            if (unlockedExtremeItems.has(i)) {
+                img.src = `DD_Extreme_Gift_${i + 1}.png`; 
+                img.alt = extremeCollectionItems[i];
+            } else {
+                img.src = 'DD_Item_Locked.png'; 
+                img.alt = '미획득 아이템';
+                img.style.transform = 'scale(5)';
+            }
+            let nameTxt = document.createElement('div');
+            nameTxt.style.fontSize = '12px'; nameTxt.style.color = '#ffeb3b'; nameTxt.style.marginTop = '8px'; nameTxt.style.textAlign = 'center'; nameTxt.style.textShadow = '0 1px 2px #000';
+            nameTxt.innerText = unlockedExtremeItems.has(i) ? extremeCollectionItems[i] : '???';
+
+            img.onerror = function() {
+                this.style.display = 'none';
+                let fallback = document.createElement('span');
+                fallback.style.fontSize = unlockedExtremeItems.has(i) ? '12px' : '40px'; 
+                fallback.style.fontWeight = 'bold'; fallback.style.textAlign = 'center'; fallback.style.color = '#ffeb3b';
+                fallback.innerText = unlockedExtremeItems.has(i) ? extremeCollectionItems[i] : '👑';
+                this.parentElement.insertBefore(fallback, nameTxt);
+            }
+            box.appendChild(img); box.appendChild(nameTxt); grid.appendChild(box);
         }
     }
 
@@ -1917,7 +2143,7 @@
         
         let charImg = document.getElementById('doguri-char');
         if (charImg) {
-            if (unlockedItems.size === 9) {
+            if (unlockedItems.size === 9 || unlockedExtremeItems.size === 3) {
                 charImg.style.transform = "translateX(-50%) scale(1.8)";
             } else {
                 charImg.style.transform = "translateX(-50%) scale(1)";
