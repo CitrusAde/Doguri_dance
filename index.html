@@ -1026,16 +1026,18 @@
 
     // 👑 노트 스킨 불러오기
     function getNoteImgPath(key, state) {
-        if (key === 'Space') return `DD_Space_Button_${state === 'Normal' ? 'Normal' : state}.png`;
+        // ⭐ 골드 조건(올클리어)과 접두사(prefix)를 맨 위에서 먼저 연산합니다.
+        let isGold = (unlockedExtremeItems.size === 3);
+        let prefix = isGold ? 'DD_Gold_' : 'DD_';
+
         if (key === 'Star') return (state === 'Normal') ? 'DD_Star_Button.png' : `DD_Star_${state}.png`;
         
-        // 👑 동시 입력용 제공 이미지 사용
-        if (key === 'UpDown') return `DD_UpDown_Button_${state}.png`;
-        if (key === 'LeftRight') return `DD_LeftRight_Button_${state}.png`;
+        // ⭐ 스페이스바 및 동시 입력 노트 앞에도 ${prefix}를 붙여줍니다.
+        if (key === 'Space') return `${prefix}Space_Button_${state === 'Normal' ? 'Normal' : state}.png`;
+        if (key === 'UpDown') return `${prefix}UpDown_Button_${state}.png`;
+        if (key === 'LeftRight') return `${prefix}LeftRight_Button_${state}.png`;
 
-        let isGold = (unlockedExtremeItems.size === 3);
         let name = arrowNames[key]; // Left, Right, Up, Down
-        let prefix = isGold ? 'DD_Gold_' : 'DD_';
         return `${prefix}${name}_Button_${state}.png`;
     }
 
@@ -1691,9 +1693,10 @@
             } else if (target.type === 'long') {
                 slot.style.overflow = 'visible'; // 상단 라벨이 잘리지 않도록 설정
 
-                // 1. 상단 안내 이미지 (DD_Long_type.png)
+                // ⭐ 1. 상단 안내 이미지(Long_type)도 골드 조건에 따라 DD_Gold_Long_type.png로 변경!
+                let isGold = (unlockedExtremeItems.size === 3);
                 let typeLabel = document.createElement('img');
-                typeLabel.src = 'DD_Long_type.png';
+                typeLabel.src = isGold ? 'DD_Gold_Long_type.png' : 'DD_Long_type.png';
                 typeLabel.className = 'long-type-label';
                 
                 // 2. 기본 노트 이미지 (노랑 테두리 적용)
@@ -1717,6 +1720,7 @@
                 slot.appendChild(typeLabel);
                 slot.appendChild(img);
                 slot.appendChild(gaugeWrapper);
+            }
             } else {
                 // single 및 double 모두 한 장의 이미지로 렌더링
                 let img = document.createElement('img');
